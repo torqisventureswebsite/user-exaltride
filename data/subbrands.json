@@ -1,0 +1,41 @@
+[
+  {
+    "id": "subbrand-001",
+    "vendor_id": "vendor-001",
+    "name": "Premium Elite",
+    "slug": "premium-elite",
+    "description": "High-end OEM replacement parts",
+    "logo_url": "/brands/premium-elite.png",
+    "commission_rate": null,
+    "is_active": true,
+    "created_at": "2024-01-15T12:00:00Z",
+    "updated_at": "2024-01-15T12:00:00Z",
+    "deleted_at": null
+  },
+  {
+    "id": "subbrand-002",
+    "vendor_id": "vendor-001",
+    "name": "Premium Budget",
+    "slug": "premium-budget",
+    "description": "Affordable aftermarket parts",
+    "logo_url": "/brands/premium-budget.png",
+    "commission_rate": 18.00,
+    "is_active": true,
+    "created_at": "2024-01-15T12:10:00Z",
+    "updated_at": "2024-01-15T12:10:00Z",
+    "deleted_at": null
+  },
+  {
+    "id": "subbrand-003",
+    "vendor_id": "vendor-002",
+    "name": "SpeedZone Pro",
+    "slug": "speedzone-pro",
+    "description": "Professional grade performance parts",
+    "logo_url": "/brands/speedzone-pro.png",
+    "commission_rate": 10.00,
+    "is_active": true,
+    "created_at": "2024-01-20T14:00:00Z",
+    "updated_at": "2024-01-20T14:00:00Z",
+    "deleted_at": null
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "pc-001",
+    "product_id": "prod-001",
+    "car_id": "car-001",
+    "notes": "Direct fit for VXi variant",
+    "verified_by": "user-003",
+    "created_at": "2024-01-20T10:10:00Z"
+  },
+  {
+    "id": "pc-002",
+    "product_id": "prod-001",
+    "car_id": "car-002",
+    "notes": "Direct fit for ZXi variant",
+    "verified_by": "user-003",
+    "created_at": "2024-01-20T10:12:00Z"
+  },
+  {
+    "id": "pc-003",
+    "product_id": "prod-002",
+    "car_id": "car-003",
+    "notes": "Front brake pads for all variants",
+    "verified_by": "user-003",
+    "created_at": "2024-01-25T11:10:00Z"
+  },
+  {
+    "id": "pc-004",
+    "product_id": "prod-003",
+    "car_id": "car-001",
+    "notes": "Universal fit - may require minor adjustment",
+    "verified_by": null,
+    "created_at": "2024-02-01T09:45:00Z"
+  },
+  {
+    "id": "pc-005",
+    "product_id": "prod-003",
+    "car_id": "car-004",
+    "notes": "Fits Honda City perfectly",
+    "verified_by": "user-003",
+    "created_at": "2024-02-01T09:47:00Z"
+  }
+]

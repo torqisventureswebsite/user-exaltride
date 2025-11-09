@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ucar-001",
+    "user_id": "user-001",
+    "car_id": "car-001",
+    "nickname": "My Daily Driver",
+    "registration_number": "MH02AB1234",
+    "purchase_year": 2023,
+    "is_primary": true,
+    "created_at": "2024-01-15T11:00:00Z"
+  },
+  {
+    "id": "ucar-002",
+    "user_id": "user-001",
+    "car_id": "car-003",
+    "nickname": "Weekend SUV",
+    "registration_number": "MH12CD5678",
+    "purchase_year": 2024,
+    "is_primary": false,
+    "created_at": "2024-02-20T14:30:00Z"
+  },
+  {
+    "id": "ucar-003",
+    "user_id": "user-004",
+    "car_id": "car-004",
+    "nickname": "City Sedan",
+    "registration_number": "KA03EF9012",
+    "purchase_year": 2023,
+    "is_primary": true,
+    "created_at": "2024-02-01T12:00:00Z"
+  }
+]

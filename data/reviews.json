@@ -1,0 +1,40 @@
+[
+  {
+    "id": "rev-001",
+    "order_item_id": "oi-001",
+    "product_id": "prod-001",
+    "vendor_id": "vendor-001",
+    "user_id": "user-001",
+    "product_rating": 5,
+    "product_review": "Excellent quality oil filter. Fits perfectly in my Swift. Noticed better engine performance after installation.",
+    "vendor_rating": 5,
+    "vendor_review": "Very fast delivery and good packaging. Seller was responsive to queries.",
+    "images": ["/reviews/rev-001-img1.jpg"],
+    "is_verified": true,
+    "is_featured": true,
+    "is_hidden": false,
+    "moderation_notes": null,
+    "helpful_count": 12,
+    "created_at": "2024-02-20T10:00:00Z",
+    "updated_at": "2024-02-20T10:00:00Z"
+  },
+  {
+    "id": "rev-002",
+    "order_item_id": "oi-002",
+    "product_id": "prod-004",
+    "vendor_id": "vendor-001",
+    "user_id": "user-001",
+    "product_rating": 4,
+    "product_review": "Good LED bulbs with bright white light. Installation was easy. However, one bulb had a slight flicker initially but it stabilized after a few hours.",
+    "vendor_rating": 5,
+    "vendor_review": "Excellent service. Quick resolution of my query.",
+    "images": [],
+    "is_verified": true,
+    "is_featured": false,
+    "is_hidden": false,
+    "moderation_notes": null,
+    "helpful_count": 8,
+    "created_at": "2024-02-21T15:30:00Z",
+    "updated_at": "2024-02-21T15:30:00Z"
+  }
+]

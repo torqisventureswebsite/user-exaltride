@@ -1,0 +1,51 @@
+[
+  {
+    "id": "pay-001",
+    "order_id": "order-001",
+    "gateway": "razorpay",
+    "gateway_order_id": "order_NAbfGnZHgdPK7Y",
+    "gateway_payment_id": "pay_NAbfGnZHgdPK7Z",
+    "gateway_signature": "9ef4dffbfd84f1318f6739a3ce19f9d85851857ae648f114332d8401e0949a3d",
+    "amount": 3944.00,
+    "currency": "INR",
+    "status": "success",
+    "payment_method": "upi",
+    "refund_amount": 0.00,
+    "refund_reason": null,
+    "refunded_at": null,
+    "gateway_response": {
+      "razorpay_order_id": "order_NAbfGnZHgdPK7Y",
+      "razorpay_payment_id": "pay_NAbfGnZHgdPK7Z",
+      "razorpay_signature": "9ef4dffbfd84f1318f6739a3ce19f9d85851857ae648f114332d8401e0949a3d"
+    },
+    "error_message": null,
+    "paid_at": "2024-02-10T10:35:00Z",
+    "created_at": "2024-02-10T10:30:00Z",
+    "updated_at": "2024-02-10T10:35:00Z"
+  },
+  {
+    "id": "pay-002",
+    "order_id": "order-002",
+    "gateway": "razorpay",
+    "gateway_order_id": "order_NAcgHnZHgdPL9A",
+    "gateway_payment_id": "pay_NAcgHnZHgdPL9B",
+    "gateway_signature": "8df3ceeaec73e0217e5628b2cd18e8c74740746bd537e003221d7300d0838b2c",
+    "amount": 5110.00,
+    "currency": "INR",
+    "status": "success",
+    "payment_method": "card",
+    "refund_amount": 0.00,
+    "refund_reason": null,
+    "refunded_at": null,
+    "gateway_response": {
+      "razorpay_order_id": "order_NAcgHnZHgdPL9A",
+      "razorpay_payment_id": "pay_NAcgHnZHgdPL9B",
+      "razorpay_signature": "8df3ceeaec73e0217e5628b2cd18e8c74740746bd537e003221d7300d0838b2c",
+      "card_network": "Visa"
+    },
+    "error_message": null,
+    "paid_at": "2024-03-01T11:35:00Z",
+    "created_at": "2024-03-01T11:30:00Z",
+    "updated_at": "2024-03-01T11:35:00Z"
+  }
+]

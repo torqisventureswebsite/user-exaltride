@@ -1,0 +1,20 @@
+[
+  {
+    "id": "payout-001",
+    "vendor_id": "vendor-001",
+    "payout_period_start": "2024-02-01",
+    "payout_period_end": "2024-02-29",
+    "total_sales": 3300.00,
+    "total_commission": 495.00,
+    "payout_amount": 2855.00,
+    "order_ids": ["order-001"],
+    "status": "completed",
+    "payment_method": "bank_transfer",
+    "transaction_id": "NEFT20240305123456",
+    "payment_proof_url": "/payouts/payout-001-proof.pdf",
+    "processed_by": "user-003",
+    "processed_at": "2024-03-05T14:00:00Z",
+    "notes": "February 2024 payout",
+    "created_at": "2024-03-01T10:00:00Z"
+  }
+]

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "coll-001",
+    "vendor_id": null,
+    "title": "Featured Products",
+    "slug": "featured",
+    "description": "Hand-picked quality products for your vehicle",
+    "image_url": "/collections/featured.jpg",
+    "collection_type": "featured",
+    "display_order": 1,
+    "is_active": true,
+    "created_at": "2024-01-01T08:00:00Z",
+    "updated_at": "2024-01-01T08:00:00Z"
+  },
+  {
+    "id": "coll-002",
+    "vendor_id": null,
+    "title": "New Arrivals",
+    "slug": "new-arrivals",
+    "description": "Latest products added to our store",
+    "image_url": "/collections/new-arrivals.jpg",
+    "collection_type": "new_arrivals",
+    "display_order": 2,
+    "is_active": true,
+    "created_at": "2024-01-01T08:10:00Z",
+    "updated_at": "2024-01-01T08:10:00Z"
+  },
+  {
+    "id": "coll-003",
+    "vendor_id": "vendor-001",
+    "title": "Premium Elite Collection",
+    "slug": "premium-elite-collection",
+    "description": "OEM quality parts from Premium Elite",
+    "image_url": "/collections/premium-elite.jpg",
+    "collection_type": "seasonal",
+    "display_order": 3,
+    "is_active": true,
+    "created_at": "2024-01-15T10:00:00Z",
+    "updated_at": "2024-01-15T10:00:00Z"
+  }
+]

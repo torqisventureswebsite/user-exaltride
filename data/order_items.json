@@ -1,0 +1,53 @@
+[
+  {
+    "id": "oi-001",
+    "order_id": "order-001",
+    "product_id": "prod-001",
+    "product_title": "Premium Oil Filter for Maruti Swift (2018-2024)",
+    "product_sku": "POF-MS-2024-001",
+    "product_image": "/products/oil-filter-1.jpg",
+    "quantity": 2,
+    "unit_price": 450.00,
+    "subtotal": 900.00,
+    "commission_rate": 15.00,
+    "commission_amount": 135.00,
+    "is_returnable": true,
+    "return_status": null,
+    "return_reason": null,
+    "created_at": "2024-02-10T10:30:00Z"
+  },
+  {
+    "id": "oi-002",
+    "order_id": "order-001",
+    "product_id": "prod-004",
+    "product_title": "LED Headlight Bulb H4 - Universal",
+    "product_sku": "LED-H4-001",
+    "product_image": "/products/led-bulb-1.jpg",
+    "quantity": 2,
+    "unit_price": 1200.00,
+    "subtotal": 2400.00,
+    "commission_rate": 18.00,
+    "commission_amount": 432.00,
+    "is_returnable": true,
+    "return_status": null,
+    "return_reason": null,
+    "created_at": "2024-02-10T10:30:00Z"
+  },
+  {
+    "id": "oi-003",
+    "order_id": "order-002",
+    "product_id": "prod-003",
+    "product_title": "Performance Shock Absorbers - Universal Fit",
+    "product_sku": "PSA-UNI-001",
+    "product_image": "/products/shock-absorber-1.jpg",
+    "quantity": 1,
+    "unit_price": 4500.00,
+    "subtotal": 4500.00,
+    "commission_rate": 12.00,
+    "commission_amount": 540.00,
+    "is_returnable": true,
+    "return_status": null,
+    "return_reason": null,
+    "created_at": "2024-03-01T11:30:00Z"
+  }
+]

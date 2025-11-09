@@ -1,0 +1,68 @@
+[
+  {
+    "id": "car-001",
+    "make": "Maruti Suzuki",
+    "model": "Swift",
+    "year": 2023,
+    "variant": "VXi",
+    "fuel_type": "Petrol",
+    "vin_pattern": "MA3ERLF*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:00:00Z"
+  },
+  {
+    "id": "car-002",
+    "make": "Maruti Suzuki",
+    "model": "Swift",
+    "year": 2023,
+    "variant": "ZXi",
+    "fuel_type": "Petrol",
+    "vin_pattern": "MA3ERLF*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:05:00Z"
+  },
+  {
+    "id": "car-003",
+    "make": "Hyundai",
+    "model": "Creta",
+    "year": 2024,
+    "variant": "SX",
+    "fuel_type": "Diesel",
+    "vin_pattern": "MALHM*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:10:00Z"
+  },
+  {
+    "id": "car-004",
+    "make": "Honda",
+    "model": "City",
+    "year": 2023,
+    "variant": "V",
+    "fuel_type": "Petrol",
+    "vin_pattern": "MAHCG8*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:15:00Z"
+  },
+  {
+    "id": "car-005",
+    "make": "Tata",
+    "model": "Nexon",
+    "year": 2024,
+    "variant": "XZ Plus",
+    "fuel_type": "Electric",
+    "vin_pattern": "MAT*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:20:00Z"
+  },
+  {
+    "id": "car-006",
+    "make": "Mahindra",
+    "model": "Scorpio",
+    "year": 2023,
+    "variant": "S11",
+    "fuel_type": "Diesel",
+    "vin_pattern": "MA1*",
+    "is_active": true,
+    "created_at": "2024-01-01T09:25:00Z"
+  }
+]
