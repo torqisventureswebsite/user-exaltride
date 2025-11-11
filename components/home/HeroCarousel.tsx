@@ -19,7 +19,6 @@ interface CarouselSlide {
   badge: string;
   title: string;
   subtitle: string;
-  categorySlug: string;
   image: string;
 }
 
@@ -29,7 +28,6 @@ const slides: CarouselSlide[] = [
     badge: "LIGHTNING DEALS",
     title: "Up to 80% OFF",
     subtitle: "Premium Touchscreen Units",
-    categorySlug: "electrical",
     image: "/images/image1.jpg",
   },
   {
@@ -37,7 +35,6 @@ const slides: CarouselSlide[] = [
     badge: "HOT DEALS",
     title: "Up to 60% OFF",
     subtitle: "Engine Parts & Accessories",
-    categorySlug: "engine-parts",
     image: "/images/image2.jpg",
   },
   {
@@ -45,7 +42,6 @@ const slides: CarouselSlide[] = [
     badge: "SPECIAL OFFER",
     title: "Up to 50% OFF",
     subtitle: "Brake System Components",
-    categorySlug: "brake-system",
     image: "/images/image3.jpg",
   },
 ];
@@ -103,7 +99,7 @@ export function HeroCarousel() {
                   </p>
 
                   {/* CTA Button */}
-                  <Link href={`/categories/${slide.categorySlug}`}>
+                  <Link href="/products">
                     <Button
                       size="lg"
                       className="group gap-2 bg-white px-8 text-base font-semibold text-blue-600 hover:bg-gray-100"

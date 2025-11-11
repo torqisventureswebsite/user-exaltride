@@ -14,9 +14,7 @@ export default function HomePage() {
       <Header />
       <TopBar />
       <main>
-        <section className="">
-          <HeroCarousel />
-        </section>
+        <HeroCarousel />
         <FeaturedProducts />
         <CategoriesSection />
         <BrandsSection />
