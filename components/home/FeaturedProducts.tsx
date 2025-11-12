@@ -51,15 +51,18 @@ export function FeaturedProducts() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {featuredProducts.map(({ product, badges }) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              badges={badges}
-              showOffers
-            />
-          ))}
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 min-w-min">
+            {featuredProducts.map(({ product, badges }) => (
+              <div key={product.id} className="w-[165px] md:w-auto">
+                <ProductCard
+                  product={product}
+                  badges={badges}
+                  showOffers
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -67,15 +67,18 @@ export function CategoriesSection() {
         </div>
 
         {/* Category Cards Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {categoryData.map((data) => (
-            <CategoryCard
-              key={data.category.id}
-              category={data.category}
-              productImages={data.productImages}
-              bgColor={data.bgColor}
-            />
-          ))}
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 min-w-min">
+            {categoryData.map((data) => (
+              <div key={data.category.id} className="w-[165px] md:w-auto">
+                <CategoryCard
+                  category={data.category}
+                  productImages={data.productImages}
+                  bgColor={data.bgColor}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

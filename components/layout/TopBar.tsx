@@ -11,19 +11,19 @@ export default function TopBar() {
 
   return (
     <div className="w-full border-t border-gray-200 bg-white">
-      <div className="container mx-auto flex items-center justify-start gap-6 px-6 py-3 overflow-x-auto">
+      <div className="container mx-auto flex items-center justify-start gap-6 px-4 md:px-6 py-3 overflow-x-auto scrollbar-hide">
         {/* Menu Icon (All Categories) */}
-        <button className="flex items-center gap-4 text-gray-800 font-medium hover:text-blue-600 whitespace-nowrap">
-          <Menu size={20} />
+        <button className="flex items-center gap-2 md:gap-4 text-gray-800 text-sm md:text-base font-medium hover:text-blue-600 whitespace-nowrap flex-shrink-0">
+          <Menu size={18} className="md:w-5 md:h-5" />
           All Categories
         </button>
 
         {/* Dynamic Category Links */}
-        <div className="flex items-center gap-8 whitespace-nowrap">
+        <div className="flex items-center gap-4 md:gap-8 whitespace-nowrap">
           {topCategories.map((cat) => (
             <button
               key={cat.id}
-              className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
+              className="text-gray-700 text-sm md:text-base font-medium hover:text-blue-600 transition-colors flex-shrink-0"
             >
               {cat.name}
             </button>
