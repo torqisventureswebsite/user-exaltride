@@ -1,4 +1,4 @@
-import { TopBar } from "@/components/layout/TopBar";
+import TopBar from "@/components/layout/TopBar";
 import Header from "@/components/layout/Header";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
@@ -6,7 +6,8 @@ import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { BrandsSection } from "@/components/home/BrandsSection";
 import { RecommendationsSection } from "@/components/home/RecommendationsSection";
 import { TrendingSection } from "@/components/home/TrendingSection";
-import { Footer } from "@/components/layout/Footer";
+import Footer from "@/components/layout/Footer";
+import { TopDealsSection } from "@/components/home/TopDealsSection";
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
         <FeaturedProducts />
         <CategoriesSection />
         <BrandsSection />
+        <TopDealsSection/>
         <RecommendationsSection />
         <TrendingSection />
       </main>

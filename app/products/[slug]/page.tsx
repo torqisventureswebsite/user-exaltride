@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
-import { TopBar } from "@/components/layout/TopBar";
-import { Footer } from "@/components/layout/Footer";
+import  TopBar  from "@/components/layout/TopBar";
+import  Footer  from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import {
   Star,
