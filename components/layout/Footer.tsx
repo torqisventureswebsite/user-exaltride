@@ -1,96 +1,172 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
-import FooterSection from "./FooterSection";
+import Link from "next/link";
+import { Facebook, Twitter, Linkedin, Instagram, Mail } from "lucide-react";
 
 export default function Footer() {
-  const quicklinks = [
-    { label: "Home" },
-    { label: "Products" },
-    { label: "Deals" },
-    { label: "Contact Us" },
-  ];
-
-  const policies = [
-    { label: "FAQ" },
-    { label: "Shipping Policy" },
-    { label: "Return Policy" },
-    { label: "Cancellation Policy" },
-    { label: "Privacy Policy" },
-    { label: "Terms & Conditions" },
-  ];
-
-  const contact = [
-    { label: "support@autoessentials.com", icon: <Mail size={16} /> },
-    { label: "1800-123-4567", icon: <Phone size={16} /> },
-    {
-      label: "502, 5th Floor, Skyline Plaza, MG Road, Bengaluru 560001, India",
-      icon: <MapPin size={16} />,
-    },
-  ];
-
   return (
-    <footer className="bg-gradient-to-b from-[#041E6E] to-[#020C3A] text-white pt-10 pb-5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10">
-        {/* Top Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 border-b border-blue-400/20 pb-10 text-center sm:text-left">
-          {/* Logo */}
-          <div className="flex flex-col items-center sm:items-start">
-            <img src="/images/logo.png" alt="Exaltride Logo" className="h-10 mb-3" />
-            <p className="text-sm text-gray-300 leading-relaxed max-w-[240px] mx-auto sm:mx-0">
-              Your trusted destination for premium car accessories
-            </p>
+    <footer className="bg-[#001155] text-white">
+      <div className="container mx-auto px-4 py-12">
+        {/* Top Section - Logo and Links */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 pb-10 border-b border-white/10">
+          {/* Logo Section */}
+          <div className="flex flex-col items-start">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-white">exaltride</h2>
+              <p className="text-xs text-gray-300 mt-1">YOUR RIDE. REINVENTED.</p>
+            </div>
           </div>
 
-          <FooterSection title="Quicklinks" items={quicklinks} />
-          <FooterSection title="Help & Policy" items={policies} />
-          <FooterSection title="Contact Us" items={contact} />
+          {/* Quicklinks */}
+          <div>
+            <h3 className="text-yellow-400 font-semibold text-lg mb-4">Quicklinks</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/products" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link href="/products?type=deals" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Deals
+                </Link>
+              </li>
+              <li>
+                <Link href="#contact" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Help & Policy */}
+          <div>
+            <h3 className="text-yellow-400 font-semibold text-lg mb-4">Help & Policy</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="#faq" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="#shipping" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Shipping Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="#return" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Return Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="#privacy" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="#terms" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                  Terms & Conditions
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Us */}
+          <div>
+            <h3 className="text-yellow-400 font-semibold text-lg mb-4">Contact Us</h3>
+            <ul className="space-y-3">
+              <li>
+                <a
+                  href="mailto:support@autoessentials.com"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors text-sm underline"
+                >
+                  support@autoessentials.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="tel:1800-123-4567"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors text-sm underline"
+                >
+                  1800-123-4567
+                </a>
+              </li>
+              <li>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  502, 5th Floor, Skyline Plaza,<br />
+                  MG Road, Bengaluru 560001, India
+                </p>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {/* Newsletter */}
-        <div className="mt-10 border-b border-blue-400/20 pb-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-5 bg-[#0E1F7A]/60 px-5 sm:px-8 py-5 rounded-xl text-center md:text-left">
-            <div className="flex flex-col sm:flex-row items-center md:items-start gap-3">
-              <Mail className="text-yellow-400 shrink-0" size={22} />
-              <div>
-                <h4 className="font-semibold text-yellow-400 text-base sm:text-lg">
-                  Stay Updated!
-                </h4>
-                <p className="text-gray-300 text-sm">
-                  Join our mailing list for exclusive deals.
-                </p>
+        {/* Newsletter Section */}
+        <div className="py-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+          {/* Newsletter Text and Input */}
+          <div className="flex-1 w-full lg:w-auto">
+            <p className="text-gray-300 text-sm mb-4">
+              Join our mailing list to stay in the loop with us...
+            </p>
+            <form className="flex max-w-md">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-l-full bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                />
               </div>
-            </div>
-            <form className="flex w-full md:w-auto justify-center md:justify-end">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-4 py-2 rounded-l-full text-blue-900 bg-amber-50 text-sm w-3/4 sm:w-72 outline-none"
-              />
               <button
                 type="submit"
-                className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-medium px-5 rounded-r-full transition flex items-center justify-center"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-2.5 rounded-r-full transition-colors text-sm whitespace-nowrap"
               >
-                ➤
+                Subscribe
               </button>
             </form>
           </div>
-        </div>
 
-        {/* Bottom Section */}
-        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-400 text-sm text-center md:text-left">
-          <p className="order-2 md:order-1">
-            © 2025 Auto Essentials. All Rights Reserved.
-          </p>
-          <div className="flex items-center justify-center gap-6 order-1 md:order-2">
-            <a href="#" className="text-white hover:text-yellow-400 transition">
-              <Facebook size={20} />
+          {/* Social Media Icons */}
+          <div className="flex items-center gap-4">
+            <a
+              href="#"
+              className="bg-yellow-400 hover:bg-yellow-500 p-2.5 rounded-lg transition-colors"
+              aria-label="Facebook"
+            >
+              <Facebook className="h-5 w-5 text-[#001155]" />
             </a>
-            <a href="#" className="text-white hover:text-yellow-400 transition">
-              <Linkedin size={20} />
+            <a
+              href="#"
+              className="bg-yellow-400 hover:bg-yellow-500 p-2.5 rounded-lg transition-colors"
+              aria-label="Twitter"
+            >
+              <Twitter className="h-5 w-5 text-[#001155]" />
             </a>
-            <a href="#" className="text-white hover:text-yellow-400 transition">
-              <Instagram size={20} />
+            <a
+              href="#"
+              className="bg-yellow-400 hover:bg-yellow-500 p-2.5 rounded-lg transition-colors"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="h-5 w-5 text-[#001155]" />
+            </a>
+            <a
+              href="#"
+              className="bg-yellow-400 hover:bg-yellow-500 p-2.5 rounded-lg transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5 text-[#001155]" />
             </a>
           </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="pt-6 border-t border-white/10">
+          <p className="text-gray-400 text-xs text-center">
+            © 2025 Auto Essentials. All Rights Reserved.
+          </p>
         </div>
       </div>
     </footer>
