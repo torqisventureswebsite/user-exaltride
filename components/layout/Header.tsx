@@ -39,6 +39,14 @@ export default function Header() {
     return () => clearInterval(interval);
   }, []);
 
+  // Smooth scroll to deals section
+  const scrollToDeals = () => {
+    const dealsSection = document.getElementById("deals");
+    if (dealsSection) {
+      dealsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
       {/* Desktop Header */}
@@ -80,7 +88,10 @@ export default function Header() {
             </div>
 
             {/* Deals */}
-            <Button className="bg-yellow-400 hover:bg-yellow-500 text-black flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors">
+            <Button
+              onClick={scrollToDeals}
+              className="bg-yellow-400 hover:bg-yellow-500 text-black flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+            >
               <Tag className="h-4 w-4" />
               Deals
             </Button>
@@ -163,12 +174,16 @@ export default function Header() {
                 </div>
 
                 {/* Deals */}
-                <Link href="/products" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 text-left bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-medium transition-colors">
-                    <Tag size={20} />
-                    <span>Deals & Offers</span>
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    scrollToDeals();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-medium transition-colors"
+                >
+                  <Tag size={20} />
+                  <span>Deals & Offers</span>
+                </button>
 
                 {/* Divider */}
                 <hr className="my-4 border-gray-200" />

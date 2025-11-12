@@ -13,7 +13,7 @@ export function TopDealsSection() {
   );
 
   return (
-    <section className="border-t bg-white py-12">
+    <section id="deals" className="border-t bg-white py-12 scroll-mt-20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
