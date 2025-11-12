@@ -23,6 +23,14 @@ export interface Product {
   brand_name?: string;
   status?: string;
   category_id?: string;
+  sku?: string;
+  warranty_months?: number;
+  weight_kg?: number;
+  dimensions_cm?: string;
+  is_oem?: boolean;
+  is_universal?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface ProductCardProps {
