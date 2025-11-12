@@ -11,6 +11,7 @@ const CartItemSchema = z.object({
   price: z.number(),
   quantity: z.number().int().positive(),
   image: z.string(),
+  categoryId: z.string().optional(),
 });
 
 type CartItem = z.infer<typeof CartItemSchema>;
@@ -60,7 +61,8 @@ export async function addToCart(
   name: string,
   price: number,
   image: string,
-  quantity: number = 1
+  quantity: number = 1,
+  categoryId?: string
 ) {
   try {
     const cart = await getCart();
@@ -79,6 +81,7 @@ export async function addToCart(
         price,
         image,
         quantity,
+        categoryId,
       });
     }
 
