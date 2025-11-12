@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
-import { TopBar } from "@/components/layout/TopBar";
-import { Footer } from "@/components/layout/Footer";
+import  TopBar  from "@/components/layout/TopBar";
+import  Footer  from "@/components/layout/Footer";
 import { X, ChevronDown } from "lucide-react";
 import productsData from "@/data/products.json";
 import categoriesData from "@/data/categories.json";
@@ -43,9 +43,16 @@ export default function ProductsPage() {
   // Get categories
   const categories = categoriesData.filter((c) => c.level === 0);
 
-  // Filter products
   const filteredProducts = useMemo(() => {
-    let filtered = [...allProducts];
+  let filtered = [...allProducts];
+
+  // If "type=deals" is present, only show discounted products
+  const viewType = searchParams.get("type");
+  if (viewType === "deals") {
+    filtered = filtered.filter(
+      (p) => p.discount_percentage && p.discount_percentage > 0
+    );
+  }
 
     // Filter by category
     if (selectedCategories.length > 0) {
