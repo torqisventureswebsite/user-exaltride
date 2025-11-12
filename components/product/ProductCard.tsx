@@ -87,17 +87,17 @@ export function ProductCard({
           />
 
           {/* Badges */}
-          <div className="absolute left-3 top-3 flex flex-col gap-2">
+          <div className="absolute left-2 md:left-3 top-2 md:top-3 flex flex-col gap-1 md:gap-2">
             {badges.primary && (
               <Badge
-                className={`${badgeStyles[badges.primary] || "bg-blue-600 text-white"} px-2 py-1 text-xs font-semibold`}
+                className={`${badgeStyles[badges.primary] || "bg-blue-600 text-white"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
               >
                 {badges.primary}
               </Badge>
             )}
             {badges.secondary && (
               <Badge
-                className={`${badgeStyles[badges.secondary] || "bg-yellow-500 text-gray-900"} px-2 py-1 text-xs font-semibold`}
+                className={`${badgeStyles[badges.secondary] || "bg-yellow-500 text-gray-900"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
               >
                 {badges.secondary}
               </Badge>
@@ -106,76 +106,77 @@ export function ProductCard({
 
           {/* Discount Badge */}
           {discountAmount > 0 && (
-            <Badge className="absolute bottom-3 left-3 bg-yellow-500 px-2 py-1 text-xs font-bold text-gray-900">
+            <Badge className="absolute bottom-2 md:bottom-3 left-2 md:left-3 bg-yellow-500 px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-bold text-gray-900">
               {discountAmount}% off
             </Badge>
           )}
         </div>
 
         {/* Card Content */}
-        <div className="p-4">
+        <div className="p-2 md:p-4">
           {/* Product Title */}
-          <h3 className="mb-2 line-clamp-2 h-12 text-sm font-medium text-gray-900">
+          <h3 className="mb-1 md:mb-2 line-clamp-2 h-8 md:h-12 text-xs md:text-sm font-medium text-gray-900">
             {product.title || "Product"}
           </h3>
 
           {/* Rating */}
           {product.rating && (
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5">
-                <span className="text-xs font-semibold text-white">
+            <div className="mb-2 md:mb-3 flex items-center gap-1 md:gap-2">
+              <div className="flex items-center gap-0.5 md:gap-1 rounded bg-blue-600 px-1 md:px-2 py-0.5">
+                <span className="text-[10px] md:text-xs font-semibold text-white">
                   {product.rating.toFixed(1)}
                 </span>
-                <Star className="h-3 w-3 fill-white text-white" />
+                <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-white text-white" />
               </div>
-              <span className="text-xs text-gray-600">
+              <span className="text-[10px] md:text-xs text-gray-600">
                 ({(product.review_count || 0).toLocaleString()})
               </span>
             </div>
           )}
 
           {/* Price */}
-          <div className="mb-2 flex items-baseline gap-2">
-            <span className="text-xl font-bold text-gray-900">
+          <div className="mb-1 md:mb-2 flex items-baseline gap-1 md:gap-2">
+            <span className="text-sm md:text-xl font-bold text-gray-900">
               ₹{(product.price || 0).toLocaleString()}
             </span>
             {product.compare_at_price && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-[10px] md:text-sm text-gray-500 line-through">
                 ₹{product.compare_at_price.toLocaleString()}
               </span>
             )}
           </div>
 
           {/* Free Delivery Badge */}
-          <div className="mb-3 flex items-center gap-1.5 text-xs text-blue-600">
-            <TruckIcon className="h-3.5 w-3.5" />
+          <div className="mb-2 md:mb-3 flex items-center gap-1 md:gap-1.5 text-[10px] md:text-xs text-blue-600">
+            <TruckIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
             <span className="font-medium">FREE Delivery</span>
           </div>
 
           {/* Offer Tags */}
           {showOffers && (
-            <div className="mb-3 flex flex-wrap gap-2">
-              <Badge variant="outline" className="text-xs font-normal">
+            <div className="mb-2 md:mb-3 flex flex-wrap gap-1 md:gap-2">
+              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
                 Today Offer
               </Badge>
-              <Badge variant="outline" className="text-xs font-normal">
+              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
                 Bank Offers
               </Badge>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-1 md:gap-2">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+              className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="mr-1 h-4 w-4" />
-              Add to cart
+              <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Add to cart</span>
+              <span className="sm:hidden">Add</span>
             </Button>
-            <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
               Buy Now
             </Button>
           </div>
