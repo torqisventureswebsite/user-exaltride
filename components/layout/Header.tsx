@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
@@ -10,15 +10,40 @@ import { User, Tag, Menu, X, ShoppingBag, MapPin, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CarSelector from "./CarSelector";
 import { CartBadge } from "@/components/cart/CartBadge";
+import CartSidebar from "@/components/cart/CartSidebar";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartCount, setCartCount] = useState(0);
+
+  // Load cart data from API
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const response = await fetch("/api/cart");
+        if (response.ok) {
+          const data = await response.json();
+          setCartItems(data.items || []);
+          setCartCount(data.count || 0);
+        }
+      } catch (error) {
+        console.error("Error loading cart:", error);
+      }
+    };
+    loadCart();
+
+    // Poll for cart updates every 2 seconds
+    const interval = setInterval(loadCart, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
       {/* Desktop Header */}
       <div className="hidden lg:block">
-        <div className="container mx-auto flex items-center justify-between py-2.5 px-6 gap-6 font-sans text-[15px] text-gray-800">
+        <div className="container mx-auto flex items-center justify-between py-2.5 px-6 gap-5 font-sans text-[15px] text-gray-800">
           {/* Left: Logo + Add Car */}
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xl font-bold text-blue-600">
@@ -36,23 +61,22 @@ export default function Header() {
           <div className="flex items-center gap-5">
             <LocationSelector />
 
-            <div className="flex items-center gap-10">
+            <div className="flex items-center gap-5">
               {/* Login */}
               <button className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
                 <User size={22} className="mb-1" />
-                <span className="text-sm font-medium">Login</span>
               </button>
 
               {/* Cart */}
-              <Link href="/cart">
-                <button className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
-                  <div className="relative mb-1">
-                    <CartIcon />
-                    <CartBadge />
-                  </div>
-                  <span className="text-sm font-medium">Cart</span>
-                </button>
-              </Link>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                <div className="relative mb-1">
+                  <CartIcon />
+                  <CartBadge count={cartCount} />
+                </div>
+              </button>
             </div>
 
             {/* Deals */}
@@ -82,12 +106,13 @@ export default function Header() {
           </Link>
 
           {/* Cart */}
-          <Link href="/cart">
-            <button className="relative p-2 text-gray-700 hover:text-gray-900">
-              <ShoppingBag size={24} />
-              <CartBadge />
-            </button>
-          </Link>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-gray-700 hover:text-gray-900"
+          >
+            <ShoppingBag size={24} />
+            <CartBadge count={cartCount} />
+          </button>
         </div>
 
         {/* Mobile Search Bar */}
@@ -167,6 +192,13 @@ export default function Header() {
           </div>
         </>
       )}
+
+      {/* Cart Sidebar */}
+      <CartSidebar
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+      />
     </header>
   );
 }
