@@ -49,28 +49,29 @@ export function CategoriesSection() {
   }, [topCategories]);
 
   return (
-    <section className="bg-gray-50 py-16">
+    <section className="bg-gray-50 py-8 md:py-16">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 md:mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-xl md:text-3xl font-bold text-gray-900">
               Shop by Categories
             </h2>
-            <p className="mt-2 text-gray-600">Explore car accessories</p>
+            <p className="mt-1 md:mt-2 text-xs md:text-base text-gray-600">Explore car accessories</p>
           </div>
-          <Link href="/products">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              Browse all
-            </Button>
+          <Link href="/products" className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base">
+            Browse all
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
 
-        {/* Category Cards Grid */}
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 min-w-min">
+        {/* Category Cards Grid - Horizontal Scroll on Mobile */}
+        <div className="overflow-x-auto pb-4 md:overflow-visible">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {categoryData.map((data) => (
-              <div key={data.category.id} className="w-[165px] md:w-auto">
+              <div key={data.category.id} className="flex-shrink-0 w-auto">
                 <CategoryCard
                   category={data.category}
                   productImages={data.productImages}

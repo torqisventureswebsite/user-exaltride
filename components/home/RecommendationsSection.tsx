@@ -24,20 +24,20 @@ export function RecommendationsSection() {
     .slice(0, 3);
 
   return (
-    <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 py-16">
+    <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 py-8 md:py-16">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="mb-6 md:mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="bg-yellow-400 p-2 md:p-3 rounded-xl flex-shrink-0">
               <Award className="h-6 w-6 md:h-8 md:w-8 text-blue-900" />
             </div>
             <div>
-              <h2 className="text-xl md:text-3xl font-bold text-white">Expert Recommendations</h2>
+              <h2 className="text-lg md:text-3xl font-bold text-white">Expert Recommendations</h2>
               <p className="text-blue-100 text-xs md:text-sm mt-1">Curated by Industry Professionals</p>
             </div>
           </div>
-          <Link href="/products" className="self-start md:self-auto">
+          <Link href="/products" className="self-start md:self-auto hidden md:block">
             <Button className="bg-white hover:bg-gray-100 text-blue-700 font-semibold gap-2 text-sm md:text-base">
               View All Picks
               <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />

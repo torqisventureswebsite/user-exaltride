@@ -1,0 +1,38 @@
+[
+  {
+    "id": "brand-1",
+    "name": "Sony",
+    "slug": "sony",
+    "item_count": 125
+  },
+  {
+    "id": "brand-2",
+    "name": "Pioneer",
+    "slug": "pioneer",
+    "item_count": 98
+  },
+  {
+    "id": "brand-3",
+    "name": "Bosch",
+    "slug": "bosch",
+    "item_count": 145
+  },
+  {
+    "id": "brand-4",
+    "name": "Philips",
+    "slug": "philips",
+    "item_count": 87
+  },
+  {
+    "id": "brand-5",
+    "name": "JBL",
+    "slug": "jbl",
+    "item_count": 63
+  },
+  {
+    "id": "brand-6",
+    "name": "Blaupunkt",
+    "slug": "blaupunkt",
+    "item_count": 54
+  }
+]

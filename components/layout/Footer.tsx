@@ -4,38 +4,44 @@ import { Facebook, Twitter, Linkedin, Instagram, Mail } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="bg-[#001155] text-white">
-      <div className="container mx-auto px-4 py-12">
-        {/* Top Section - Logo and Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 pb-10 border-b border-white/10">
-          {/* Logo Section */}
-          <div className="flex flex-col items-start">
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold text-white">exaltride</h2>
-              <p className="text-xs text-gray-300 mt-1">YOUR RIDE. REINVENTED.</p>
-            </div>
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        {/* Logo Section - Centered on Mobile */}
+        <div className="flex flex-col items-center text-center mb-8 md:mb-12">
+          <div className="mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">exaltride</h2>
+            <p className="text-xs md:text-sm text-gray-300 tracking-wider">YOUR RIDE. REINVENTED.</p>
           </div>
+          <p className="text-sm md:text-base text-gray-200 max-w-md">
+            Your trusted destination<br className="md:hidden" />
+            for premium car accessories
+          </p>
+        </div>
 
+        {/* Links Section - Single Column on Mobile, Grid on Desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pb-8 md:pb-10 border-b border-white/10">
           {/* Quicklinks */}
           <div>
-            <h3 className="text-yellow-400 font-semibold text-lg mb-4">Quicklinks</h3>
-            <ul className="space-y-2">
+            <h3 className="text-yellow-400 font-semibold text-base md:text-lg mb-4 flex items-center gap-2">
+              <span className="text-yellow-400">●</span> Quicklinks
+            </h3>
+            <ul className="space-y-2 md:space-y-3 pl-5 md:pl-0">
               <li>
-                <Link href="/" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/products" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Products
                 </Link>
               </li>
               <li>
-                <Link href="/products?type=deals" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/products?type=deals" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Deals
                 </Link>
               </li>
               <li>
-                <Link href="#contact" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#contact" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Contact Us
                 </Link>
               </li>
@@ -44,46 +50,53 @@ export default function Footer() {
 
           {/* Help & Policy */}
           <div>
-            <h3 className="text-yellow-400 font-semibold text-lg mb-4">Help & Policy</h3>
-            <ul className="space-y-2">
+            <h3 className="text-yellow-400 font-semibold text-base md:text-lg mb-4 flex items-center gap-2">
+              <span className="text-yellow-400">●</span> Help & Policy
+            </h3>
+            <ul className="space-y-2 md:space-y-3 pl-5 md:pl-0">
               <li>
-                <Link href="#faq" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#faq" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="#shipping" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#shipping" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Shipping Policy
                 </Link>
               </li>
               <li>
-                <Link href="#return" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#return" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Return Policy
                 </Link>
               </li>
               <li>
-                <Link href="#privacy" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#cancellation" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
+                  Cancellation Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="#privacy" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#terms" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="#terms" className="text-gray-300 hover:text-yellow-400 transition-colors text-sm md:text-base">
                   Terms & Conditions
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Us */}
-          <div>
+          {/* Contact Us - Hidden on Mobile, shown on Desktop */}
+          <div className="hidden md:block">
             <h3 className="text-yellow-400 font-semibold text-lg mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:support@autoessentials.com"
+                  href="mailto:support@exaltride.com"
                   className="text-gray-300 hover:text-yellow-400 transition-colors text-sm underline"
                 >
-                  support@autoessentials.com
+                  support@exaltride.com
                 </a>
               </li>
               <li>
@@ -94,18 +107,12 @@ export default function Footer() {
                   1800-123-4567
                 </a>
               </li>
-              <li>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  502, 5th Floor, Skyline Plaza,<br />
-                  MG Road, Bengaluru 560001, India
-                </p>
-              </li>
             </ul>
           </div>
         </div>
 
-        {/* Newsletter Section */}
-        <div className="py-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+        {/* Newsletter Section - Hidden on Mobile */}
+        <div className="hidden md:flex py-8 flex-col lg:flex-row items-center justify-between gap-6">
           {/* Newsletter Text and Input */}
           <div className="flex-1 w-full lg:w-auto">
             <p className="text-gray-300 text-sm mb-4">
@@ -163,9 +170,9 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="pt-6 border-t border-white/10">
+        <div className="pt-6 md:pt-6 border-t border-white/10 md:border-t-0">
           <p className="text-gray-400 text-xs text-center">
-            © 2025 Auto Essentials. All Rights Reserved.
+            © 2025 Exaltride. All Rights Reserved.
           </p>
         </div>
       </div>

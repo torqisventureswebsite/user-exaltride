@@ -63,7 +63,7 @@ export function HeroCarousel() {
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
-            <div className="relative h-[500px] w-full overflow-hidden">
+            <div className="relative h-[300px] md:h-[400px] lg:h-[500px] w-full overflow-hidden">
               {/* Background Image */}
               <Image
                 src={slide.image}
@@ -77,35 +77,35 @@ export function HeroCarousel() {
               <div className="absolute inset-0 bg-blue-600/80" />
 
               {/* Content */}
-              <div className="relative flex h-full items-center px-8 md:px-16">
+              <div className="relative flex h-full items-center px-4 md:px-8 lg:px-16">
                 <div className="max-w-2xl text-white">
                   {/* Badge */}
                   <Badge
                     variant="secondary"
-                    className="mb-6 gap-1.5 bg-white/20 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30"
+                    className="mb-3 md:mb-6 gap-1 md:gap-1.5 bg-white/20 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30"
                   >
-                    <Zap className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Zap className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400" />
                     {slide.badge}
                   </Badge>
 
                   {/* Title */}
-                  <h1 className="mb-4 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
+                  <h1 className="mb-2 md:mb-4 text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                     {slide.title}
                   </h1>
 
                   {/* Subtitle */}
-                  <p className="mb-8 text-xl font-medium md:text-2xl">
+                  <p className="mb-4 md:mb-8 text-sm md:text-xl lg:text-2xl font-medium">
                     {slide.subtitle}
                   </p>
 
                   {/* CTA Button */}
                   <Link href="/products">
                     <Button
-                      size="lg"
-                      className="group gap-2 bg-white px-8 text-base font-semibold text-blue-600 hover:bg-gray-100"
+                      size="sm"
+                      className="group gap-2 bg-white px-4 md:px-8 text-xs md:text-base font-semibold text-blue-600 hover:bg-gray-100 h-9 md:h-11"
                     >
                       Shop Now
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight className="h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </Link>
                 </div>
@@ -116,8 +116,8 @@ export function HeroCarousel() {
       </CarouselContent>
 
       {/* Navigation Arrows */}
-      <CarouselPrevious className="left-4 h-12 w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
-      <CarouselNext className="right-4 h-12 w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
+      <CarouselPrevious className="left-2 md:left-4 h-8 w-8 md:h-12 md:w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
+      <CarouselNext className="right-2 md:right-4 h-8 w-8 md:h-12 md:w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
     </Carousel>
   );
 }
