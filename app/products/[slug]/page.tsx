@@ -57,11 +57,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <TopBar />
+      <div className="hidden md:block">
+        <TopBar />
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 md:py-8">
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-600">
+        <div className="mb-4 md:mb-6 flex items-center gap-2 text-xs md:text-sm text-gray-600">
           <a href="/" className="hover:text-blue-600">
             Home
           </a>
@@ -74,9 +76,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {/* Product Detail Section */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
           {/* Product Images */}
-          <div className="space-y-4">
+          <div className="space-y-2 md:space-y-4">
             <Card className="overflow-hidden">
               <div className="relative aspect-square">
                 <Image
@@ -96,7 +98,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Brand */}
             <div>
               <span className="text-sm text-gray-600">
@@ -105,7 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900">
               {product.title}
             </h1>
 
@@ -126,12 +128,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Price */}
             <div className="space-y-2">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-gray-900">
+              <div className="flex items-baseline gap-2 md:gap-3">
+                <span className="text-2xl md:text-4xl font-bold text-gray-900">
                   ₹{(product.price || 0).toLocaleString()}
                 </span>
                 {product.compare_at_price && (
-                  <span className="text-xl text-gray-500 line-through">
+                  <span className="text-lg md:text-xl text-gray-500 line-through">
                     ₹{product.compare_at_price.toLocaleString()}
                   </span>
                 )}
@@ -158,36 +160,36 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Description */}
             <div>
-              <h3 className="mb-2 font-semibold text-gray-900">Description</h3>
-              <p className="text-gray-600">{product.description}</p>
+              <h3 className="mb-2 text-sm md:text-base font-semibold text-gray-900">Description</h3>
+              <p className="text-sm md:text-base text-gray-600">{product.description}</p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 md:gap-3">
               <Button
-                size="lg"
-                className="flex-1 gap-2 bg-yellow-500 text-gray-900 hover:bg-yellow-600"
+                size="default"
+                className="flex-1 gap-1 md:gap-2 bg-yellow-500 text-gray-900 hover:bg-yellow-600 h-10 md:h-11 text-xs md:text-sm"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
                 Add to Cart
               </Button>
               <Button
-                size="lg"
-                className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700"
+                size="default"
+                className="flex-1 gap-1 md:gap-2 bg-blue-600 hover:bg-blue-700 h-10 md:h-11 text-xs md:text-sm"
               >
                 Buy Now
               </Button>
             </div>
 
             {/* Secondary Actions */}
-            <div className="flex gap-3">
-              <Button variant="outline" size="lg" className="flex-1 gap-2">
-                <Heart className="h-5 w-5" />
-                Wishlist
+            <div className="flex gap-2 md:gap-3">
+              <Button variant="outline" size="default" className="flex-1 gap-1 md:gap-2 h-10 md:h-11 text-xs md:text-sm">
+                <Heart className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="hidden sm:inline">Wishlist</span>
               </Button>
-              <Button variant="outline" size="lg" className="flex-1 gap-2">
-                <Share2 className="h-5 w-5" />
-                Share
+              <Button variant="outline" size="default" className="flex-1 gap-1 md:gap-2 h-10 md:h-11 text-xs md:text-sm">
+                <Share2 className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="hidden sm:inline">Share</span>
               </Button>
             </div>
 
@@ -255,35 +257,42 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Similar Products Section */}
         {similarProducts.length > 0 && (
-          <section className="mt-16">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">
+          <section className="mt-8 md:mt-16">
+            <div className="mb-4 md:mb-8">
+              <h2 className="text-lg md:text-2xl font-bold text-gray-900">
                 Similar Products
               </h2>
-              <p className="text-gray-600">
+              <p className="text-xs md:text-base text-gray-600">
                 Products from the same category
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {similarProducts.map((similarProduct, index) => (
-                <ProductCard
-                  key={similarProduct.id}
-                  product={similarProduct}
-                  badges={
-                    index === 0
-                      ? { primary: "Bestseller", secondary: "Hot Deal" }
-                      : undefined
-                  }
-                  showOffers
-                />
-              ))}
+            {/* Horizontal Scroll on Mobile, Grid on Desktop */}
+            <div className="overflow-x-auto pb-4 md:overflow-visible -mx-4 px-4">
+              <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+                {similarProducts.map((similarProduct, index) => (
+                  <div key={similarProduct.id} className="flex-shrink-0 w-[165px] md:w-auto">
+                    <ProductCard
+                      product={similarProduct}
+                      badges={
+                        index === 0
+                          ? { primary: "Bestseller", secondary: "Hot Deal" }
+                          : undefined
+                      }
+                      showOffers
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
       </main>
 
-      <Footer />
+      {/* Footer - Hidden on Mobile */}
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 }

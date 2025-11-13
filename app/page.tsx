@@ -13,7 +13,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <TopBar />
+      <div className="hidden md:block">
+        <TopBar />
+      </div>
       <main>
         <HeroCarousel />
         <FeaturedProducts />
