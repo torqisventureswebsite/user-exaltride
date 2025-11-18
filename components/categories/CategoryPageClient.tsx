@@ -1,0 +1,173 @@
+// components/category/CategoryPageClient.tsx
+"use client";
+
+import { useMemo, useState, useEffect } from "react";
+import { ProductCard } from "@/components/product/ProductCard";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { Product } from "@/components/product/ProductCard";
+import CategoryHero from "./CategoryHero";
+import OffersSection from "@/components/product/OffersSection";
+import BundlePriceBox from "@/components/product/BundlePriceBox"; // optional: if you use
+import CategoryExtras from "@/components/category-sections/CategoryExtras";
+import SidebarFilters from "./SideBarFilters";
+export default function CategoryPageClient({
+  category,
+  initialProducts,
+  subCategories,
+}: {
+  category: { id: string; name: string; description?: string; slug: string };
+  initialProducts: Product[];
+  subCategories: { id: string; name: string; slug: string }[];
+}) {
+  // filters
+  const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>(() => {
+    // compute min/max
+    const prices = initialProducts.map((p) => p.price || 0);
+    const min = Math.min(...prices, 0);
+    const max = Math.max(...prices, 0);
+    return [min, max];
+  });
+  const [localRange, setLocalRange] = useState<[number, number]>(priceRange);
+  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "rating" | "newest">("relevance");
+
+  // pagination
+  const itemsPerPage = 12;
+  const [page, setPage] = useState(1);
+  
+  
+
+  // derive available brands from current category products
+  const brands = useMemo(() => {
+    const set = new Set(initialProducts.map((p) => p.brand_name).filter(Boolean));
+    return Array.from(set).sort();
+  }, [initialProducts]);
+
+  // Derived filtered products
+  const filtered = useMemo(() => {
+    let list = initialProducts.slice();
+
+    if (selectedSubcat) {
+      list = list.filter((p) => p.category_id === selectedSubcat);
+    }
+
+    if (selectedBrands.length > 0) {
+      list = list.filter((p) => selectedBrands.includes(p.brand_name || ""));
+    }
+
+    // price filter
+    list = list.filter((p) => {
+      const price = p.price || 0;
+      return price >= localRange[0] && price <= localRange[1];
+    });
+
+    // sort
+    switch (sortBy) {
+      case "price-asc":
+        list.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case "price-desc":
+        list.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case "rating":
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case "newest":
+        list.sort((a, b) => new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime());
+        break;
+      default:
+        // relevance or default: keep original order
+        break;
+    }
+
+    return list;
+  }, [initialProducts, selectedSubcat, selectedBrands, localRange, sortBy]);
+
+  // pagination calc
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [totalPages]);
+
+  const visible = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  // helpers
+  const toggleBrand = (b: string) =>
+    setSelectedBrands((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]));
+
+  const clearAll = () => {
+    setSelectedSubcat(null);
+    setSelectedBrands([]);
+    setLocalRange(priceRange);
+    setSortBy("relevance");
+    setPage(1);
+  };
+
+  return (
+    <div>
+      <CategoryHero name={category.name} productCount={initialProducts.length} description={category.description} />
+
+      <div className="container mx-auto grid grid-cols-12 gap-6">
+        {/* Sidebar */}
+        <aside className="col-span-12 lg:col-span-3">
+          <SidebarFilters
+            selectedBrands={selectedBrands}
+            toggleBrand={toggleBrand}
+            priceRange={priceRange}
+            localRange={localRange}
+            setLocalRange={setLocalRange}
+            clearAll={clearAll}
+          />
+        </aside>
+
+        {/* Product Grid */}
+        <div className="col-span-12 lg:col-span-9 space-y-4">
+          {/* Top bar with result count */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-md bg-white px-4 py-2 shadow-sm text-sm">
+                {filtered.length.toLocaleString()} results
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="text-sm">View</div>
+              <div className="bg-white rounded-md p-2 shadow-sm">
+                {/* placeholder for grid/list toggle if desired */}
+                <span className="text-sm">Grid</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Product cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
+            {visible.map((p) => (
+              <ProductCard key={p.id} product={p} showOffers />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <Button onClick={() => setPage((s) => Math.max(1, s - 1))} variant="outline" disabled={page === 1}>
+              <ChevronLeft />
+            </Button>
+
+            <div className="px-3 py-2 bg-white rounded shadow-sm">{page} / {totalPages}</div>
+
+            <Button onClick={() => setPage((s) => Math.min(totalPages, s + 1))} variant="outline" disabled={page === totalPages}>
+              <ChevronRight />
+            </Button>
+          </div>
+           <div className="mt-10">
+            <CategoryExtras />
+           </div>   
+         
+        </div>
+      </div>
+    </div>
+  );
+}

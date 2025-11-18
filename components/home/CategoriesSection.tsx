@@ -33,8 +33,8 @@ export function CategoriesSection() {
       // Define different background colors for each card
       const bgColors = [
         "bg-gradient-to-br from-yellow-200 to-yellow-300",
-        "bg-gradient-to-br from-orange-200 to-orange-300",
-        "bg-gradient-to-br from-amber-200 to-amber-300",
+        // "bg-gradient-to-br from-orange-200 to-orange-300",
+        // "bg-gradient-to-br from-amber-200 to-amber-300",
       ];
 
       return {

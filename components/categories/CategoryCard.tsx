@@ -27,7 +27,7 @@ export function CategoryCard({
   const displayImages = productImages.slice(0, 5);
 
   return (
-    <Link href={`/products?category=${category.id}`}>
+    <Link href={`/categories/${category.slug}`}>
       <Card
         className={`group relative overflow-hidden ${bgColor} border-none p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
       >

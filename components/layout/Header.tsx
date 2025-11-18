@@ -54,8 +54,14 @@ export default function Header() {
         <div className="container mx-auto flex items-center justify-between py-2.5 px-6 gap-5 font-sans text-[15px] text-gray-800">
           {/* Left: Logo + Add Car */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-xl font-bold text-blue-600">
-              EXALTRIDE
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/images/logo.png"
+                alt="ExaltRide Logo"
+                width={80}     // adjust size based on your design
+                height={10}     // adjust accordingly
+                priority
+              />
             </Link>
             <CarSelector />
           </div>
