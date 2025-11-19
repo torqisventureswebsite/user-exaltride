@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 export default function CarSelector() {
   const [cars, setCars] = useState<any[]>([]);
-  const [selectedCar, setSelectedCar] = useState<string>("Add your Car");
-  const [showMenu, setShowMenu] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<string>("Add Your Car");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/cars")
@@ -16,28 +17,34 @@ export default function CarSelector() {
 
   const handleSelect = (car: any) => {
     setSelectedCar(`${car.make} ${car.model} (${car.year})`);
-    setShowMenu(false);
+    setOpen(false);
   };
 
   return (
     <div className="relative">
-      {/* Button */}
       <button
-        onClick={() => setShowMenu(prev => !prev)}
-        className="flex items-center gap-2 text-gray-700 font-medium hover:text-gray-900 transition-colors"
+        onClick={() => setOpen(!open)}
+        className="
+          flex items-center justify-between gap-2
+          border border-[#0033A1] text-[#0033A1]
+          rounded-md px-4 h-[36px]   /* Matches Figma */
+          bg-white font-medium cursor-pointer
+          hover:bg-blue-50 transition
+        "
       >
-        {selectedCar} <span className="text-[13px]">▼</span>
+        <span className="whitespace-nowrap">{selectedCar}</span>
+        <ChevronDown size={16} />
       </button>
 
       {/* Dropdown */}
-      {showMenu && (
-        <div className="absolute left-0 mt-2 w-60 bg-white border border-gray-200 shadow-lg rounded-lg z-50">
-          <ul className="max-h-60 overflow-y-auto">
-            {cars.map(car => (
+      {open && (
+        <div className="absolute left-0 mt-2 w-60 bg-white border border-gray-200 shadow-lg rounded-md z-50 max-h-60 overflow-y-auto">
+          <ul className="p-1">
+            {cars.map((car) => (
               <li
                 key={car.id}
                 onClick={() => handleSelect(car)}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
               >
                 {car.make} {car.model} {car.variant} ({car.year})
               </li>

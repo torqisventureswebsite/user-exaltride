@@ -10,9 +10,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/components/product/ProductCard";
 import CategoryHero from "./CategoryHero";
 import OffersSection from "@/components/product/OffersSection";
-import BundlePriceBox from "@/components/product/BundlePriceBox"; // optional: if you use
 import CategoryExtras from "@/components/category-sections/CategoryExtras";
 import SidebarFilters from "./SideBarFilters";
+import MobileFiltersButton from "@/components/categories/MobileFiltersButton";
+import MobileFilterDrawer from "@/components/categories/MobileFilterDrawer";
+
 export default function CategoryPageClient({
   category,
   initialProducts,
@@ -20,34 +22,50 @@ export default function CategoryPageClient({
 }: {
   category: { id: string; name: string; description?: string; slug: string };
   initialProducts: Product[];
-  subCategories: { id: string; name: string; slug: string }[];
+  subCategories: { id: number; name: string; slug: string }[];
 }) {
-  // filters
+  // ---------- FILTER STATE ----------
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>(() => {
-    // compute min/max
     const prices = initialProducts.map((p) => p.price || 0);
     const min = Math.min(...prices, 0);
     const max = Math.max(...prices, 0);
     return [min, max];
   });
   const [localRange, setLocalRange] = useState<[number, number]>(priceRange);
-  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "rating" | "newest">("relevance");
+  const [sortBy, setSortBy] = useState<
+    "relevance" | "price-asc" | "price-desc" | "rating" | "newest"
+  >("relevance");
 
-  // pagination
+  // filter drawer state (mobile)
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // ---------- PAGINATION ----------
   const itemsPerPage = 12;
   const [page, setPage] = useState(1);
-  
-  
 
-  // derive available brands from current category products
+  // ---------- DERIVED DATA ----------
+  // brands available from products
   const brands = useMemo(() => {
-    const set = new Set(initialProducts.map((p) => p.brand_name).filter(Boolean));
+    const set = new Set(
+      initialProducts.map((p) => p.brand_name).filter(Boolean)
+    );
     return Array.from(set).sort();
   }, [initialProducts]);
 
-  // Derived filtered products
+  // parent categories for filters (use subCategories prop; fallback to empty)
+  const parentCategories = useMemo(
+    () =>
+      (subCategories || []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        item_count: 0,
+      })),
+    [subCategories]
+  );
+
+  // ---------- FILTER LOGIC ----------
   const filtered = useMemo(() => {
     let list = initialProducts.slice();
 
@@ -59,7 +77,7 @@ export default function CategoryPageClient({
       list = list.filter((p) => selectedBrands.includes(p.brand_name || ""));
     }
 
-    // price filter
+    // price filter using localRange
     list = list.filter((p) => {
       const price = p.price || 0;
       return price >= localRange[0] && price <= localRange[1];
@@ -77,10 +95,13 @@ export default function CategoryPageClient({
         list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "newest":
-        list.sort((a, b) => new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime());
+        list.sort(
+          (a, b) =>
+            new Date(b.created_at || "").getTime() -
+            new Date(a.created_at || "").getTime()
+        );
         break;
       default:
-        // relevance or default: keep original order
         break;
     }
 
@@ -91,13 +112,15 @@ export default function CategoryPageClient({
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   useEffect(() => {
     if (page > totalPages) setPage(1);
-  }, [totalPages]);
+  }, [totalPages, page]);
 
   const visible = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  // helpers
+  // ---------- HELPERS ----------
   const toggleBrand = (b: string) =>
-    setSelectedBrands((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]));
+    setSelectedBrands((prev) =>
+      prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]
+    );
 
   const clearAll = () => {
     setSelectedSubcat(null);
@@ -107,27 +130,74 @@ export default function CategoryPageClient({
     setPage(1);
   };
 
+  // apply filters from mobile drawer (you can add API calls here)
+  const applyFilters = () => {
+    setPage(1);
+    // If you want to persist filters to the URL, do it here.
+    // If you want to call the server for filtered products, call API here.
+  };
+
+  // ---------- UI ----------
+  // total results (for mobile button)
+  const totalResults = filtered.length;
+
   return (
     <div>
-      <CategoryHero name={category.name} productCount={initialProducts.length} description={category.description} />
+      <CategoryHero
+        name={category.name}
+        productCount={initialProducts.length}
+        description={category.description}
+      />
 
-      <div className="container mx-auto grid grid-cols-12 gap-6">
-        {/* Sidebar */}
-        <aside className="col-span-12 lg:col-span-3">
-          <SidebarFilters
-            selectedBrands={selectedBrands}
-            toggleBrand={toggleBrand}
-            priceRange={priceRange}
-            localRange={localRange}
-            setLocalRange={setLocalRange}
-            clearAll={clearAll}
+      {/* Top mobile filter row (mobile-only) */}
+      <div className="md:hidden max-w-[480px] mx-auto px-4">
+        <div className="flex items-center gap-3 py-3">
+          <MobileFiltersButton
+            onOpen={() => setIsFilterOpen(true)}
+            totalResults={totalResults}
           />
+
+          <div className="flex-1 text-center text-sm text-gray-600">
+            {totalResults.toLocaleString()} results
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              className="px-2 py-2 border rounded-lg text-sm"
+              onClick={() =>
+                setSortBy((s) =>
+                  s === "relevance" ? "price-asc" : s === "price-asc" ? "price-desc" : "relevance"
+                )
+              }
+            >
+              Sort
+            </button>
+            <button className="px-2 py-2 border rounded-lg text-sm">Grid</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main container */}
+      <div className="container mx-auto grid grid-cols-12 gap-6 px-4 md:px-6">
+        {/* Sidebar (desktop only) */}
+        <aside className="col-span-12 lg:col-span-3">
+          {/* show on md/lg as sidebar, hide on mobile */}
+          <div className="hidden md:block">
+            <SidebarFilters
+              selectedBrands={selectedBrands}
+              toggleBrand={toggleBrand}
+              priceRange={priceRange}
+              localRange={localRange}
+              setLocalRange={setLocalRange}
+              clearAll={clearAll}
+            />
+          </div>
         </aside>
 
         {/* Product Grid */}
         <div className="col-span-12 lg:col-span-9 space-y-4">
-          {/* Top bar with result count */}
-          <div className="flex items-center justify-between">
+          {/* Top bar (desktop) */}
+          <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-md bg-white px-4 py-2 shadow-sm text-sm">
                 {filtered.length.toLocaleString()} results
@@ -137,13 +207,12 @@ export default function CategoryPageClient({
             <div className="flex items-center gap-3">
               <div className="text-sm">View</div>
               <div className="bg-white rounded-md p-2 shadow-sm">
-                {/* placeholder for grid/list toggle if desired */}
                 <span className="text-sm">Grid</span>
               </div>
             </div>
           </div>
 
-          {/* Product cards */}
+          {/* Product cards grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
             {visible.map((p) => (
               <ProductCard key={p.id} product={p} showOffers />
@@ -152,22 +221,50 @@ export default function CategoryPageClient({
 
           {/* Pagination */}
           <div className="flex items-center justify-center gap-3 mt-4">
-            <Button onClick={() => setPage((s) => Math.max(1, s - 1))} variant="outline" disabled={page === 1}>
+            <Button
+              onClick={() => setPage((s) => Math.max(1, s - 1))}
+              variant="outline"
+              disabled={page === 1}
+            >
               <ChevronLeft />
             </Button>
 
-            <div className="px-3 py-2 bg-white rounded shadow-sm">{page} / {totalPages}</div>
+            <div className="px-3 py-2 bg-white rounded shadow-sm">
+              {page} / {totalPages}
+            </div>
 
-            <Button onClick={() => setPage((s) => Math.min(totalPages, s + 1))} variant="outline" disabled={page === totalPages}>
+            <Button
+              onClick={() => setPage((s) => Math.min(totalPages, s + 1))}
+              variant="outline"
+              disabled={page === totalPages}
+            >
               <ChevronRight />
             </Button>
           </div>
-           <div className="mt-10">
+
+          {/* Category extras / other sections */}
+          <div className="mt-10">
             <CategoryExtras />
-           </div>   
-         
+          </div>
         </div>
       </div>
+
+      {/* Mobile filter drawer */}
+      <MobileFilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        parentCategories={parentCategories}
+        selectedBrands={selectedBrands}
+        toggleBrand={toggleBrand}
+        localRange={localRange}
+        setLocalRange={setLocalRange}
+        priceRange={priceRange}
+        clearAll={clearAll}
+        applyFilters={() => {
+          applyFilters();
+          setIsFilterOpen(false);
+        }}
+      />
     </div>
   );
 }

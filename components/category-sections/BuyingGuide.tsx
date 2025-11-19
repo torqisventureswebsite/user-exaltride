@@ -31,7 +31,7 @@ export default function BuyingGuide() {
         ))}
       </div>
 
-      <button className="mt-5 border border-green-500 px-4 py-2 rounded-lg text-green-700 flex items-center gap-2">
+      <button className="mt-5 mx-auto border border-green-500 px-4 py-2 rounded-lg text-green-700 flex items-center gap-2">
         💬 Need Help? Chat with Expert
       </button>
     </div>
