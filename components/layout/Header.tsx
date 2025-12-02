@@ -51,11 +51,23 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
       {/* Desktop Header */}
       <div className="hidden lg:block">
-        <div className="container mx-auto flex items-center justify-between py-2.5 px-6 gap-5 font-sans text-[15px] text-gray-800">
+        <div className="
+          container mx-auto 
+          flex items-center justify-between 
+          h-[78px] 
+          px-6 gap-6
+          font-sans text-[15px] text-gray-800
+        ">
           {/* Left: Logo + Add Car */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-xl font-bold text-blue-600">
-              EXALTRIDE
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/images/logo.png"
+                alt="ExaltRide Logo"
+                width={80}     // adjust size based on your design
+                height={10}     // adjust accordingly
+                priority
+              />
             </Link>
             <CarSelector />
           </div>
@@ -100,35 +112,43 @@ export default function Header() {
       </div>
 
       {/* Mobile Header */}
-      <div className="lg:hidden">
-        <div className="flex items-center justify-between py-3 px-4">
-          {/* Hamburger Menu */}
+      <div className="lg:hidden border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between py-2.5 px-4">
+          
+          {/* Hamburger */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-gray-700 hover:text-gray-900"
-            aria-label="Menu"
+            className="p-1.5 text-gray-700"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Logo */}
-          <Link href="/" className="text-lg font-bold text-blue-600">
-            EXALTRIDE
+          {/* Logo (Image, centered — matches Figma) */}
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/images/logo.png"
+              alt="ExaltRide Logo"
+              width={95}
+              height={20}
+              priority
+            />
           </Link>
 
           {/* Cart */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="relative p-2 text-gray-700 hover:text-gray-900"
+            className="relative p-1.5 text-gray-700"
           >
-            <ShoppingBag size={24} />
+            <ShoppingBag size={22} />
             <CartBadge count={cartCount} />
           </button>
+
         </div>
 
-        {/* Mobile Search Bar */}
+        {/* Mobile Search Container (Figma blue border box style) */}
         <div className="px-4 pb-3">
-          <SearchBar />
+            <SearchBar />
+          
         </div>
       </div>
 

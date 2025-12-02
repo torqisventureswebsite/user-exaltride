@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "type": "Bank Offer",
+    "title": "10% Instant Discount",
+    "desc": "Get 10% instant discount on HDFC Bank Credit & Debit Cards",
+    "icon": "bank",
+    "code": "HDFC10",
+    "terms": "Minimum purchase ₹5,000 • Maximum discount ₹1,500 • Valid till 15 Nov"
+  },
+  {
+    "id": 2,
+    "type": "Partner Offer",
+    "title": "5% Cashback",
+    "desc": "Get 5% cashback with CitiBank Credit Cards",
+    "icon": "gift",
+    "code": "CITI5",
+    "terms": "Maximum cashback ₹1,000 • Valid on all products"
+  },
+  {
+    "id": 3,
+    "type": "Combo Deal",
+    "title": "Buy 2 Save 15%",
+    "desc": "Purchase 2 or more items and save 15% on total order",
+    "icon": "combo",
+    "code": "COMBO15",
+    "terms": "Applicable on cart value • No minimum limit"
+  }
+]
