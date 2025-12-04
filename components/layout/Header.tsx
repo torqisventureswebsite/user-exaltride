@@ -126,7 +126,7 @@ export default function Header() {
           {/* Logo (Image, centered — matches Figma) */}
           <Link href="/" className="flex items-center">
             <Image 
-              src="/images/logo.png"
+              src="/images/dark_logo.png"
               alt="ExaltRide Logo"
               width={95}
               height={20}
