@@ -4,7 +4,14 @@ import SimilarProducts from "@/components/cart/SimilarProducts";
 import Link from "next/link";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import CartNavbar from "@/components/cart/CartNavbar";
+import CartHeader from "@/components/cart/CartHeader";
+import CartItemCard from "@/components/cart/CartItemCard";
+import CartCouponBox from "@/components/cart/CartCouponBox";
+import OrderSummary from "@/components/cart/OrderSummary";
+import Footer from "@/components/layout/Footer";
+import { ShoppingBag } from "lucide-react";
+import CartTopBar from "@/components/cart/CartTopBar";  
 export default async function CartPage() {
   const cartItems = await getCartItems();
 
@@ -20,94 +27,66 @@ export default async function CartPage() {
   );
   const productIds = cartItems.map((item) => item.productId);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-            <p className="text-gray-600">
-              {cartItems.length} {cartItems.length === 1 ? "item" : "items"} in your cart
-            </p>
+return (
+  <div className="min-h-screen bg-gray-50">
+    <CartNavbar cartCount={cartItems.length} />
+    <CartTopBar />
+    <div className="container mx-auto px-4 py-8">
+      <CartHeader itemCount={cartItems.length} />
+
+      {cartItems.length === 0 ? (
+        <EmptyCart />
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-8">
+
+          {/* LEFT SIDE */}
+          <div className="lg:col-span-2 space-y-4">
+            {cartItems.map((item) => (
+              <CartItemCard key={item.productId} item={item} />
+
+            ))}
+
+            {/* CONTINUE SHOPPING BUTTON BELOW PRODUCTS */}
+            <div className="pt-4">
+              <Link href="/products">
+                <button className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#052460] text-[#052460] rounded-xl font-semibold hover:bg-[#052460]/5 transition">
+                  <ShoppingBag size={20} />
+                  Continue Shopping
+                </button>
+              </Link>
+            </div>
           </div>
-          <Link href="/">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Continue Shopping
-            </Button>
-          </Link>
+
+          {/* RIGHT SIDE (Coupon + Summary) */}
+          <div className="space-y-6">
+            <CartCouponBox />
+
+            <OrderSummary
+              cartItems={cartItems}
+              subtotal={subtotal}
+              shipping={shipping}
+              tax={tax}
+              total={total}
+            />
+          </div>
+
         </div>
-
-        {cartItems.length === 0 ? (
-          <EmptyCart />
-        ) : (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item) => (
-                <CartItem key={item.productId} item={item} />
-              ))}
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
-
-                <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Subtotal</span>
-                    <span className="font-medium">₹{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-700">
-                    <span>Shipping</span>
-                    <span className="font-medium">
-                      {shipping === 0 ? (
-                        <span className="text-green-600">FREE</span>
-                      ) : (
-                        `₹${shipping.toFixed(2)}`
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-700">
-                    <span>Tax (GST 18%)</span>
-                    <span className="font-medium">₹{tax.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
-                  <span>Total</span>
-                  <span>₹{total.toFixed(2)}</span>
-                </div>
-
-                {shipping > 0 && (
-                  <div className="bg-blue-50 text-blue-700 text-sm p-3 rounded-lg mb-4">
-                    Add ₹{(999 - subtotal + 1).toFixed(2)} more to get FREE shipping!
-                  </div>
-                )}
-
-                <Link href="/checkout">
-                  <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-lg py-6">
-                    Proceed to Checkout
-                  </Button>
-                </Link>
-
-                <div className="mt-4 text-center">
-                  <p className="text-xs text-gray-500">Secure checkout powered by ExaltRide</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Similar Products Section */}
-      {cartItems.length > 0 && (
-        <SimilarProducts categoryIds={categoryIds} excludeProductIds={productIds} />
       )}
     </div>
-  );
+
+    {cartItems.length > 0 && (
+      <SimilarProducts
+        categoryIds={categoryIds}
+        excludeProductIds={productIds}
+      />
+    )}
+
+    <Footer />
+  </div>
+);
+
+
+
 }
 
 function EmptyCart() {
