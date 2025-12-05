@@ -10,11 +10,14 @@ import { User, Tag, Menu, X, ShoppingBag, MapPin, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CarSelector from "./CarSelector";
 import { CartBadge } from "@/components/cart/CartBadge";
-import CartSidebar from "@/components/cart/CartSidebar";
+// import CartSidebar from "@/components/cart/CartSidebar";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState(0);
 
@@ -89,8 +92,8 @@ export default function Header() {
 
               {/* Cart */}
               <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+              onClick={() => router.push("/cart")}
+              className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
               >
                 <div className="relative mb-1">
                   <CartIcon />
@@ -136,7 +139,7 @@ export default function Header() {
 
           {/* Cart */}
           <button
-            onClick={() => setIsCartOpen(true)}
+            onClick={() => router.push("/cart")}
             className="relative p-1.5 text-gray-700"
           >
             <ShoppingBag size={22} />
@@ -228,12 +231,12 @@ export default function Header() {
         </>
       )}
 
-      {/* Cart Sidebar */}
+      {/* Cart Sidebar
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}
-      />
+      /> */}
     </header>
   );
 }

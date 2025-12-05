@@ -37,80 +37,80 @@ export default function CartItem({ item }: CartItemProps) {
   };
 
   return (
-    <div
-      className={`bg-white rounded-lg shadow-sm p-4 md:p-6 transition-opacity ${
-        isRemoving ? "opacity-50" : ""
-      }`}
-    >
-      <div className="flex gap-4">
-        {/* Product Image */}
-        <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-          <Image
-            src={item.image || "/placeholder.jpg"}
-            alt={item.name}
-            fill
-            className="object-cover"
-          />
+  <div className={`bg-white rounded-lg border p-4 transition-opacity ${isRemoving ? "opacity-50" : ""}`}>
+    
+    <div className="flex gap-4">
+      
+      {/* LEFT IMAGE */}
+      <div className="relative w-20 h-20 bg-gray-100 rounded overflow-hidden">
+        <Image 
+          src="/images/image1.jpg"
+          alt={item.name}
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      {/* RIGHT CONTENT */}
+      <div className="flex-1">
+        
+        {/* TOP ROW: name + delete */}
+        <div className="flex justify-between">
+          <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">
+            {item.name}
+          </h3>
+
+          <button 
+            onClick={handleRemove}
+            className="text-gray-400 hover:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Product Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between gap-4 mb-2">
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 line-clamp-2">
-              {item.name}
-            </h3>
-            <button
-              onClick={handleRemove}
-              disabled={isPending}
-              className="text-red-500 hover:text-red-700 transition-colors flex-shrink-0"
-              aria-label="Remove item"
+        {/* PRICE */}
+        <p className="text-gray-900 font-bold mt-1 text-base">
+          ₹{item.price}
+        </p>
+
+        {/* QUANTITY + TOTAL */}
+        <div className="mt-3 flex items-center justify-between">
+          
+          {/* QUANTITY */}
+          <div className="flex items-center border rounded-lg overflow-hidden">
+            <button 
+              onClick={() => handleUpdateQuantity(item.quantity - 1)}
+              disabled={isPending || item.quantity <= 1}
+              className="px-3 py-1 text-gray-700 disabled:opacity-50"
             >
-              <Trash2 className="h-5 w-5" />
+              -
+            </button>
+
+            <span className="px-4 py-1 text-gray-900 font-medium">
+              {item.quantity}
+            </span>
+
+            <button 
+              onClick={() => handleUpdateQuantity(item.quantity + 1)}
+              disabled={isPending}
+              className="px-3 py-1 text-gray-700 disabled:opacity-50"
+            >
+              +
             </button>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4">
-            {/* Price */}
-            <div className="text-xl font-bold text-gray-900">
-              ₹{item.price.toFixed(2)}
-            </div>
-
-            {/* Quantity Controls */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 mr-2">Quantity:</span>
-              <div className="flex items-center border border-gray-300 rounded-lg">
-                <button
-                  onClick={() => handleUpdateQuantity(item.quantity - 1)}
-                  disabled={isPending || item.quantity <= 1}
-                  className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="px-4 py-2 font-semibold text-gray-900 min-w-[3rem] text-center">
-                  {item.quantity}
-                </span>
-                <button
-                  onClick={() => handleUpdateQuantity(item.quantity + 1)}
-                  disabled={isPending}
-                  className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  aria-label="Increase quantity"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Item Total */}
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Item Total</p>
-              <p className="text-lg font-bold text-gray-900">
-                ₹{(item.price * item.quantity).toFixed(2)}
-              </p>
-            </div>
+          {/* ITEM TOTAL */}
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Item Total</p>
+            <p className="text-sm font-bold text-gray-900">
+              ₹{(item.price * item.quantity).toFixed(2)}
+            </p>
           </div>
         </div>
       </div>
+
     </div>
-  );
+  </div>
+);
+
 }
