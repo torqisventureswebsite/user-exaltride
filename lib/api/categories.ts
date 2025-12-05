@@ -52,26 +52,28 @@ export async function fetchCategories(): Promise<Category[]> {
  */
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/category/${slug}`, {
-      next: { revalidate: 300 },
+    const res = await fetch(`${API_BASE_URL}/categories`, {
+      cache: "no-store",
     });
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`Failed to fetch category: ${response.statusText}`);
+    if (!res.ok) return null;
+
+    const json = await res.json();
+
+    // API returns { data: [...] }
+    const list = json.data || json;
+
+    if (!Array.isArray(list)) {
+      console.error("Categories API did not return an array:", json);
+      return null;
     }
 
-    const data = await response.json();
-    
-    // The API might return { data: category } or just the category
-    const category = data.data || data;
-    const validated = ApiCategorySchema.parse(category);
+    const match = list.find((c: any) => c.slug === slug);
+    if (!match) return null;
 
-    return validated;
-  } catch (error) {
-    console.error(`Error fetching category ${slug}:`, error);
+    return ApiCategorySchema.parse(match);
+  } catch (err) {
+    console.error("Error fetching category:", err);
     return null;
   }
 }

@@ -1,16 +1,14 @@
 // app/categories/[slug]/page.tsx
 import { notFound } from "next/navigation";
-import CategoryPageClient from "@/components/categories/CategoryPageClient";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
-import CategoryExtras from "@/components/category-sections/CategoryExtras";
 import Footer from "@/components/layout/Footer";
+import CategoryPageClient from "@/components/categories/CategoryPageClient";
 import { fetchAllProducts } from "@/lib/api/products";
 import { fetchCategoryBySlug, fetchSubcategories } from "@/lib/api/categories";
 
 export default async function CategoryPage(props: { params: Promise<{ slug: string }> }) {
-  // NEXT 15/16: params is NOW A PROMISE → MUST AWAIT
   const { slug } = await props.params;
 
   // Fetch category from API
@@ -33,7 +31,6 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
 
   return (
     <main className="min-h-screen bg-gray-50">
-
       <Header />
 
       <div className="hidden md:block">
@@ -68,5 +65,4 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
 
     </main>
   );
-
 }
