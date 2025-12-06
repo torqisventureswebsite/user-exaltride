@@ -21,7 +21,7 @@ interface CategoryCardProps {
 export function CategoryCard({
   category,
   productImages,
-  bgColor = "bg-gradient-to-br from-yellow-200 to-yellow-300",
+  bgColor = "black",
 }: CategoryCardProps) {
   // Display up to 5 product images in a grid
   const displayImages = productImages.slice(0, 5);
@@ -29,7 +29,7 @@ export function CategoryCard({
   return (
     <Link href={`/categories/${category.slug}`}>
       <Card
-        className={`group relative overflow-hidden ${bgColor} border-none p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+        className={`group relative overflow-hidden bg-[#FFC107] border-none p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
       >
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
