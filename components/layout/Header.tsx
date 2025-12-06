@@ -60,7 +60,7 @@ export default function Header() {
           container mx-auto 
           flex items-center justify-between 
           h-[78px] 
-          px-6 gap-6
+          px-6 gap-6 
           font-sans text-[15px] text-gray-800
         ">
           {/* Left: Logo + Add Car */}
@@ -116,12 +116,14 @@ export default function Header() {
               <button
               onClick={() => router.push("/cart")}
               className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <div className="relative mb-1">
-                  <CartIcon />
-                  <CartBadge count={cartCount} />
-                </div>
-              </button>
+            >
+              <div className="relative mb-1">
+                <CartIcon />
+                <CartBadge count={cartCount} />
+              </div>
+              <span className="text-xs font-medium">Cart</span>
+            </button>
+
             </div>
 
             {/* Deals */}

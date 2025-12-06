@@ -26,8 +26,8 @@ export default function CarSelector() {
         onClick={() => setOpen(!open)}
         className="
           flex items-center justify-between gap-2
-          border border-[#0033A1] text-[#0033A1]
-          rounded-md px-4 h-[36px]   /* Matches Figma */
+           text-black
+          px-4 h-[36px]   
           bg-white font-medium cursor-pointer
           hover:bg-blue-50 transition
         "

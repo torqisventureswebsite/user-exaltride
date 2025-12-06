@@ -1,13 +1,12 @@
 "use client";
 
-import { CategoryCard, type CategoryCardProps } from "@/components/categories/CategoryCard";
-import { Button } from "@/components/ui/button";
+import { CategoryCard } from "@/components/categories/CategoryCard";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchCategories } from "@/lib/api/categories";
 import { fetchProducts } from "@/lib/api/products";
-import type { Product } from "@/lib/api/products";
 import type { Category } from "@/lib/api/categories";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CategoryWithProducts {
   category: Category & { item_count: number };
@@ -19,33 +18,64 @@ export function CategoriesSection() {
   const [categoryData, setCategoryData] = useState<CategoryWithProducts[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ SCROLL LOGIC
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const cardWidth = 340; // category card width + gap
+    const scrollAmount = cardWidth * 3;
+
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = scrollRef.current;
+    if (!el) return;
+
+    el.addEventListener("scroll", checkScroll);
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, []);
+
+  // ✅ DATA FETCH (TOP 8 POPULATED)
   useEffect(() => {
     async function loadCategoriesWithProducts() {
       try {
         setLoading(true);
-        
-        // Fetch all categories
+
         const categories = await fetchCategories();
-        
-        // Get only top-level categories (level 0)
         const topCategories = categories.filter((c) => c.level === 0);
 
-        // Fetch products for each category and count them
         const categoriesWithCounts = await Promise.all(
           topCategories.map(async (category) => {
             try {
-              const { products } = await fetchProducts({ 
+              const { products } = await fetchProducts({
                 category: category.id,
-                limit: 100 
+                limit: 100,
               });
-              
+
               return {
                 category,
                 productCount: products.length,
-                products: products.slice(0, 5), // Get first 5 products for images
+                products: products.slice(0, 5),
               };
-            } catch (error) {
-              console.error(`Error fetching products for category ${category.id}:`, error);
+            } catch {
               return {
                 category,
                 productCount: 0,
@@ -55,43 +85,46 @@ export function CategoriesSection() {
           })
         );
 
-        // Sort by product count and take top 3
-        const topThreeCategories = categoriesWithCounts
+        // ✅ TAKE TOP 8 (NOT 3)
+        const topEightCategories = categoriesWithCounts
           .sort((a, b) => b.productCount - a.productCount)
-          .slice(0, 3);
+          .slice(0, 8);
 
-        // Define different background colors for each card
         const bgColors = [
           "bg-gradient-to-br from-yellow-200 to-yellow-300",
           "bg-gradient-to-br from-orange-200 to-orange-300",
           "bg-gradient-to-br from-amber-200 to-amber-300",
+          "bg-gradient-to-br from-lime-200 to-lime-300",
+          "bg-gradient-to-br from-blue-200 to-blue-300",
+          "bg-gradient-to-br from-purple-200 to-purple-300",
+          "bg-gradient-to-br from-pink-200 to-pink-300",
+          "bg-gradient-to-br from-teal-200 to-teal-300",
         ];
 
-        // Build category data with product images
-        const data: CategoryWithProducts[] = topThreeCategories.map((item, index) => {
-          // Get product images
-          const productImages = item.products
-            .map((p) => p.primary_image || "/images/image1.jpg")
-            .filter(Boolean)
-            .slice(0, 5);
+        const data: CategoryWithProducts[] = topEightCategories.map(
+          (item, index) => {
+            const productImages = item.products
+              .map((p) => p.primary_image || "/images/image1.jpg")
+              .filter(Boolean)
+              .slice(0, 5);
 
-          // If not enough images, fill with default
-          while (productImages.length < 5) {
-            productImages.push("/images/image1.jpg");
+            while (productImages.length < 5) {
+              productImages.push("/images/image1.jpg");
+            }
+
+            return {
+              category: {
+                id: item.category.id,
+                name: item.category.name,
+                description: item.category.description,
+                slug: item.category.slug,
+                item_count: item.productCount,
+              },
+              productImages,
+              bgColor: "bg-[#FBC84C]",
+            };
           }
-
-          return {
-            category: {
-              id: item.category.id,
-              name: item.category.name,
-              description: item.category.description,
-              slug: item.category.slug,
-              item_count: item.productCount,
-            },
-            productImages,
-            bgColor: bgColors[index % bgColors.length],
-          };
-        });
+        );
 
         setCategoryData(data);
       } catch (error) {
@@ -107,23 +140,39 @@ export function CategoriesSection() {
   return (
     <section className="bg-gray-50 py-8 md:py-16">
       <div className="container mx-auto px-4">
-        {/* Section Header */}
+        {/* Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-xl md:text-3xl font-bold text-gray-900">
+            <h2 className="text-xl md:text-3xl font-bold text-[#101828]">
               Shop by Categories
             </h2>
-            <p className="mt-1 md:mt-2 text-xs md:text-base text-gray-600">Explore car accessories</p>
+            <p className="mt-1 md:mt-2 text-xs md:text-base text-gray-600">
+              Explore car accessories
+            </p>
           </div>
-          <Link href="/products" className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base">
+
+          <Link
+            href="/products"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base"
+          >
             Browse all
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </Link>
         </div>
 
-        {/* Category Cards Grid - Horizontal Scroll on Mobile */}
+        {/* ✅ LOADING STATE */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -136,10 +185,32 @@ export function CategoriesSection() {
             <p className="text-gray-600">No categories available</p>
           </div>
         ) : (
-          <div className="overflow-x-auto pb-4 md:overflow-visible">
-            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          // ✅ REAL SCROLLER WITH ARROWS
+          <div className="relative">
+<button
+  onClick={() => scroll("left")}
+  className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+>
+  <ChevronLeft className="h-5 w-5" />
+</button>
+
+<button
+  onClick={() => scroll("right")}
+  className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+>
+  <ChevronRight className="h-5 w-5" />
+</button>
+
+
+            <div
+              ref={scrollRef}
+              className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-6"
+            >
               {categoryData.map((data) => (
-                <div key={data.category.id} className="flex-shrink-0 w-auto">
+                <div
+                  key={data.category.id}
+                  className="min-w-[320px] max-w-[320px] shrink-0"
+                >
                   <CategoryCard
                     category={data.category}
                     productImages={data.productImages}
