@@ -32,7 +32,7 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
     .slice(0, 3);
 
   return (
-    <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 py-8 md:py-16">
+    <section className="bg-gradient-to-br from-[#001F5F] to-[#003580] py-8 md:py-16">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-6 md:mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -62,8 +62,8 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
               <Badge className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">
                 ⭐ Featured Pick
               </Badge>
-              <Badge className="bg-red-500 text-white hover:bg-red-600">
-                🔴 Expert Review
+              <Badge className="bg-[#001F5F] text-white hover:bg-red-600">
+                 Expert Review
               </Badge>
             </div>
 
@@ -88,7 +88,7 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
 
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-3">
-                <span className="text-3xl font-bold text-blue-600">
+                <span className="text-3xl font-bold text-[#001F5F]">
                   ₹{featuredProduct.price?.toLocaleString()}
                 </span>
                 {featuredProduct.compare_at_price && (
@@ -112,7 +112,7 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
                   Add to cart
                 </Button>
                 <Link href={`/products/${featuredProduct.slug}`} className="flex-1">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+                  <Button className="w-full bg-[#001F5F] hover:bg-blue-700 text-white font-semibold">
                     Buy Now
                   </Button>
                 </Link>

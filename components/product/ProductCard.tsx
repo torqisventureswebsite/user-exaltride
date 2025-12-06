@@ -224,7 +224,7 @@ export function ProductCard({
                 </>
               )}
             </Button>
-            <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
+            <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
               Buy Now
             </Button>
           </div>

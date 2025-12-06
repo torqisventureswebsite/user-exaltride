@@ -116,8 +116,32 @@ export function HeroCarousel() {
       </CarouselContent>
 
       {/* Navigation Arrows */}
-      <CarouselPrevious className="left-2 md:left-4 h-8 w-8 md:h-12 md:w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
-      <CarouselNext className="right-2 md:right-4 h-8 w-8 md:h-12 md:w-12 border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20" />
-    </Carousel>
+      {/* Navigation Arrows */}
+<CarouselPrevious
+  className="
+    left-3 md:left-6
+    h-8 w-8 md:h-12 md:w-12
+    rounded-full
+    bg-white text-gray-900
+    border border-white
+    shadow-md
+    hover:bg-gray-100
+    transition
+  "
+/>
+
+<CarouselNext
+  className="
+    right-3 md:right-6
+    h-8 w-8 md:h-12 md:w-12
+    rounded-full
+    bg-white text-gray-900
+    border border-white
+    shadow-md
+    hover:bg-gray-100
+    transition
+  "
+/>
+      </Carousel>
   );
 }
