@@ -1,6 +1,6 @@
 "use client";
 
-import { CategoryCard } from "@/components/categories/CategoryCard";
+import { CategoryCard, type CategoryCardProps } from "@/components/categories/CategoryCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -84,7 +84,7 @@ export function CategoriesSection() {
             category: {
               id: item.category.id,
               name: item.category.name,
-              description: item.category.description || undefined,
+              description: item.category.description,
               slug: item.category.slug,
               item_count: item.productCount,
             },

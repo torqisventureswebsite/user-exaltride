@@ -6,11 +6,11 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-interface CategoryCardProps {
+export interface CategoryCardProps {
   category: {
     id: string;
     name: string;
-    description?: string;
+    description?: string | null;
     slug: string;
     item_count?: number;
   };
