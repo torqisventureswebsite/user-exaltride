@@ -14,7 +14,8 @@ import CategoryExtras from "@/components/category-sections/CategoryExtras";
 import SidebarFilters from "./SideBarFilters";
 import MobileFiltersButton from "@/components/categories/MobileFiltersButton";
 import MobileFilterDrawer from "@/components/categories/MobileFilterDrawer";
-
+import { useSearchParams } from "next/navigation";
+import { fetchBrands } from "@/lib/api/brands";
 export default function CategoryPageClient({
   category,
   initialProducts,
@@ -24,9 +25,13 @@ export default function CategoryPageClient({
   initialProducts: Product[];
   subCategories: { id: string; name: string; slug: string }[];
 }) {
+
+  const searchParams = useSearchParams();
+const brandFromUrl = searchParams.get("brand"); // e.g. "mann-filter"
   // ---------- FILTER STATE ----------
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [allBrands, setAllBrands] = useState<any[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>(() => {
     const prices = initialProducts.map((p) => p.price || 0);
     const min = Math.min(...prices, 0);
@@ -44,6 +49,20 @@ export default function CategoryPageClient({
   // ---------- PAGINATION ----------
   const itemsPerPage = 12;
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+  fetchBrands().then((data) => setAllBrands(data));
+}, []);
+
+useEffect(() => {
+  if (brandFromUrl && allBrands.length) {
+    const match = allBrands.find((b) => b.slug === brandFromUrl);
+    if (match) {
+      setSelectedBrands([match.name]); // auto-tick the sidebar brand
+    }
+  }
+}, [brandFromUrl, allBrands]);
+
 
   // ---------- DERIVED DATA ----------
   // brands available from products
@@ -184,13 +203,15 @@ export default function CategoryPageClient({
           {/* show on md/lg as sidebar, hide on mobile */}
           <div className="hidden md:block">
             <SidebarFilters
-              selectedBrands={selectedBrands}
-              toggleBrand={toggleBrand}
-              priceRange={priceRange}
-              localRange={localRange}
-              setLocalRange={setLocalRange}
-              clearAll={clearAll}
-            />
+            categories={[category, ...subCategories]}  // OR full API category list if you fetch it
+            brands={allBrands} 
+            selectedBrands={selectedBrands}
+            toggleBrand={toggleBrand}
+            priceRange={priceRange}
+            localRange={localRange}
+            setLocalRange={setLocalRange}
+            clearAll={clearAll}
+          />
           </div>
         </aside>
 
@@ -267,4 +288,7 @@ export default function CategoryPageClient({
       />
     </div>
   );
+console.log("Selected brands:", selectedBrands);
+console.log("All brands:", allBrands);
+console.log("Visible products:", visible.map(p => p.brand_name));
 }

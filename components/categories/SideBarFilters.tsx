@@ -5,9 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { ChevronDown, Filter } from "lucide-react";
 
-import categoriesData from "@/data/categories.json";
-
 export default function SidebarFilters({
+  categories,
+  brands,
   selectedBrands,
   toggleBrand,
   priceRange,
@@ -15,6 +15,8 @@ export default function SidebarFilters({
   setLocalRange,
   clearAll,
 }: {
+  categories: { id: string; name: string; slug: string; product_count?: number }[];
+  brands: { id: string; name: string; slug: string; product_count?: number }[]; 
   selectedBrands: string[];
   toggleBrand: (b: string) => void;
   priceRange: [number, number];
@@ -22,31 +24,32 @@ export default function SidebarFilters({
   setLocalRange: (range: [number, number]) => void;
   clearAll: () => void;
 }) {
-  // Parent-level categories only
-  const parentCategories = categoriesData.filter((c) => c.parent_id === null);
+  // 🔥 Sort categories by product_count DESC
+  const sorted = [...categories].sort(
+    (a, b) => (b.product_count || 0) - (a.product_count || 0)
+  );
 
-  // All brands manually processed at parent level (CategoryPageClient passes these)
-  // So no brand logic here
+  // 🔥 Top 5 for sidebar
+  const topFive = sorted.slice(0, 5);
+  const remaining = sorted.slice(5);
+
+  // Expand / collapse toggle
+  const [showAll, setShowAll] = useState(false);
 
   return (
     <Card className="p-0 overflow-hidden border rounded-xl shadow-sm">
-      
-      {/* Blue Header */}
+      {/* Header */}
       <div className="bg-blue-600 text-white flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2 font-medium">
           <Filter className="h-4 w-4" />
           Filters
         </div>
-        <button
-          onClick={clearAll}
-          className="text-white text-sm underline"
-        >
+        <button onClick={clearAll} className="text-white text-sm underline">
           Clear All
         </button>
       </div>
 
       <div className="p-4">
-        
         {/* CATEGORIES SECTION */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
@@ -55,29 +58,38 @@ export default function SidebarFilters({
           </h3>
 
           <div className="flex flex-col gap-3">
-            {parentCategories.map((cat) => (
+            {/* TOP 5 CATEGORIES */}
+            {topFive.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {/* ICONS based on category name (replace with your own mapping logic) */}
-                  <span className="text-xl">
-                    {cat.name.includes("Audio") && "🎵"}
-                    {cat.name.includes("Interior") && "🪑"}
-                    {cat.name.includes("Exterior") && "🚗"}
-                    {cat.name.includes("Electronics") && "📱"}
-                    {cat.name.includes("Lighting") && "💡"}
-                    {cat.name.includes("Security") && "🔒"}
-                    {cat.name.includes("Cleaning") && "🧽"}
-                    {cat.name.includes("Performance") && "⚡"}
-                  </span>
-
-                  <span className="text-sm">{cat.name}</span>
-                </div>
-
+                <span className="text-sm">{cat.name}</span>
                 <span className="text-xs text-gray-500">
-                  ({cat.item_count || 0})
+                  ({cat.product_count || 0})
                 </span>
               </div>
             ))}
+
+            {/* TOGGLE BUTTON */}
+            {remaining.length > 0 && (
+              <button
+                className="text-blue-600 text-sm mt-1"
+                onClick={() => setShowAll(!showAll)}
+              >
+                {showAll
+                  ? "Show Less"
+                  : `+ ${remaining.length} more categories`}
+              </button>
+            )}
+
+            {/* REMAINING CATEGORIES */}
+            {showAll &&
+              remaining.map((cat) => (
+                <div key={cat.id} className="flex items-center justify-between">
+                  <span className="text-sm">{cat.name}</span>
+                  <span className="text-xs text-gray-500">
+                    ({cat.product_count || 0})
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -89,7 +101,6 @@ export default function SidebarFilters({
             Price Range
           </h3>
 
-          {/* Modern Slider */}
           <Slider
             value={localRange}
             min={priceRange[0]}
@@ -133,20 +144,22 @@ export default function SidebarFilters({
           </h3>
 
           <div className="flex flex-col gap-3">
-            {["Sony", "Pioneer", "Bosch", "JBL"].map((b) => (
-              <label key={b} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedBrands.includes(b)}
-                    onChange={() => toggleBrand(b)}
-                  />
-                  <span className="text-sm">{b}</span>
-                </div>
+          {brands.map((b) => (
+            <label key={b.id} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedBrands.includes(b.name)}
+                  onChange={() => toggleBrand(b.name)}
+                />
+                <span className="text-sm">{b.name}</span>
+              </div>
 
-                <span className="text-xs text-gray-500">(96)</span>
-              </label>
-            ))}
+              <span className="text-xs text-gray-500">
+                ({b.product_count || 0})
+              </span>
+            </label>
+          ))}
           </div>
         </div>
       </div>
