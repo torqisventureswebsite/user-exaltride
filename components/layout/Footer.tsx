@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Logo Section */}
           <div className="md:col-span-1">
             <div className="mb-4">
-              <Image src="/images/logo.png" alt="Exaltride Logo" className="invert" width={150} height={50} />
+              <Image src="/images/logo.png" alt="Exaltride Logo" className="" width={150} height={50} />
               <p className="text-[10px] md:text-xs text-gray-300 tracking-widest">YOUR RIDE. REINVENTED.</p>
             </div>
           </div>
