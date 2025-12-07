@@ -13,17 +13,23 @@ export const cognitoConfig = {
   region: "ap-south-1",
   
   // API endpoints
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://5mevyhs2u2.execute-api.ap-south-1.amazonaws.com/dev",
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://k8he8cx9he.execute-api.ap-south-1.amazonaws.com/dev",
   
   // Redirect URLs (update these with your actual domain)
   redirectUri: process.env.NEXT_PUBLIC_REDIRECT_URI || "http://localhost:3000/auth/callback",
   logoutUri: process.env.NEXT_PUBLIC_LOGOUT_URI || "http://localhost:3000",
 };
 
+// Use proxy endpoints to bypass CORS issues with AWS API Gateway
+// The proxy forwards requests from /api/proxy/auth/* to the real AWS endpoint
+const localApiBase = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const useLocalAuth = process.env.NEXT_PUBLIC_USE_LOCAL_AUTH === "true";
+
 export const authEndpoints = {
-  signup: `${cognitoConfig.apiBaseUrl}/auth/signup`,
-  login: `${cognitoConfig.apiBaseUrl}/auth/login`,
-  verifyOtp: `${cognitoConfig.apiBaseUrl}/auth/verify-otp`,
+  // Use proxy endpoints to avoid CORS issues (proxy forwards to AWS)
+  signup: useLocalAuth ? `${localApiBase}/api/auth/signup` : `${localApiBase}/api/proxy/auth/signup`,
+  login: useLocalAuth ? `${localApiBase}/api/auth/login` : `${localApiBase}/api/proxy/auth/login`,
+  verifyOtp: useLocalAuth ? `${localApiBase}/api/auth/verify-otp` : `${localApiBase}/api/proxy/auth/verify-otp`,
   ssoAuthorize: `https://${cognitoConfig.domain}/oauth2/authorize`,
   token: `https://${cognitoConfig.domain}/oauth2/token`,
   logout: `https://${cognitoConfig.domain}/logout`,

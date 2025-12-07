@@ -9,8 +9,8 @@ COGNITO_CLIENT_SECRET=uqltvu1cr8sgt60pg9c8fmhaacvqmt77op46ut3em7p8igqmde
 NEXT_PUBLIC_COGNITO_SSO_CLIENT_ID=24vle4l58riamcdce2lh1imn35
 COGNITO_SSO_CLIENT_SECRET=11jhe4jcpokjjca9mskuv79mvnpk0neo8phnq3etgpb2oc8b8hup
 
-# API Configuration
-NEXT_PUBLIC_API_BASE_URL=https://5mevyhs2u2.execute-api.ap-south-1.amazonaws.com/dev
+# API Configuration (WhatsApp OTP)
+NEXT_PUBLIC_API_BASE_URL=https://k8he8cx9he.execute-api.ap-south-1.amazonaws.com/dev
 
 # Redirect URLs (update for production)
 NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000/auth/callback
