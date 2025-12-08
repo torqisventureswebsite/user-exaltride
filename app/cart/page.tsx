@@ -3,14 +3,14 @@ import SimilarProducts from "@/components/cart/SimilarProducts";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CartNavbar from "@/components/cart/CartNavbar";
+import Header from "@/components/layout/Header";
+import TopBar from "@/components/layout/TopBar";
 import CartHeader from "@/components/cart/CartHeader";
 import CartItemCard from "@/components/cart/CartItemCard";
 import CartCouponBox from "@/components/cart/CartCouponBox";
 import OrderSummary from "@/components/cart/OrderSummary";
 import Footer from "@/components/layout/Footer";
 import { ShoppingBag } from "lucide-react";
-import CartTopBar from "@/components/cart/CartTopBar";
 import FlashSaleBar from "@/components/cart/FlashSaleBar";
 import { ProductCard } from "@/components/product/ProductCard";
 import WishlistSection from "@/components/cart/WishlistSection";
@@ -35,9 +35,11 @@ export default async function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ✅ NAVIGATION */}
-      <CartNavbar cartCount={cartItems.length} />
-      <CartTopBar />
+      {/* ✅ NAVIGATION - Same as homepage */}
+      <Header />
+      <div className="hidden md:block">
+        <TopBar />
+      </div>
 
       {/* ✅ CART HEADER */}
       <div className="container mx-auto px-4 pt-8">
