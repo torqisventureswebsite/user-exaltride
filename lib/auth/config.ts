@@ -22,14 +22,41 @@ export const cognitoConfig = {
 
 // Use proxy endpoints to bypass CORS issues with AWS API Gateway
 // The proxy forwards requests from /api/proxy/auth/* to the real AWS endpoint
-const localApiBase = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+// Auto-detect the base URL - works on both client and server
+function getBaseUrl() {
+  // Check for explicit env var first
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  // Vercel deployment URL
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  }
+  // Client-side: use window.location.origin
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  // Fallback for local development
+  return "http://localhost:3000";
+}
+
 const useLocalAuth = process.env.NEXT_PUBLIC_USE_LOCAL_AUTH === "true";
 
 export const authEndpoints = {
   // Use proxy endpoints to avoid CORS issues (proxy forwards to AWS)
-  signup: useLocalAuth ? `${localApiBase}/api/auth/signup` : `${localApiBase}/api/proxy/auth/signup`,
-  login: useLocalAuth ? `${localApiBase}/api/auth/login` : `${localApiBase}/api/proxy/auth/login`,
-  verifyOtp: useLocalAuth ? `${localApiBase}/api/auth/verify-otp` : `${localApiBase}/api/proxy/auth/verify-otp`,
+  get signup() {
+    const base = getBaseUrl();
+    return useLocalAuth ? `${base}/api/auth/signup` : `${base}/api/proxy/auth/signup`;
+  },
+  get login() {
+    const base = getBaseUrl();
+    return useLocalAuth ? `${base}/api/auth/login` : `${base}/api/proxy/auth/login`;
+  },
+  get verifyOtp() {
+    const base = getBaseUrl();
+    return useLocalAuth ? `${base}/api/auth/verify-otp` : `${base}/api/proxy/auth/verify-otp`;
+  },
   ssoAuthorize: `https://${cognitoConfig.domain}/oauth2/authorize`,
   token: `https://${cognitoConfig.domain}/oauth2/token`,
   logout: `https://${cognitoConfig.domain}/logout`,
