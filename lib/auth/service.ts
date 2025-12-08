@@ -32,12 +32,14 @@ class AuthService {
         body: JSON.stringify(data),
       });
 
+      const result = await response.json();
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Signup failed");
+        console.error("Signup API error:", result);
+        throw new Error(result.error || result.message || "Signup failed");
       }
 
-      return await response.json();
+      return result;
     } catch (error) {
       console.error("Signup error:", error);
       throw error;

@@ -38,7 +38,17 @@ export async function POST(request: NextRequest) {
       data = { message: responseText };
     }
 
-    // Return response with proper status
+    // Return response with proper status and include original error
+    if (!response.ok) {
+      return NextResponse.json(
+        { 
+          error: data.error || data.message || "Signup failed",
+          details: data,
+          status: response.status 
+        }, 
+        { status: response.status }
+      );
+    }
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Proxy signup error:", error);
