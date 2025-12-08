@@ -6,10 +6,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Transform field names if needed (camelCase to snake_case)
+    // Backend might expect 'code' instead of 'otp'
     const transformedBody = {
       phone_number: body.phoneNumber || body.phone_number,
       session: body.session,
-      otp: body.otp,
+      code: body.otp || body.code,
     };
 
     console.log("Verify OTP request body:", JSON.stringify(transformedBody));
