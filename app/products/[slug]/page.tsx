@@ -4,21 +4,27 @@ import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
 
-import { fetchProductBySlug, fetchRelatedProducts } from "@/lib/api/products";
+import { fetchProductBySlug } from "@/lib/api/products";
 import type { Product } from "@/components/product/ProductCard";
 
 import ProductImages from "@/components/product/ProductImages";
 import ProductInfo from "@/components/product/ProductInfo";
-import PriceBox from "@/components/product/PriceBox";
 import ProductFeatures from "@/components/product/ProductFeatures";
 import PurchaseActions from "@/components/product/PurchaseActions";
 import ProductHighlights from "@/components/product/ProductHighlights";
 import OffersSection from "@/components/product/OffersSection";
 import FrequentlyBoughtSection from "@/components/product/FrequentlyBoughtSection";
 import RelatedProducts from "@/components/product/RelatedProducts";
-
+import DeliveryAndServices from "@/components/product/DeliveryAndServices";
+import KeyHighlights from "@/components/product/KeyHighlights";
+import VehicleCompatibility from "@/components/product/VehicleCompatibility";
 import { ChevronRight } from "lucide-react";
-
+import InstallationGuide from "@/components/product/InstallationGuide";
+import ProfessionalInstallationCard from "@/components/product/ProfessionalInstallationCard";
+import SellerInfoCard from "@/components/product/SellerInfoCard";
+import WhyBuyFromUs from "@/components/product/WhyBuyFromUs";
+import BundlePriceBox from "@/components/product/BundlePriceBox";
+import RecentlyViewedSection from "@/components/cart/RecentlyViewedSection";
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -26,11 +32,9 @@ interface ProductPageProps {
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  // Fetch product from API
   const product = await fetchProductBySlug(slug);
   if (!product) notFound();
 
-  // Discount %
   const discountAmount =
     product.compare_at_price && product.price
       ? Math.round(
@@ -42,7 +46,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
       <Header />
       <div className="hidden md:block">
         <TopBar />
@@ -50,86 +53,90 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <main className="container mx-auto px-4 py-4 md:py-8">
 
-        {/* BREADCRUMB */}
+        {/* ✅ BREADCRUMB */}
         <div className="mb-4 md:mb-6 flex items-center gap-2 text-xs md:text-sm text-gray-600">
           <a href="/" className="hover:text-blue-600">Home</a>
           <ChevronRight className="h-4 w-4" />
-
           <a href="/products" className="hover:text-blue-600">Products</a>
           <ChevronRight className="h-4 w-4" />
-
           <span className="text-gray-900">{product.title}</span>
         </div>
 
-        {/* MAIN PRODUCT GRID */}
-        <div className="grid gap-6 md:gap-10 lg:grid-cols-2">
+        {/* ✅ TRUE 3 COLUMN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* LEFT → IMAGES */}
-          <ProductImages
-            images={
-              product.images?.length
-                ? product.images
-                : product.primary_image
-                ? [product.primary_image]
-                : ["/images/fallback.jpg"]
-            }
-            title={product.title}
-            discount={discountAmount}
-          />
-
-          {/* RIGHT → MAIN INFO */}
-          <section className="space-y-6">
-            <ProductInfo product={product} />
-
-            {/* <PriceBox
+          {/* ✅ LEFT COLUMN → IMAGES */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <ProductImages
+              images={
+                product.images?.length
+                  ? product.images
+                  : product.primary_image
+                  ? [product.primary_image]
+                  : ["/images/fallback.jpg"]
+              }
+              title={product.title}
+              discount={discountAmount}
+            />
+                <PurchaseActions
+              id={product.id}
+              title={product.title}
               price={product.price}
-              compareAt={product.compare_at_price}
-            /> */}
+              image={product.primary_image}
+              categoryId={product.category?.id} // ✅ FIXED for new API
+            />
+            <InstallationGuide/>
+          </div>
 
-            <PurchaseActions
-            id={product.id}
-            title={product.title}
-            price={product.price}
-            image={product.primary_image}
-            categoryId={product.category_id}
-          />
+          {/* ✅ CENTER COLUMN → PRODUCT INFO */}
+          <div className="lg:col-span-4 space-y-6">
+            <ProductInfo product={product} />
+            <OffersSection />
+            <DeliveryAndServices/>
+            <KeyHighlights />
+            <VehicleCompatibility />
+        
 
             <ProductFeatures warranty={product.warranty_months} />
-          </section>
+
+            
+          </div>
+
+          {/* ✅ RIGHT COLUMN → INSTALLATION / SELLER / TRUST */}
+          <div className="lg:col-span-3 space-y-6">
+
+ <div className="lg:col-span-3 space-y-6">
+  <ProfessionalInstallationCard />
+  <SellerInfoCard />
+<WhyBuyFromUs />
+<BundlePriceBox />
+ 
+</div>
+
+          </div>
         </div>
 
-        {/* PRODUCT HIGHLIGHTS */}
-        <div className="mt-10">
-        <ProductHighlights
-        sku={product.sku}
-        weight={product.weight_kg}
-        dimensions={product.dimensions_cm}
-        is_oem={product.is_oem}
-      />
+ 
 
-        </div>
-
-        {/* OFFERS SECTION */}
-        <div className="mt-10">
-          <OffersSection />
-        </div>
-
-        {/* FREQUENTLY BOUGHT */}
-        <div className="mt-10">
+        {/* ✅ FREQUENTLY BOUGHT */}
+        {/* <div className="mt-12">
           <FrequentlyBoughtSection baseProduct={product} />
-        </div>
+        </div> */}
 
-        {/* RELATED PRODUCTS */}
-        <div className="mt-10">
+        {/* ✅ RELATED PRODUCTS */}
+        {/* <div className="mt-12">
           <RelatedProducts
-            categoryId={product.category_id}
+            categoryId={product.category?.id} // ✅ FIXED
             brandName={product.brand_name}
             currentProductId={product.id}
           />
-        </div>
-      </main>
+        </div> */}
 
-      {/* FOOTER */}
+      </main>
+      <RecentlyViewedSection/>  
+      <RecentlyViewedSection title="Customers Who Bought Also Purchased" />
+      <RecentlyViewedSection title="Customers Who Bought Also Viewed" />
+
       <div className="hidden md:block">
         <Footer />
       </div>

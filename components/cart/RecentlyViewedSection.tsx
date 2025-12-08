@@ -6,7 +6,8 @@ import { NewProductCard } from "@/components/product/NewProductCard";
 import type { Product } from "@/components/product/ProductCard";
 import { fetchAllProducts } from "@/lib/api/products";
 
-export default function RecentlyViewedSection() {
+export default function RecentlyViewedSection({ title = "Recently Viewed" }: { title?: string }) {
+
   const [products, setProducts] = useState<Product[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -47,9 +48,9 @@ export default function RecentlyViewedSection() {
   return (
     <section className="bg-white py-8 md:py-12 border-t">
       <div className="container mx-auto px-4">
-        <h2 className="mb-6 text-lg md:text-xl font-bold text-[#101828]">
-          Recently Viewed
-        </h2>
+<h2 className="mb-6 text-lg md:text-xl font-bold text-[#101828]">
+  {title}
+</h2>   
 
         <div className="relative">
           {/* LEFT ARROW */}
