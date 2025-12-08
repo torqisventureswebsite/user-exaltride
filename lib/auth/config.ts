@@ -25,17 +25,13 @@ export const cognitoConfig = {
 
 // Auto-detect the base URL - works on both client and server
 function getBaseUrl() {
-  // Check for explicit env var first
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  // Vercel deployment URL
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-  }
-  // Client-side: use window.location.origin
+  // Client-side: always use window.location.origin to ensure same-origin requests
   if (typeof window !== "undefined") {
     return window.location.origin;
+  }
+  // Server-side: check for explicit env var
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
   }
   // Fallback for local development
   return "http://localhost:3000";
