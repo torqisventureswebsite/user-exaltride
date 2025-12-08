@@ -38,7 +38,14 @@ export default function SignupPage() {
       setSession(sessionId);
       setStep("otp");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      const errorMessage = err instanceof Error ? err.message : "Signup failed";
+      
+      // Handle specific error cases
+      if (errorMessage.toLowerCase().includes("user already exists")) {
+        setError("This phone number is already registered. Please login instead.");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
