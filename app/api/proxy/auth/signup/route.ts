@@ -5,9 +5,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Transform field names if needed (camelCase to snake_case)
+    // Backend expects camelCase
     const transformedBody = {
-      phone_number: body.phoneNumber || body.phone_number,
+      phoneNumber: body.phoneNumber || body.phone_number,
       name: body.name,
       role: body.role || "buyer",
     };
