@@ -74,7 +74,7 @@ export function HeroCarousel() {
               />
 
               {/* Blue Overlay */}
-              <div className="absolute inset-0 bg-blue-600/80" />
+              <div className="absolute inset-0 bg-[#001F5F]/80" />
 
               {/* Content */}
               <div className="relative flex h-full items-center px-4 md:px-8 lg:px-16">

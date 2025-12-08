@@ -16,6 +16,9 @@ import MobileFiltersButton from "@/components/categories/MobileFiltersButton";
 import MobileFilterDrawer from "@/components/categories/MobileFilterDrawer";
 import { useSearchParams } from "next/navigation";
 import { fetchBrands } from "@/lib/api/brands";
+import CategoryOfferCarousel from "@/components/categories/CategoryOfferCarousel";
+import CategoryTopControls from "./CategoryTopControls";
+import DealOfDay from "../category-sections/DealOfDay";
 export default function CategoryPageClient({
   category,
   initialProducts,
@@ -162,12 +165,17 @@ useEffect(() => {
 
   return (
     <div>
-      <CategoryHero
-        name={category.name}
-        productCount={initialProducts.length}
-        description={category.description}
-      />
+<div className="mb-0">
+  <CategoryHero
+    name={category.name}
+    productCount={initialProducts.length}
+    description={category.description}
+  />
+</div>
 
+<div className="-mt-1">
+  <CategoryOfferCarousel />
+</div>
       {/* Top mobile filter row (mobile-only) */}
       <div className="md:hidden max-w-[480px] mx-auto px-4">
         <div className="flex items-center gap-3 py-3">
@@ -201,6 +209,8 @@ useEffect(() => {
         {/* Sidebar (desktop only) */}
         <aside className="col-span-12 lg:col-span-3">
           {/* show on md/lg as sidebar, hide on mobile */}
+          {/* ✅ DEAL OF THE DAY FIRST */}
+    <DealOfDay />
           <div className="hidden md:block">
             <SidebarFilters
             categories={[category, ...subCategories]}  // OR full API category list if you fetch it
@@ -232,6 +242,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          <CategoryTopControls sortBy={sortBy} setSortBy={setSortBy} />
 
           {/* Product cards grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
@@ -288,7 +299,5 @@ useEffect(() => {
       />
     </div>
   );
-console.log("Selected brands:", selectedBrands);
-console.log("All brands:", allBrands);
-console.log("Visible products:", visible.map(p => p.brand_name));
+
 }
