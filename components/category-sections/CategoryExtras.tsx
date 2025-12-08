@@ -1,11 +1,11 @@
 // components/category-sections/CategoryExtras.tsx
 import HighlightsRow from "./HighlightsRow";
 import DealOfDay from "./DealOfDay";
-import BankOffers from "./BankOffers";
 import SponsoredBrands from "./SponsoredBrands";
 import BuyingGuide from "./BuyingGuide";
 import ServiceFeatures from "./ServiceFeatures";
 import Footer from "../layout/Footer";
+
 export default function CategoryExtras() {
   return (
     <div className="space-y-8"> 
@@ -18,20 +18,16 @@ export default function CategoryExtras() {
       </div>
 
       <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
-        <BankOffers />
-
-      </div>
-
-      <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
         <SponsoredBrands />
       </div>
+      
       <div className="mt-10">
         <BuyingGuide />
-    </div>
+      </div>
 
-    <div className="mt-10">
+      <div className="mt-10">
        <ServiceFeatures />
-    </div>
+      </div>
     
     </div>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/context";
+import { Toaster } from "sonner";
 
 const interTight = Inter_Tight({
   variable: "--font-sans",
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           {children}
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>
     </html>

@@ -15,6 +15,7 @@ import PurchaseActions from "@/components/product/PurchaseActions";
 import ProductHighlights from "@/components/product/ProductHighlights";
 import OffersSection from "@/components/product/OffersSection";
 import FrequentlyBoughtSection from "@/components/product/FrequentlyBoughtSection";
+import RelatedProducts from "@/components/product/RelatedProducts";
 
 import { ChevronRight } from "lucide-react";
 
@@ -116,6 +117,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* FREQUENTLY BOUGHT */}
         <div className="mt-10">
           <FrequentlyBoughtSection baseProduct={product} />
+        </div>
+
+        {/* RELATED PRODUCTS */}
+        <div className="mt-10">
+          <RelatedProducts
+            categoryId={product.category_id}
+            brandName={product.brand_name}
+            currentProductId={product.id}
+          />
         </div>
       </main>
 
