@@ -1,22 +1,24 @@
-"use client";
-
 import { Suspense } from "react";
-import SearchResults from "./SearchResults";
+import WishlistContent from "./WishlistContent";
 
-export default function SearchPage() {
+export const metadata = {
+  title: "My Wishlist | ExaltRide",
+  description: "View and manage your wishlist items",
+};
+
+export default function WishlistPage() {
   return (
-    <Suspense fallback={<SearchPageSkeleton />}>
-      <SearchResults />
+    <Suspense fallback={<WishlistSkeleton />}>
+      <WishlistContent />
     </Suspense>
   );
 }
 
-function SearchPageSkeleton() {
+function WishlistSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="h-8 w-64 bg-gray-200 rounded mb-4 animate-pulse"></div>
-      <div className="h-4 w-48 bg-gray-200 rounded mb-8 animate-pulse"></div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="h-8 w-48 bg-gray-200 rounded mb-6 animate-pulse"></div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="border rounded-lg p-4">
             <div className="aspect-square bg-gray-200 rounded mb-4 animate-pulse"></div>

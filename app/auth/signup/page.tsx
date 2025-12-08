@@ -102,25 +102,6 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                Account Type
-              </label>
-              <select
-                id="role"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
-              >
-                <option value="buyer">Buyer</option>
-                <option value="vendor">Vendor</option>
-                <option value="admin">Admin</option>
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Select buyer for shopping, vendor for selling
-              </p>
-            </div>
 
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
