@@ -39,7 +39,7 @@ export default function SidebarFilters({
   return (
     <Card className="p-0 overflow-hidden border rounded-xl shadow-sm">
       {/* Header */}
-      <div className="bg-blue-600 text-white flex items-center justify-between px-4 py-3">
+      <div className="bg-[#001F5F] text-white flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2 font-medium">
           <Filter className="h-4 w-4" />
           Filters

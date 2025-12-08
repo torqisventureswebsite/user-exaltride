@@ -6,25 +6,25 @@ export default function HighlightsRow() {
       title: "Budget Friendly",
       desc: "Under ₹2,000",
       count: "145 items",
-      icon: <IndianRupee className="h-5 w-5 text-blue-600" />,
+      icon: <IndianRupee className="h-5 w-5 text-[#FBC84C33]" />,
     },
     {
       title: "Best Sellers",
       desc: "Top rated products",
       count: "89 items",
-      icon: <Medal className="h-5 w-5 text-blue-600" />,
+      icon: <Medal className="h-5 w-5 text-[#FBC84C33]" />,
     },
     {
       title: "Premium Range",
       desc: "High-end systems",
       count: "56 items",
-      icon: <Gauge className="h-5 w-5 text-blue-600" />,
+      icon: <Gauge className="h-5 w-5 text-[#FBC84C33]" />,
     },
     {
       title: "Latest Arrivals",
       desc: "New this month",
       count: "34 items",
-      icon: <Calendar className="h-5 w-5 text-blue-600" />,
+      icon: <Calendar className="h-5 w-5 text-[#FBC84C33]" />,
     },
   ];
 

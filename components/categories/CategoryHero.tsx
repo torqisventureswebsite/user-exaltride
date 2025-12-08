@@ -14,17 +14,16 @@ export default function CategoryHero({
   description?: string;
 }) {
   return (
-    <section
-      className="
-        w-full 
-        bg-blue-700 
-        text-white 
-        rounded-xl 
-        px-4 py-5
-        md:py-8 md:px-6
-        mb-6
-      "
-    >
+<section
+  className="
+    w-full 
+    bg-[#001F5F]
+    text-white 
+    px-4 py-5
+    md:py-8 md:px-6
+  "
+>
+
       <div
         className="
           max-w-[480px] mx-auto

@@ -12,22 +12,19 @@ export default function CategoryExtras() {
       <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
         <HighlightsRow />
       </div>
-
-      <div className="rounded-xl bg-yellow-50 p-4 md:p-6 shadow-sm">
-       <DealOfDay />
-      </div>
-
-      <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
+     <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
         <SponsoredBrands />
       </div>
-      
-      <div className="mt-10">
+       <div className="mt-10">
         <BuyingGuide />
       </div>
 
-      <div className="mt-10">
-       <ServiceFeatures />
-      </div>
+
+      {/* <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
+        <BankOffers />
+
+      </div> */}
+
     
     </div>
   );

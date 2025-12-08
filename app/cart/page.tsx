@@ -46,6 +46,7 @@ export default async function CartPage() {
 
       {/* ✅ FULL WIDTH FLASH BAR (CORRECT POSITION) */}
       <FlashSaleBar />
+      
 
       {/* ✅ MAIN CART CONTENT */}
       <div className="container mx-auto px-4 pt-8 pb-8 flex-1">
