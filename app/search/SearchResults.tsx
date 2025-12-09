@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { Search, Filter, SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/layout/Header";
+import TopBar from "@/components/layout/TopBar";
+import Footer from "@/components/layout/Footer";
 
 interface Product {
   id: string;
@@ -76,36 +79,55 @@ export default function SearchResults() {
 
   if (!query) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Search for Products</h1>
-        <p className="text-gray-600">
-          Enter a search term in the search bar above to find products
-        </p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header />
+        <div className="hidden md:block">
+          <TopBar />
+        </div>
+        <div className="container mx-auto px-4 py-16 text-center flex-1">
+          <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Search for Products</h1>
+          <p className="text-gray-600">
+            Enter a search term in the search bar above to find products
+          </p>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="h-8 w-64 bg-gray-200 rounded mb-4 animate-pulse"></div>
-        <div className="h-4 w-48 bg-gray-200 rounded mb-8 animate-pulse"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="border rounded-lg p-4">
-              <div className="aspect-square bg-gray-200 rounded mb-4 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
-            </div>
-          ))}
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header />
+        <div className="hidden md:block">
+          <TopBar />
         </div>
+        <div className="container mx-auto px-4 py-8 flex-1">
+          <div className="h-8 w-64 bg-gray-200 rounded mb-4 animate-pulse"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded mb-8 animate-pulse"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="border rounded-lg p-4">
+                <div className="aspect-square bg-gray-200 rounded mb-4 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header />
+      <div className="hidden md:block">
+        <TopBar />
+      </div>
+      <div className="container mx-auto px-4 py-8 flex-1">
       {/* Search Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -223,6 +245,8 @@ export default function SearchResults() {
           <Button variant="outline">Load More Products</Button>
         </div>
       )}
+      </div>
+      <Footer />
     </div>
   );
 }
