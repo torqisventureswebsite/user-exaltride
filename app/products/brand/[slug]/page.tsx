@@ -26,15 +26,27 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BrandPage({ params }: { params: { slug: string } }) {
+export const dynamic = "force-dynamic";
+
+export default async function BrandPage(
+  props: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await props.params;
+
+  console.log("BRAND PAGE PARAM:", slug);
+
   const brands = await fetchBrands();
-  const brand = brands.find((b) => b.slug === params.slug);
+  console.log("ALL BRAND SLUGS:", brands.map((b) => b.slug));
+
+  const brand = brands.find((b) => b.slug === slug);
 
   if (!brand) {
+    console.log("❌ BRAND NOT FOUND FOR:", slug);
     notFound();
   }
 
-  const products = await fetchAllBrandProducts(params.slug);
+const products = await fetchAllBrandProducts(brand.id);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,28 +95,54 @@ export default async function BrandPage({ params }: { params: { slug: string } }
       </div>
 
       {/* Products Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            All {brand.name} Products
-          </h2>
-          <p className="text-gray-600">
-            Showing {products.length} {products.length === 1 ? "product" : "products"}
-          </p>
-        </div>
+{/* ✅ ALL PRODUCTS SECTION */}
+<div className="container mx-auto px-4 py-10">
 
-        {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} showOffers />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-gray-500 text-lg">No products available for this brand</p>
-          </div>
-        )}
-      </div>
+  {/* HEADER ROW */}
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900">
+        All {brand.name} Products
+      </h2>
+      <p className="text-sm text-gray-600">
+        Showing {products.length}{" "}
+        {products.length === 1 ? "product" : "products"}
+      </p>
+    </div>
+
+    {/* SORT (UI ONLY FOR NOW) */}
+    <div className="flex items-center gap-2">
+      <label className="text-sm text-gray-600">Sort by:</label>
+      <select className="border rounded-lg px-3 py-2 text-sm">
+        <option>Relevance</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+        <option>Latest</option>
+        <option>Top Rated</option>
+      </select>
+    </div>
+  </div>
+
+  {/* ✅ PRODUCT GRID */}
+  {products.length > 0 ? (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          showOffers
+        />
+      ))}
+    </div>
+  ) : (
+    <div className="text-center py-20">
+      <p className="text-gray-500 text-lg">
+        No products available for this brand
+      </p>
+    </div>
+  )}
+</div>
+
 
       {/* Why Choose This Brand */}
       <div className="bg-white py-12">

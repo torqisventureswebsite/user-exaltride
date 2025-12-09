@@ -13,7 +13,15 @@ export const ApiProductSchema = z.object({
   review_count: z.number().optional().default(0),
   in_stock: z.boolean().optional().default(true),
   brand_name: z.string(),
+
+  //category fix
+  category: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+  }),
 });
+
 
 export const ApiResponseSchema = z.object({
   data: z.array(ApiProductSchema),
@@ -42,8 +50,16 @@ export interface Product {
   review_count: number;
   in_stock?: boolean;
   brand_name: string;
-  // Optional fields that may come from other sources
+
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+
+  
   category_id?: string;
+
   description?: string;
   stock?: number;
   status?: string;
@@ -57,6 +73,7 @@ export interface Product {
   updated_at?: string;
   images?: string[];
 }
+
 
 const API_BASE_URL = "https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1";
 
@@ -104,6 +121,7 @@ export async function fetchProducts(params?: {
       brand_name: apiProduct.brand_name,
       stock: apiProduct.in_stock ? 100 : 0, // Default stock value
       status: apiProduct.in_stock ? "active" : "out_of_stock",
+      category_id: apiProduct.category.id,
     }));
 
     return {

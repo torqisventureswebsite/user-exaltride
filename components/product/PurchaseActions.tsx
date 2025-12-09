@@ -160,8 +160,8 @@ export default function PurchaseActions({
         <Button
           className={`flex-1 font-semibold ${
             added
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
+              ? "bg-green-500 hover:bg-green-600 text-[#001F5F]"
+              : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
           }`}
           onClick={handleAddToCart}
           disabled={isPending}
@@ -171,7 +171,7 @@ export default function PurchaseActions({
         </Button>
 
         <Button 
-          className="flex-1 bg-blue-600 hover:bg-blue-700 font-semibold"
+          className="flex-1 bg-[#001F5F]"
           onClick={handleBuyNow}
           disabled={isPending}
         >
@@ -180,7 +180,7 @@ export default function PurchaseActions({
       </div>
 
       {/* Secondary Buttons */}
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <Button 
           variant="outline" 
           className={`flex-1 gap-2 ${inWishlist ? "text-red-500 border-red-500" : ""}`}
@@ -198,8 +198,8 @@ export default function PurchaseActions({
         >
           <Share2 className="h-4 w-4" />
           Share
-        </Button>
-      </div>
+        </Button> */}
+      {/* </div> */}
     </div>
   );
 }
