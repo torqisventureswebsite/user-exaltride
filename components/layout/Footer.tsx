@@ -62,24 +62,28 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <a href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Shipping Policy
                 </a>
               </li>
               <li>
-                <a href="#return-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <a href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Return Policy
                 </a>
               </li>
               <li>
-                <a href="#cancellation-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <a href="/cancellation-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Cancellation Policy
                 </a>
               </li>
+            
               <li>
-                <a href="#privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link
+                  href="/privacy-policy"
+                  className="text-gray-300 hover:text-white transition-colors text-sm"
+                >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#terms" className="text-gray-300 hover:text-white transition-colors text-sm">
