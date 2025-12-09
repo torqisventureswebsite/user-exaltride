@@ -176,8 +176,9 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
           </div>
 
           <div className="flex gap-6">
-            {/* Sidebar Filters - Hidden on Mobile */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
+            {/* Sidebar Filters - Hidden on Mobile, toggleable on Desktop */}
+            {showFilters && (
+            <aside className="hidden lg:block w-64 flex-shrink-0 transition-all duration-300">
               <Card className="sticky top-4 p-4">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="font-semibold text-gray-900">Filters</h2>
@@ -308,6 +309,7 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
                 </div>
               </Card>
             </aside>
+            )}
 
             {/* Main Content */}
             <div className="flex-1 lg:ml-0">
@@ -318,9 +320,10 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
                     variant="outline"
                     size="sm"
                     onClick={() => setShowFilters(!showFilters)}
-                    className="lg:hidden"
+                    className="hidden lg:flex items-center gap-1"
                   >
-                    {showFilters ? "Hide" : "Show"} Filters
+                    <Filter className="h-4 w-4" />
+                    {showFilters ? "Hide Filters" : "Show Filters"}
                   </Button>
 
                   {/* Active Filter Badges */}
@@ -407,7 +410,7 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
 
               {/* Products Grid */}
               {paginatedProducts.length > 0 ? (
-                <div className="grid gap-3 md:gap-6 grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                   {paginatedProducts.map((product, index) => {
                     let badges = {};
                     if (index === 0) {

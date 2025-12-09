@@ -36,10 +36,15 @@ export default async function RelatedProducts({
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         Related Products
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {relatedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} showOffers />
-        ))}
+      {/* Horizontal scrollable container */}
+      <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-4 pb-4" style={{ minWidth: "max-content" }}>
+          {relatedProducts.map((product) => (
+            <div key={product.id} className="w-[180px] sm:w-[200px] md:w-[220px] flex-shrink-0">
+              <ProductCard product={product} showOffers />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

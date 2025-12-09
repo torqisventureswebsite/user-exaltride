@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, ShoppingCart } from "lucide-react";
 import { useState, useTransition } from "react";
-import { addToCart } from "@/lib/cart-actions";
+import { addToCart, getCartCount } from "@/lib/cart-actions";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -35,14 +35,27 @@ export default function PurchaseActions({
   const [added, setAdded] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
-  // Check if item is in wishlist on mount
+  // Load cart count and check wishlist on mount
   useEffect(() => {
-    const checkWishlist = async () => {
-      const isIn = await isInWishlist(id);
+    const loadData = async () => {
+      const [isIn, count] = await Promise.all([
+        isInWishlist(id),
+        getCartCount()
+      ]);
       setInWishlist(isIn);
+      setCartCount(count);
     };
-    checkWishlist();
+    loadData();
+
+    // Poll for cart updates
+    const interval = setInterval(async () => {
+      const count = await getCartCount();
+      setCartCount(count);
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -55,6 +68,9 @@ export default function PurchaseActions({
       const res = await addToCart(id, title, price, image || "", 1, categoryId);
       if (res.success) {
         setAdded(true);
+        // Update cart count immediately
+        const newCount = await getCartCount();
+        setCartCount(newCount);
         toast.success("Added to cart!", {
           description: `${title} has been added to your cart`,
         });
@@ -154,20 +170,61 @@ export default function PurchaseActions({
   };
 
   return (
-    <div className="space-y-3">
-      {/* Primary Buttons */}
-      <div className="flex gap-2">
+    <>
+      {/* Desktop/Tablet View */}
+      <div className="space-y-3">
+        {/* Primary Buttons */}
+        <div className="flex gap-2">
+          <Button
+            className={`flex-1 font-semibold relative ${
+              added
+                ? "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
+            }`}
+            onClick={handleAddToCart}
+            disabled={isPending}
+          >
+            <div className="relative">
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {cartCount > 0 && !added && (
+                <span className="absolute -top-2 -right-1 bg-[#001F5F] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </div>
+            {added ? "Added ✓" : `Add to cart${cartCount > 0 ? ` (${cartCount})` : ""}`}
+          </Button>
+
+          <Button 
+            className="flex-1 bg-[#001F5F]"
+            onClick={handleBuyNow}
+            disabled={isPending}
+          >
+            Buy Now
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <Button
-          className={`flex-1 font-semibold ${
+          className={`flex-1 font-semibold relative ${
             added
-              ? "bg-green-500 hover:bg-green-600 text-[#001F5F]"
+              ? "bg-green-500 hover:bg-green-600 text-white"
               : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
           }`}
           onClick={handleAddToCart}
           disabled={isPending}
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          {added ? "Added ✓" : "Add to cart"}
+          <div className="relative mr-2">
+            <ShoppingCart className="h-4 w-4" />
+            {cartCount > 0 && !added && (
+              <span className="absolute -top-2 -right-2 bg-[#001F5F] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </div>
+          {added ? "Added ✓" : `Add to cart${cartCount > 0 ? ` (${cartCount})` : ""}`}
         </Button>
 
         <Button 
@@ -179,27 +236,8 @@ export default function PurchaseActions({
         </Button>
       </div>
 
-      {/* Secondary Buttons */}
-      {/* <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          className={`flex-1 gap-2 ${inWishlist ? "text-red-500 border-red-500" : ""}`}
-          onClick={handleWishlist}
-          disabled={wishlistLoading}
-        >
-          <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500" : ""}`} />
-          {inWishlist ? "In Wishlist" : "Wishlist"}
-        </Button>
-
-        <Button 
-          variant="outline" 
-          className="flex-1 gap-2"
-          onClick={handleShare}
-        >
-          <Share2 className="h-4 w-4" />
-          Share
-        </Button> */}
-      {/* </div> */}
-    </div>
+      {/* Spacer for mobile sticky bar */}
+      <div className="h-16 lg:hidden" />
+    </>
   );
 }

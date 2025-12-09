@@ -54,74 +54,72 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
         </div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Featured Product - Left Side */}
-          <div className="bg-white rounded-2xl p-6 shadow-xl h-full flex flex-col">
+          <div className="bg-white rounded-2xl p-5 shadow-xl flex flex-col">
             {/* Badges */}
-            <div className="flex gap-2 mb-4">
-              <Badge className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">
+            <div className="flex gap-2 mb-3">
+              <Badge className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 text-xs">
                 ⭐ Featured Pick
               </Badge>
-              <Badge className="bg-[#001F5F] text-white hover:bg-red-600">
-                 Expert Review
+              <Badge className="bg-[#001F5F] text-white hover:bg-blue-700 text-xs">
+                Expert Review
               </Badge>
             </div>
 
             {/* Product Image */}
-            <div className="relative h-56 mb-4 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+            <div className="relative h-40 md:h-48 mb-3 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
               <Image
-                src="/images/image1.jpg"
+                src={featuredProduct.primary_image || "/images/image1.jpg"}
                 alt={featuredProduct.title || "Featured Product"}
                 fill
                 className="object-cover"
               />
             </div>
 
-            {/* Product Info - Flex grow to fill space */}
-            <div className="flex flex-col flex-grow">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {featuredProduct.title}
-              </h3>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {featuredProduct.description || "Complete emergency roadside assistance kit"}
-              </p>
+            {/* Product Info */}
+            <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
+              {featuredProduct.title}
+            </h3>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {featuredProduct.description || "Complete emergency roadside assistance kit"}
+            </p>
 
-              {/* Price */}
-              <div className="flex items-baseline gap-3 mb-3">
-                <span className="text-3xl font-bold text-[#001F5F]">
-                  ₹{featuredProduct.price?.toLocaleString()}
-                </span>
-                {featuredProduct.compare_at_price && (
-                  <>
-                    <span className="text-lg text-gray-400 line-through">
-                      ₹{featuredProduct.compare_at_price.toLocaleString()}
-                    </span>
-                    <Badge className="bg-green-500 text-white">
-                      {featuredProduct.discount_percentage?.toFixed(0)}% OFF
-                    </Badge>
-                  </>
-                )}
-              </div>
+            {/* Price */}
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-2xl font-bold text-[#001F5F]">
+                ₹{featuredProduct.price?.toLocaleString()}
+              </span>
+              {featuredProduct.compare_at_price && (
+                <>
+                  <span className="text-sm text-gray-400 line-through">
+                    ₹{featuredProduct.compare_at_price.toLocaleString()}
+                  </span>
+                  <Badge className="bg-green-500 text-white text-xs">
+                    {featuredProduct.discount_percentage?.toFixed(0)}% OFF
+                  </Badge>
+                </>
+              )}
+            </div>
 
-              <p className="text-sm text-orange-600 font-semibold mb-auto pb-4">Limited Time Offer</p>
+            <p className="text-xs text-orange-600 font-semibold mb-3">Limited Time Offer</p>
 
-              {/* Action Buttons - Pushed to bottom */}
-              <div className="flex gap-3 mt-auto">
-                <Button className="flex-1 bg-[#FFC107] hover:bg-[#FFB300] text-gray-900 font-semibold gap-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  Add to cart
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-auto">
+              <Button className="flex-1 bg-[#FFC107] hover:bg-[#FFB300] text-gray-900 font-semibold gap-2 h-10">
+                <ShoppingCart className="h-4 w-4" />
+                Add to cart
+              </Button>
+              <Link href={`/products/${featuredProduct.slug}`} className="flex-1">
+                <Button className="w-full bg-[#001F5F] hover:bg-blue-700 text-white font-semibold h-10">
+                  Buy Now
                 </Button>
-                <Link href={`/products/${featuredProduct.slug}`} className="flex-1">
-                  <Button className="w-full bg-[#001F5F] hover:bg-blue-700 text-white font-semibold">
-                    Buy Now
-                  </Button>
-                </Link>
-              </div>
+              </Link>
             </div>
           </div>
 
           {/* Recommendation Cards - Right Side */}
-          <div className="flex flex-col gap-4 h-full">
+          <div className="flex flex-col gap-3">
             {recommendedProducts.map((product) => (
               <RecommendationCard key={product.id} product={product} />
             ))}

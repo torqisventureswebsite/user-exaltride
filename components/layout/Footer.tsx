@@ -1,43 +1,48 @@
 import Link from "next/link";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#000B5C] text-white">
+    <footer className="bg-gradient-to-b from-[#000B5C] to-[#000842] text-white">
       <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8">
           {/* Logo Section */}
           <div className="md:col-span-1">
             <div className="mb-4">
-              <Image src="/images/logo.png" alt="Exaltride Logo" className="" width={150} height={50} />
-              <p className="text-[10px] md:text-xs text-gray-300 tracking-widest">YOUR RIDE. REINVENTED.</p>
+              <Image src="/images/logo.png" alt="Exaltride Logo" width={120} height={40} />
+              <p className="text-[10px] md:text-xs text-gray-400 tracking-widest mt-1">YOUR RIDE. REINVENTED.</p>
             </div>
+            <p className="text-gray-300 text-sm leading-relaxed mt-4">
+              ExaltRide — your car&apos;s online upgrade hub. Everything you need, all in one place.
+            </p>
           </div>
+
           {/* Quicklinks */}
           <div>
-            <h3 className="text-yellow-400 font-semibold text-sm md:text-base mb-4 border-b border-yellow-400 pb-2 inline-block">
+            <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
+              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Quicklinks
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               <li>
-                <Link href="/" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/products" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Products
                 </Link>
               </li>
               <li>
-                <Link href="/products?type=deals" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/products?type=deals" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Deals
                 </Link>
               </li>
               <li>
-                <Link href="#contact" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Contact Us
                 </Link>
               </li>
@@ -46,128 +51,155 @@ export default function Footer() {
 
           {/* Help & Policy */}
           <div>
-            <h3 className="text-yellow-400 font-semibold text-sm md:text-base mb-4 border-b border-yellow-400 pb-2 inline-block">
+            <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
+              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Help & Policy
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               <li>
-                <Link href="#faq" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <a href="#faq" className="text-gray-300 hover:text-white transition-colors text-sm">
                   FAQ
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#shipping" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <a href="#shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Shipping Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#return" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <a href="#return-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Return Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#privacy" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <a href="#cancellation-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Cancellation Policy
+                </a>
+              </li>
+              <li>
+                <a href="#privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#terms" className="text-gray-200 hover:text-yellow-400 transition-colors text-sm">
+                <a href="#terms" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Terms & Conditions
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
 
           {/* Contact Us */}
           <div>
-            <h3 className="text-yellow-400 font-semibold text-sm md:text-base mb-4 border-b border-yellow-400 pb-2 inline-block">
+            <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
+              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Contact Us
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <a
                   href="mailto:support@autoessentials.com"
-                  className="text-gray-200 hover:text-yellow-400 transition-colors text-sm block"
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-sm"
                 >
+                  <Mail className="h-4 w-4 text-gray-400" />
                   support@autoessentials.com
                 </a>
               </li>
               <li>
                 <a
                   href="tel:1800-123-4567"
-                  className="text-gray-200 hover:text-yellow-400 transition-colors text-sm block"
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-sm"
                 >
+                  <Phone className="h-4 w-4 text-gray-400" />
                   1800-123-4567
                 </a>
               </li>
-              <li className="text-gray-200 text-sm leading-relaxed pt-2">
-                502, 5th Floor, Skyline Plaza,<br />
-                MG Road, Bengaluru 560001, India
+              <li className="flex items-start gap-2 text-gray-300 text-sm leading-relaxed">
+                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <span>
+                  502, 5th Floor, Skyline Plaza,<br />
+                  MG Road, Bengaluru 560001, India
+                </span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Newsletter Section */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-8 border-t border-white/20">
-          {/* Newsletter Text and Input */}
-          <div className="flex-1 w-full">
-            <p className="text-gray-200 text-sm mb-3">
-              Join our mailing list to stay in the loop with us...
-            </p>
-            <form className="flex max-w-lg">
+        <div className="bg-[#001070] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          {/* Newsletter Text */}
+          <div className="flex items-center gap-4">
+            <div className="bg-[#1a2a7a] p-3 rounded-full">
+              <Mail className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h4 className="text-white font-semibold text-base">Stay Updated!</h4>
+              <p className="text-gray-400 text-sm">
+                Join our mailing list for exclusive deals...
+              </p>
+            </div>
+          </div>
+
+          {/* Newsletter Input */}
+          <form className="flex w-full md:w-auto md:min-w-[400px]">
+            <div className="flex-1 flex items-center bg-[#0a1654] rounded-l-full px-4 py-2 border border-[#1a2a7a]">
+              <Mail className="h-4 w-4 text-gray-500 mr-2" />
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-2.5 rounded-l-md bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-gray-500"
               />
-              <button
-                type="submit"
-                className="bg-yellow-400 hover:bg-yellow-500 text-[#000B5C] font-semibold px-6 py-2.5 rounded-r-md transition-colors text-sm whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-
-          {/* Social Media Icons */}
-          <div className="flex items-center gap-3">
-            <a
-              href="#"
-              className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full transition-colors"
-              aria-label="Facebook"
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors -ml-2"
+              aria-label="Subscribe"
             >
-              <Facebook className="h-5 w-5 text-[#000B5C]" fill="currentColor" />
-            </a>
-            <a
-              href="#"
-              className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter className="h-5 w-5 text-[#000B5C]" fill="currentColor" />
-            </a>
-            <a
-              href="#"
-              className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full transition-colors"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-5 w-5 text-[#000B5C]" fill="currentColor" />
-            </a>
-            <a
-              href="#"
-              className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full transition-colors"
-              aria-label="Instagram"
-            >
-              <Instagram className="h-5 w-5 text-[#000B5C]" fill="currentColor" />
-            </a>
-          </div>
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </form>
         </div>
 
-        {/* Copyright */}
-        <div className="pt-6 border-t border-white/20">
-          <p className="text-gray-300 text-xs">
+        {/* Bottom Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 mt-8 border-t border-white/10">
+          {/* Copyright */}
+          <p className="text-gray-400 text-sm">
             © 2025 Auto Essentials. All Rights Reserved.
           </p>
+
+          {/* Social Media Icons */}
+          <div className="flex items-center gap-2 md:gap-3">
+            <a
+              href="#"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
+              aria-label="Facebook"
+            >
+              <Facebook className="w-4 h-4 text-white" />
+            </a>
+            <a
+              href="#"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
+              aria-label="Twitter"
+            >
+              <Twitter className="w-4 h-4 text-white" />
+            </a>
+            <a
+              href="#"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="w-4 h-4 text-white" />
+            </a>
+            <a
+              href="#"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
+              aria-label="Instagram"
+            >
+              <Instagram className="w-4 h-4 text-white" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>

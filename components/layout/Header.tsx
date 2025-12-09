@@ -184,100 +184,163 @@ export default function Header() {
         <>
           {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Sidebar */}
-          <div className="fixed top-0 left-0 h-full w-80 bg-white z-50 shadow-xl overflow-y-auto lg:hidden">
-            <div className="p-6">
-              {/* Close Button */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Menu</h2>
+          <div className="fixed top-0 left-0 h-full w-[85%] max-w-[320px] bg-gradient-to-b from-[#001F5F] to-[#000B3D] z-50 shadow-2xl overflow-y-auto lg:hidden">
+            {/* Header with Logo */}
+            <div className="p-5 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <Image 
+                  src="/images/logo.png"
+                  alt="ExaltRide Logo"
+                  width={100}
+                  height={30}
+                  priority
+                />
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 text-gray-500 hover:text-gray-900"
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                 >
-                  <X size={24} />
+                  <X size={22} />
                 </button>
               </div>
+            </div>
 
-              {/* Menu Items */}
-              <nav className="space-y-4">
-                {/* Login/Profile */}
-                {isAuthenticated ? (
-                  <div className="px-4 py-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <p className="font-medium text-gray-900">{user?.name}</p>
-                        <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
-                      </div>
-                      <User size={20} className="text-gray-400" />
+            {/* User Section */}
+            <div className="p-4">
+              {isAuthenticated ? (
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <User size={24} className="text-[#001F5F]" />
                     </div>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <LogOut size={16} />
-                      <span>Logout</span>
-                    </button>
+                    <div>
+                      <p className="font-semibold text-white">{user?.name}</p>
+                      <p className="text-xs text-white/60 capitalize">{user?.role}</p>
+                    </div>
                   </div>
-                ) : (
                   <button
                     onClick={() => {
-                      router.push("/auth/login");
+                      logout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg transition-colors"
                   >
-                    <User size={20} />
-                    <span className="font-medium">Login / Sign Up</span>
+                    <LogOut size={16} />
+                    <span>Logout</span>
                   </button>
-                )}
-
-                {/* Add Car */}
-                <div className="px-4 py-3">
-                  <CarSelector />
                 </div>
-
-                {/* Location */}
-                <div className="px-4 py-3">
-                  <LocationSelector />
-                </div>
-
-                {/* Deals */}
+              ) : (
                 <button
                   onClick={() => {
+                    router.push("/auth/login");
                     setIsMobileMenuOpen(false);
-                    scrollToDeals();
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-medium transition-colors"
+                  className="w-full flex items-center gap-3 bg-yellow-400 hover:bg-yellow-500 text-[#001F5F] font-semibold px-4 py-3.5 rounded-xl transition-colors"
                 >
-                  <Tag size={20} />
-                  <span>Deals & Offers</span>
+                  <div className="w-10 h-10 bg-[#001F5F]/10 rounded-full flex items-center justify-center">
+                    <User size={20} />
+                  </div>
+                  <span>Login / Sign Up</span>
                 </button>
+              )}
+            </div>
 
-                {/* Divider */}
-                <hr className="my-4 border-gray-200" />
+            {/* Quick Actions */}
+            <div className="px-4 pb-4 grid grid-cols-2 gap-3">
+              <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
+                <CarSelector />
+              </div>
+              <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
+                <LocationSelector />
+              </div>
+            </div>
 
-                {/* Additional Links */}
-                <Link href="/products" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                    <ShoppingBag size={20} />
-                    <span className="font-medium">All Products</span>
-                  </button>
-                </Link>
+            {/* Menu Items */}
+            <nav className="px-4 space-y-1">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
+                Browse
+              </p>
+              
+              <Link href="/products" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+                    <ShoppingBag size={18} />
+                  </div>
+                  <span className="font-medium">All Products</span>
+                </div>
+              </Link>
 
-                <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                    <ShoppingBag size={20} />
-                    <span className="font-medium">My Cart</span>
-                  </button>
-                </Link>
-              </nav>
+              <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center relative">
+                    <ShoppingBag size={18} />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#001F5F] text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-medium">My Cart</span>
+                </div>
+              </Link>
+
+              <Link href="/wishlist" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Wishlist</span>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  scrollToDeals();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+              >
+                <div className="w-9 h-9 bg-yellow-400/20 rounded-lg flex items-center justify-center">
+                  <Tag size={18} className="text-yellow-400" />
+                </div>
+                <span className="font-medium">Deals & Offers</span>
+                <span className="ml-auto bg-yellow-400 text-[#001F5F] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  HOT
+                </span>
+              </button>
+            </nav>
+
+            {/* Categories Section */}
+            <div className="px-4 mt-6">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
+                Categories
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {["Engine Parts", "Brakes", "Filters", "Batteries"].map((cat) => (
+                  <Link 
+                    key={cat} 
+                    href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white transition-colors text-center">
+                      {cat}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-auto p-4 border-t border-white/10 mt-6">
+              <p className="text-xs text-white/40 text-center">
+                © 2025 ExaltRide. All rights reserved.
+              </p>
             </div>
           </div>
         </>
