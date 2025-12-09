@@ -60,7 +60,7 @@ export default function TopBar() {
             className="flex items-center gap-2 md:gap-4 text-gray-800 text-sm md:text-base font-medium hover:text-blue-600"
           >
             <Menu size={18} />
-            All Categories
+            <span className="w-[100px]">All Categories</span>
           </button>
 
           {/* === TOP 6 CATEGORIES === */}

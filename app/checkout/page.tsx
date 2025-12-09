@@ -13,11 +13,11 @@ export default async function CheckoutPage() {
     redirect("/cart");
   }
 
-  // Calculate totals
+  // Calculate totals (prices are tax-inclusive)
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 999 ? 0 : 50;
-  const tax = subtotal * 0.18; // 18% GST
-  const total = subtotal + shipping + tax;
+  const tax = 0; // Taxes already included in prices
+  const total = subtotal + shipping;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,7 +72,7 @@ export default async function CheckoutPage() {
                   <span>Shipping</span>
                   <span className="font-medium">
                     {shipping === 0 ? (
-                      <span className="text-green-600">FREE</span>
+                      <span className="text-yellow-600">FREE</span>
                     ) : (
                       `₹${shipping.toFixed(2)}`
                     )}
@@ -90,7 +90,7 @@ export default async function CheckoutPage() {
               </div>
 
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mt-4">
-                <ShieldCheck className="h-4 w-4 text-green-600" />
+                <ShieldCheck className="h-4 w-4 text-yellow-600" />
                 <span>Secure checkout</span>
               </div>
             </div>

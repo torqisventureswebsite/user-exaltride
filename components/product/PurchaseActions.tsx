@@ -178,7 +178,7 @@ export default function PurchaseActions({
           <Button
             className={`flex-1 font-semibold relative ${
               added
-                ? "bg-green-500 hover:bg-green-600 text-white"
+                ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                 : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
             }`}
             onClick={handleAddToCart}
@@ -210,7 +210,7 @@ export default function PurchaseActions({
         <Button
           className={`flex-1 font-semibold relative ${
             added
-              ? "bg-green-500 hover:bg-green-600 text-white"
+              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
               : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
           }`}
           onClick={handleAddToCart}

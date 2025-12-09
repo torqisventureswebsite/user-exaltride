@@ -27,8 +27,8 @@ export default function CartSidebar({ isOpen, onClose, items }: CartSidebarProps
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 999 ? 0 : 50;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shipping + tax;
+  const tax = 0; // Taxes already included in prices
+  const total = subtotal + shipping;
 
   return (
     <>
@@ -86,7 +86,7 @@ export default function CartSidebar({ isOpen, onClose, items }: CartSidebarProps
                   <span>Shipping</span>
                   <span className="font-medium">
                     {shipping === 0 ? (
-                      <span className="text-green-600">FREE</span>
+                      <span className="text-yellow-600">FREE</span>
                     ) : (
                       `₹${shipping.toFixed(2)}`
                     )}

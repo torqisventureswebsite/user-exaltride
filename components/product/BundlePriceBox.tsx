@@ -35,7 +35,7 @@ export default function BundlePriceBox({
           <span className="font-semibold text-gray-900">₹{totalPrice.toLocaleString()}</span>
         </p>
         {savings > 0 && (
-          <p className="text-green-700 font-medium mt-1">
+          <p className="text-yellow-700 font-medium mt-1">
             Save ₹{savings.toLocaleString()} with this bundle!
           </p>
         )}

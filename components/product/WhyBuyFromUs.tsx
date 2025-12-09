@@ -9,7 +9,7 @@ export default function WhyBuyFromUs() {
 
       <div className="space-y-3 text-sm">
         <div className="flex items-start gap-3">
-          <CheckCircle className="h-5 w-5 text-green-600" />
+          <CheckCircle className="h-5 w-5 text-yellow-600" />
           <div>
             <p className="font-medium text-gray-800">Genuine Products</p>
             <p className="text-gray-600 text-xs">

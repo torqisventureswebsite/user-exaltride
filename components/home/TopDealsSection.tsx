@@ -138,7 +138,7 @@ export function TopDealsSection({ products }: TopDealsSectionProps) {
             {topDeals.slice(0, 40).map((product) => (
               <div
                 key={product.id}
-                className="min-w-[280px] max-w-[280px] shrink-0"
+                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0"
               >
                 <ProductCard product={product} />
               </div>

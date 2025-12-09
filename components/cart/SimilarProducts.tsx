@@ -74,7 +74,7 @@ function ProductCard({ product }: { product: Product }) {
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-600">{product.brand_name}</span>
             {product.stock > 0 ? (
-              <span className="text-xs text-green-600 font-medium">In Stock</span>
+              <span className="text-xs text-yellow-600 font-medium">In Stock</span>
             ) : (
               <span className="text-xs text-red-600 font-medium">Out of Stock</span>
             )}

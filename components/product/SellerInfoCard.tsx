@@ -18,7 +18,7 @@ export default function SellerInfoCard() {
           </h3>
 
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-[2px] rounded">
+            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-[2px] rounded">
               Verified Seller
             </span>
 
@@ -39,7 +39,7 @@ export default function SellerInfoCard() {
         <div className="font-semibold text-right">Within 2 hours</div>
 
         <div>Ship on Time</div>
-        <div className="font-semibold text-right text-green-600">98%</div>
+        <div className="font-semibold text-right text-yellow-600">98%</div>
       </div>
 
       {/* CTA */}

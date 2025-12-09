@@ -140,7 +140,7 @@ export default function Header() {
 
       {/* Mobile Header */}
       <div className="lg:hidden border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between py-2.5 px-4">
+        <div className="flex items-center justify-between py-0 px-4">
           
           {/* Hamburger */}
           <button

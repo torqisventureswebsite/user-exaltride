@@ -61,7 +61,7 @@ export default function MiniProductCard({ product }: { product: Product }) {
       <Button
         className={`w-full mt-2 text-xs ${
           added
-            ? "bg-green-50 text-green-600 border-green-500"
+            ? "bg-yellow-50 text-yellow-600 border-yellow-500"
             : "bg-yellow-400 hover:bg-yellow-500 text-black"
         }`}
         onClick={handleAdd}

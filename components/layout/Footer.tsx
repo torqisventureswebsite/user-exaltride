@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-[#000B5C] to-[#000842] text-white">
       <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-8">
           {/* Logo Section */}
           <div className="md:col-span-1">
             <div className="mb-4">

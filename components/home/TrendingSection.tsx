@@ -123,10 +123,10 @@ export function TrendingSection({ products }: TrendingSectionProps) {
             {trendingProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="min-w-[280px] max-w-[280px] shrink-0 relative"
+                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0 relative"
               >
                 {/* ✅ RANK BADGE (#1, #2, etc.) */}
-                <div className="absolute top-8 left-2 z-10 bg-[#001F5F] text-white text-xs font-bold px-2 py-1 rounded-full shadow">
+                <div className="absolute top-6 md:top-8 left-1 md:left-2 z-10 bg-[#001F5F] text-white text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full shadow">
                   #{index + 1}
                 </div>
 

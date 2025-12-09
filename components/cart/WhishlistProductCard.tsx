@@ -107,7 +107,7 @@ export function NewProductCard({ product }: WishlistProductCardProps) {
           className={`w-full flex items-center justify-center gap-2 rounded-md text-xs font-semibold py-2 transition
             ${
               isAdded
-                ? "bg-green-500 text-white"
+                ? "bg-yellow-500 text-white"
                 : "bg-[#FBC84C] hover:bg-[#F5B800] text-black"
             }
           `}

@@ -19,14 +19,14 @@ import RecentlyViewedSection from "@/components/cart/RecentlyViewedSection";
 export default async function CartPage() {
   const cartItems = await getCartItems();
 
-  // Totals
+  // Totals (prices are tax-inclusive)
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
   const shipping = subtotal > 999 ? 0 : 50;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shipping + tax;
+  const tax = 0; // Taxes already included in prices
+  const total = subtotal + shipping;
 
   const categoryIds = Array.from(
     new Set(cartItems.map((item) => item.categoryId).filter(Boolean) as string[])

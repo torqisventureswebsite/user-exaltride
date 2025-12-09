@@ -126,7 +126,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             {featuredProducts.map(({ product, badges }) => (
               <div
                 key={product.id}
-                className="min-w-[280px] max-w-[280px] shrink-0"
+                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0"
               >
                 <ProductCard product={product} badges={badges} showOffers />
               </div>

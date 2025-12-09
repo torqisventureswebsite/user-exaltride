@@ -45,7 +45,7 @@ export default function DeliveryAndServices() {
         </div>
 
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-green-600" />
+          <ShieldCheck className="h-4 w-4 text-yellow-600" />
           <span>Secure Payment</span>
         </div>
 

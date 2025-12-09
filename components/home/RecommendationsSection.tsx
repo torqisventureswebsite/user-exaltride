@@ -95,7 +95,7 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
                   <span className="text-sm text-gray-400 line-through">
                     ₹{featuredProduct.compare_at_price.toLocaleString()}
                   </span>
-                  <Badge className="bg-green-500 text-white text-xs">
+                  <Badge className="bg-yellow-500 text-white text-xs">
                     {featuredProduct.discount_percentage?.toFixed(0)}% OFF
                   </Badge>
                 </>

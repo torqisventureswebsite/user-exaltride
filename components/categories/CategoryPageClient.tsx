@@ -16,6 +16,7 @@ import MobileFiltersButton from "@/components/categories/MobileFiltersButton";
 import MobileFilterDrawer from "@/components/categories/MobileFilterDrawer";
 import { useSearchParams } from "next/navigation";
 import { fetchBrands } from "@/lib/api/brands";
+import { fetchCategories, type Category } from "@/lib/api/categories";
 import CategoryOfferCarousel from "@/components/categories/CategoryOfferCarousel";
 import CategoryTopControls from "./CategoryTopControls";
 import DealOfDay from "../category-sections/DealOfDay";
@@ -35,6 +36,7 @@ export default function CategoryPageClient({
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [allBrands, setAllBrands] = useState<any[]>([]);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>(() => {
     const prices = initialProducts.map((p) => p.price || 0);
     const min = Math.min(...prices, 0);
@@ -55,6 +57,7 @@ export default function CategoryPageClient({
 
   useEffect(() => {
     fetchBrands().then((data) => setAllBrands(data));
+    fetchCategories().then((data) => setAllCategories(data));
   }, []);
 
   useEffect(() => {
@@ -76,15 +79,16 @@ export default function CategoryPageClient({
     return Array.from(set).sort();
   }, [initialProducts]);
 
-  // parent categories for filters (use subCategories prop; fallback to empty)
-  const parentCategories = useMemo(
+  // Categories for filters - map item_count to product_count for consistency
+  const categoriesForFilter = useMemo(
     () =>
-      (subCategories || []).map((c) => ({
+      allCategories.map((c) => ({
         id: c.id,
         name: c.name,
-        item_count: 0,
+        slug: c.slug,
+        product_count: c.item_count || 0,
       })),
-    [subCategories]
+    [allCategories]
   );
 
   // ---------- FILTER LOGIC ----------
@@ -213,7 +217,7 @@ export default function CategoryPageClient({
           <DealOfDay />
           <div className="hidden md:block">
             <SidebarFilters
-              categories={[category, ...subCategories]}  // OR full API category list if you fetch it
+              categories={categoriesForFilter.length > 0 ? categoriesForFilter : [{ ...category, product_count: 0 }, ...subCategories.map(c => ({ ...c, product_count: 0 }))]}
               brands={allBrands}
               selectedBrands={selectedBrands}
               toggleBrand={toggleBrand}
@@ -285,7 +289,8 @@ export default function CategoryPageClient({
       <MobileFilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        parentCategories={parentCategories}
+        parentCategories={categoriesForFilter}
+        brands={allBrands}
         selectedBrands={selectedBrands}
         toggleBrand={toggleBrand}
         localRange={localRange}

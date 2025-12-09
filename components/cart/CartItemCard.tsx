@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Heart, Trash2, Truck } from "lucide-react";
 import { updateCartQuantity, removeFromCart } from "@/lib/cart-actions";
 import { useTransition, useState } from "react";
@@ -13,6 +14,7 @@ interface CartItemCardProps {
     quantity: number;
     image: string;
     categoryId?: string;
+    slug?: string;
   };
 }
 
@@ -21,7 +23,11 @@ export default function CartItemCard({ item }: CartItemCardProps) {
   const [removing, setRemoving] = useState(false);
 
   const handleQty = (newQty: number) => {
-    if (newQty < 1) return;
+    if (newQty < 1) {
+      // When quantity goes to 0, remove the item
+      handleRemove();
+      return;
+    }
     startTransition(async () => {
       await updateCartQuantity(item.productId, newQty);
     });
@@ -42,23 +48,23 @@ export default function CartItemCard({ item }: CartItemCardProps) {
     >
       <div className="flex gap-5">
         {/* ✅ IMAGE */}
-        <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+        <Link href={`/products/${item.slug || item.productId}`} className="relative w-32 h-32 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 block">
           <Image
             src={item.image || "/images/image1.jpg"}
             alt={item.name}
             fill
-            className="object-cover"
+            className="object-cover hover:scale-105 transition-transform"
           />
-        </div>
+        </Link>
 
         {/* ✅ RIGHT CONTENT */}
         <div className="flex-1 flex flex-col justify-between">
           {/* ✅ TOP SECTION */}
           <div className="flex justify-between items-start gap-4">
             <div>
-              <h2 className="font-semibold text-gray-900 text-[16px] leading-tight">
+              <Link href={`/products/${item.slug || item.productId}`} className="font-semibold text-gray-900 text-[16px] leading-tight hover:text-blue-600 transition-colors">
                 {item.name}
-              </h2>
+              </Link>
 
               <p className="text-sm text-gray-500 mt-1">
                 For: <span className="font-medium">Fits Hyundai Creta 2019–2023, all variants</span>
@@ -104,7 +110,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
 
               <div className="flex items-center border rounded-lg overflow-hidden">
                 <button
-                  disabled={isPending || item.quantity <= 1}
+                  disabled={isPending}
                   onClick={() => handleQty(item.quantity - 1)}
                   className="w-10 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 disabled:opacity-40"
                 >

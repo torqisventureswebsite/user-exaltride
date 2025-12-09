@@ -96,7 +96,7 @@ export function RecommendationCard({ product }: RecommendationCardProps) {
               disabled={isPending}
               className={`flex-1 text-xs h-8 ${
                 added
-                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                   : "bg-yellow-400 hover:bg-yellow-500 text-gray-900"
               } font-semibold`}
             >

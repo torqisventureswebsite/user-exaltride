@@ -12,8 +12,8 @@ export default function CartHeader({ itemCount }: { itemCount: number }) {
       </div>
 
       {/* RIGHT - Secure Checkout Badge */}
-      <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg border border-green-200 text-sm">
-        <span className="text-green-600">◉</span>
+      <div className="flex items-center gap-2 bg-yellow-50 text-yellow-700 px-4 py-2 rounded-lg border border-yellow-200 text-sm">
+        <span className="text-yellow-600">◉</span>
         <span className="font-medium">100% Secure Checkout</span>
       </div>
     </div>

@@ -97,7 +97,8 @@ export function ProductCard({
           productData.price,
           productData.image,
           1,
-          productData.categoryId
+          productData.categoryId,
+          product.slug
         );
         
         if (result.success) {
@@ -206,7 +207,7 @@ export function ProductCard({
               size="sm"
               className={`flex-1 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9 font-semibold transition-colors ${
                 isAdded
-                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                   : "bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
               }`}
               onClick={handleAddToCart}

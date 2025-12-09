@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ShoppingCart, Star } from "lucide-react";
 import { addToCart } from "@/lib/cart-actions";
 import { useState, useTransition } from "react";
@@ -24,7 +25,8 @@ export function NewProductCard({ product }: NewProductCardProps) {
         product.price || 0,
         product.primary_image || "/images/image1.jpg",
         1,
-        product.category_id
+        product.category_id,
+        product.slug
       );
 
       if (result?.success) {
@@ -35,22 +37,23 @@ export function NewProductCard({ product }: NewProductCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      {/* IMAGE */}
-      <div className="relative aspect-square bg-gray-100">
-        <Image
-          src={product.primary_image || "/images/image1.jpg"}
-          alt={product.title || "Product"}
-          fill
-          className="object-cover"
-        />
-      </div>
+    <Link href={`/products/${product.slug || product.id}`} className="block">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
+        {/* IMAGE */}
+        <div className="relative aspect-square bg-gray-100">
+          <Image
+            src={product.primary_image || "/images/image1.jpg"}
+            alt={product.title || "Product"}
+            fill
+            className="object-cover"
+          />
+        </div>
 
-      {/* CONTENT */}
-      <div className="p-3">
-        <h3 className="text-xs font-medium text-gray-900 line-clamp-2 mb-1 min-h-[32px]">
-          {product.title}
-        </h3>
+        {/* CONTENT */}
+        <div className="p-3">
+          <h3 className="text-xs font-medium text-gray-900 line-clamp-2 mb-1 min-h-[32px]">
+            {product.title}
+          </h3>
 
         {/* RATING */}
         {product.rating && product.rating > 0 && (
@@ -83,12 +86,16 @@ export function NewProductCard({ product }: NewProductCardProps) {
 
         {/* SINGLE ADD TO CART BUTTON */}
         <button
-          onClick={handleAddToCart}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleAddToCart();
+          }}
           disabled={isPending}
           className={`w-full flex items-center justify-center gap-2 rounded-md text-xs font-semibold py-2 transition
             ${
               isAdded
-                ? "bg-green-500 text-white"
+                ? "bg-yellow-500 text-white"
                 : "bg-[#FBC84C] hover:bg-[#F5B800] text-black"
             }
           `}
@@ -98,5 +105,6 @@ export function NewProductCard({ product }: NewProductCardProps) {
         </button>
       </div>
     </div>
+    </Link>
   );
 }

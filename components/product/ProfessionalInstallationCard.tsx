@@ -27,22 +27,22 @@ export default function ProfessionalInstallationCard() {
       {/* FEATURES */}
       <div className="space-y-2 text-sm">
         <div className="flex items-center gap-2 text-gray-700">
-          <CheckCircle className="h-4 w-4 text-green-600" />
+          <CheckCircle className="h-4 w-4 text-yellow-600" />
           Certified technician at your location
         </div>
 
         <div className="flex items-center gap-2 text-gray-700">
-          <CheckCircle className="h-4 w-4 text-green-600" />
+          <CheckCircle className="h-4 w-4 text-yellow-600" />
           Same-day installation available
         </div>
 
         <div className="flex items-center gap-2 text-gray-700">
-          <CheckCircle className="h-4 w-4 text-green-600" />
+          <CheckCircle className="h-4 w-4 text-yellow-600" />
           30-day installation warranty
         </div>
 
         <div className="flex items-center gap-2 text-gray-700">
-          <CheckCircle className="h-4 w-4 text-green-600" />
+          <CheckCircle className="h-4 w-4 text-yellow-600" />
           Free sound tuning & optimization
         </div>
       </div>

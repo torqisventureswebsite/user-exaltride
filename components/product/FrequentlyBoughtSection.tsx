@@ -41,7 +41,7 @@ export default function FrequentlyBoughtSection({
       Frequently Bought Together
     </h2>
 
-    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-semibold">
+    <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg text-sm font-semibold">
       Save ₹{savings.toLocaleString()}
     </span>
   </div>

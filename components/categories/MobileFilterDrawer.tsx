@@ -10,6 +10,7 @@ export default function MobileFilterDrawer({
   onClose,
   // data & state lifted from parent
   parentCategories,
+  brands,
   selectedBrands,
   toggleBrand,
   localRange,
@@ -20,7 +21,8 @@ export default function MobileFilterDrawer({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  parentCategories: { id: string; name: string; item_count?: number }[];
+  parentCategories: { id: string; name: string; slug?: string; product_count?: number }[];
+  brands: { id: string; name: string; slug: string; product_count?: number }[];
   selectedBrands: string[];
   toggleBrand: (b: string) => void;
   localRange: [number, number];
@@ -100,7 +102,7 @@ export default function MobileFilterDrawer({
                     <span className="text-base">{/* optional icon mapping */}</span>
                     <span className="text-sm">{c.name}</span>
                   </div>
-                  <span className="text-xs text-gray-500">({c.item_count || 0})</span>
+                  <span className="text-xs text-gray-500">({c.product_count || 0})</span>
                 </label>
               ))}
             </div>
@@ -143,18 +145,18 @@ export default function MobileFilterDrawer({
           <section>
             <h4 className="text-sm font-medium mb-3">Brands</h4>
             <div className="flex flex-col gap-2">
-              {["Sony", "Pioneer", "Bosch", "JBL"].map((b) => (
-                <label key={b} className="flex items-center justify-between">
+              {brands.map((b) => (
+                <label key={b.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={selectedBrands.includes(b)}
-                      onChange={() => toggleBrand(b)}
+                      checked={selectedBrands.includes(b.name)}
+                      onChange={() => toggleBrand(b.name)}
                       className="h-4 w-4"
                     />
-                    <span className="text-sm">{b}</span>
+                    <span className="text-sm">{b.name}</span>
                   </div>
-                  <span className="text-xs text-gray-500">(96)</span>
+                  <span className="text-xs text-gray-500">({b.product_count || 0})</span>
                 </label>
               ))}
             </div>

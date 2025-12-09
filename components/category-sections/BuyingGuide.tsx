@@ -54,7 +54,7 @@ export default function BuyingGuide() {
         ))}
       </div>
 
-      {/* OUTLINED NAVY BUTTON (not green) */}
+      {/* OUTLINED NAVY BUTTON (not yellow) */}
       <div className="flex justify-center">
         <button className="mt-5 px-4 py-2 text-sm border border-[#001F5F] text-[#001F5F] rounded-lg hover:bg-[#001F5F] hover:text-white transition flex items-center gap-2">
           💬 Need Help? Chat with Expert

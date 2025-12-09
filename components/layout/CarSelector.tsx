@@ -118,13 +118,13 @@ export default function CarSelector() {
 
             {/* Current Car Display */}
             {savedCar && (
-              <div className="mb-5 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+              <div className="mb-5 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-800">
+                  <p className="text-sm font-medium text-yellow-800">
                     {savedCar.brand} {savedCar.car} {savedCar.model}
                   </p>
                   {savedCar.year && (
-                    <p className="text-xs text-green-600">Year: {savedCar.year}</p>
+                    <p className="text-xs text-yellow-600">Year: {savedCar.year}</p>
                   )}
                 </div>
                 <button
