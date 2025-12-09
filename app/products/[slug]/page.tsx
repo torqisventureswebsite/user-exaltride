@@ -109,7 +109,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
   <ProfessionalInstallationCard />
   <SellerInfoCard />
 <WhyBuyFromUs />
-<BundlePriceBox />
+<BundlePriceBox 
+  totalPrice={product.price || 0}
+  originalPrice={product.compare_at_price || product.price || 0}
+  savings={(product.compare_at_price || 0) - (product.price || 0)}
+/>
  
 </div>
 
