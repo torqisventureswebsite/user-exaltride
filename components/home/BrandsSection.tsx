@@ -153,7 +153,8 @@ export function BrandsSection() {
               return (
                 <Link
                   key={brand.id}
-                  href={`/products?brand=${brand.slug}`}
+                  href={`/products/brand/${brand.slug}` as any}
+
                   className="min-w-[140px] max-w-[140px] shrink-0 flex flex-col items-center justify-center rounded-lg border border-gray-200 p-3 md:p-4 hover:border-blue-500 hover:shadow-md transition-all"
                 >
                   <Icon className="h-8 w-8 md:h-10 md:w-10 text-gray-600 mb-2" />
