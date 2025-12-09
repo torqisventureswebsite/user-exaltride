@@ -15,6 +15,9 @@ const interTight = Inter_Tight({
 export const metadata: Metadata = {
   title: "ExaltRide - Premium E-Commerce",
   description: "Discover premium products for your lifestyle. High-quality, fast delivery.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
