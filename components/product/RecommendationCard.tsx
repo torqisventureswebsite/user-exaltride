@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Star, ShoppingCart } from "lucide-react";
+import { Heart, Star, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
-import { addToCart } from "@/lib/cart-actions";
+import { useTransition } from "react";
+import { useCart } from "@/lib/cart/context";
 import { toast } from "sonner";
 import type { Product } from "@/components/product/ProductCard";
 
@@ -15,28 +15,43 @@ interface RecommendationCardProps {
 
 export function RecommendationCard({ product }: RecommendationCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [added, setAdded] = useState(false);
+  const { addItem, updateQuantity, getItemQuantity } = useCart();
+  const quantityInCart = getItemQuantity(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     startTransition(async () => {
-      const res = await addToCart(
-        product.id,
-        product.title || "",
-        product.price || 0,
-        product.primary_image || "/images/image1.jpg",
-        1,
-        product.category_id
-      );
-      if (res.success) {
-        setAdded(true);
+      try {
+        await addItem({
+          productId: product.id,
+          name: product.title || "",
+          price: product.price || 0,
+          image: product.primary_image || "/images/image1.jpg",
+          categoryId: product.category_id,
+          slug: product.slug,
+        });
         toast.success("Added to cart!");
-        setTimeout(() => setAdded(false), 1500);
-      } else {
+      } catch (error) {
         toast.error("Failed to add to cart");
       }
+    });
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart + 1);
+    });
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart - 1);
     });
   };
 
@@ -90,19 +105,37 @@ export function RecommendationCard({ product }: RecommendationCardProps) {
 
           {/* Buttons */}
           <div className="flex items-center gap-2 mt-auto">
-            <Button
-              size="sm"
-              onClick={handleAddToCart}
-              disabled={isPending}
-              className={`flex-1 text-xs h-8 ${
-                added
-                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                  : "bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-              } font-semibold`}
-            >
-              <ShoppingCart className="h-3 w-3 mr-1" />
-              {added ? "Added!" : "Add"}
-            </Button>
+            {quantityInCart > 0 ? (
+              <div className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 rounded-md h-8">
+                <button
+                  onClick={handleDecrement}
+                  disabled={isPending}
+                  className="w-6 h-6 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
+                >
+                  <Minus className="h-3 w-3" />
+                </button>
+                <span className="text-xs font-bold text-gray-900 min-w-[16px] text-center">
+                  {quantityInCart}
+                </span>
+                <button
+                  onClick={handleIncrement}
+                  disabled={isPending}
+                  className="w-6 h-6 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleAddToCart}
+                disabled={isPending}
+                className="flex-1 text-xs h-8 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+              >
+                <ShoppingCart className="h-3 w-3 mr-1" />
+                Add
+              </Button>
+            )}
             <Link href={`/products/${product.slug}`} className="flex-1">
               <Button
                 size="sm"

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Trash2, Truck } from "lucide-react";
-import { updateCartQuantity, removeFromCart } from "@/lib/cart-actions";
+import { useCart } from "@/lib/cart/context";
 import { useTransition, useState } from "react";
 
 interface CartItemCardProps {
@@ -21,6 +21,7 @@ interface CartItemCardProps {
 export default function CartItemCard({ item }: CartItemCardProps) {
   const [isPending, startTransition] = useTransition();
   const [removing, setRemoving] = useState(false);
+  const { updateQuantity, removeItem } = useCart();
 
   const handleQty = (newQty: number) => {
     if (newQty < 1) {
@@ -29,14 +30,14 @@ export default function CartItemCard({ item }: CartItemCardProps) {
       return;
     }
     startTransition(async () => {
-      await updateCartQuantity(item.productId, newQty);
+      await updateQuantity(item.productId, newQty);
     });
   };
 
   const handleRemove = () => {
     setRemoving(true);
     startTransition(async () => {
-      await removeFromCart(item.productId);
+      await removeItem(item.productId);
     });
   };
 

@@ -1,13 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Heart, Share2, ShoppingCart } from "lucide-react";
-import { useState, useTransition } from "react";
-import { addToCart, getCartCount } from "@/lib/cart-actions";
+import { Heart, Share2, ShoppingCart, Plus, Minus } from "lucide-react";
+import { useState, useTransition, useEffect } from "react";
+import { useCart } from "@/lib/cart/context";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 interface PurchaseActionsProps {
   id: string;
@@ -32,30 +31,18 @@ export default function PurchaseActions({
 }: PurchaseActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [added, setAdded] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const { addItem, updateQuantity, getItemQuantity, count: cartCount } = useCart();
+  const quantityInCart = getItemQuantity(id);
 
-  // Load cart count and check wishlist on mount
+  // Check wishlist on mount
   useEffect(() => {
-    const loadData = async () => {
-      const [isIn, count] = await Promise.all([
-        isInWishlist(id),
-        getCartCount()
-      ]);
+    const loadWishlist = async () => {
+      const isIn = await isInWishlist(id);
       setInWishlist(isIn);
-      setCartCount(count);
     };
-    loadData();
-
-    // Poll for cart updates
-    const interval = setInterval(async () => {
-      const count = await getCartCount();
-      setCartCount(count);
-    }, 2000);
-
-    return () => clearInterval(interval);
+    loadWishlist();
   }, [id]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -65,21 +52,39 @@ export default function PurchaseActions({
     if (!id || !title || !price) return;
 
     startTransition(async () => {
-      const res = await addToCart(id, title, price, image || "", 1, categoryId);
-      if (res.success) {
-        setAdded(true);
-        // Update cart count immediately
-        const newCount = await getCartCount();
-        setCartCount(newCount);
+      try {
+        await addItem({
+          productId: id,
+          name: title,
+          price: price,
+          image: image || "",
+          categoryId,
+          slug,
+        });
         toast.success("Added to cart!", {
           description: `${title} has been added to your cart`,
         });
-        setTimeout(() => setAdded(false), 1500);
-      } else {
+      } catch (error) {
         toast.error("Failed to add to cart", {
           description: "Please try again",
         });
       }
+    });
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(id, quantityInCart + 1);
+    });
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(id, quantityInCart - 1);
     });
   };
 
@@ -89,13 +94,19 @@ export default function PurchaseActions({
 
     if (!id || !title || !price) return;
 
-    // Add to cart first
-    const res = await addToCart(id, title, price, image || "", 1, categoryId);
-    if (res.success) {
-      toast.success("Added to cart!");
-      // Navigate to cart page
+    try {
+      if (quantityInCart === 0) {
+        await addItem({
+          productId: id,
+          name: title,
+          price: price,
+          image: image || "",
+          categoryId,
+          slug,
+        });
+      }
       router.push("/cart");
-    } else {
+    } catch (error) {
       toast.error("Failed to add to cart");
     }
   };
@@ -175,25 +186,36 @@ export default function PurchaseActions({
       <div className="space-y-3">
         {/* Primary Buttons */}
         <div className="flex gap-2">
-          <Button
-            className={`flex-1 font-semibold relative ${
-              added
-                ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
-            }`}
-            onClick={handleAddToCart}
-            disabled={isPending}
-          >
-            <div className="relative">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {cartCount > 0 && !added && (
-                <span className="absolute -top-2 -right-1 bg-[#001F5F] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
+          {quantityInCart > 0 ? (
+            <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
+              <button
+                onClick={handleDecrement}
+                disabled={isPending}
+                className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+              <span className="text-lg font-bold text-[#001F5F] min-w-[32px] text-center">
+                {quantityInCart}
+              </span>
+              <button
+                onClick={handleIncrement}
+                disabled={isPending}
+                className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
             </div>
-            {added ? "Added ✓" : `Add to cart${cartCount > 0 ? ` (${cartCount})` : ""}`}
-          </Button>
+          ) : (
+            <Button
+              className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
+              onClick={handleAddToCart}
+              disabled={isPending}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to cart
+            </Button>
+          )}
 
           <Button 
             className="flex-1 bg-[#001F5F]"
@@ -207,25 +229,36 @@ export default function PurchaseActions({
 
       {/* Mobile Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <Button
-          className={`flex-1 font-semibold relative ${
-            added
-              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-              : "bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
-          }`}
-          onClick={handleAddToCart}
-          disabled={isPending}
-        >
-          <div className="relative mr-2">
-            <ShoppingCart className="h-4 w-4" />
-            {cartCount > 0 && !added && (
-              <span className="absolute -top-2 -right-2 bg-[#001F5F] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
-            )}
+        {quantityInCart > 0 ? (
+          <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
+            <button
+              onClick={handleDecrement}
+              disabled={isPending}
+              className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
+            >
+              <Minus className="h-5 w-5" />
+            </button>
+            <span className="text-lg font-bold text-[#001F5F] min-w-[32px] text-center">
+              {quantityInCart}
+            </span>
+            <button
+              onClick={handleIncrement}
+              disabled={isPending}
+              className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
           </div>
-          {added ? "Added ✓" : `Add to cart${cartCount > 0 ? ` (${cartCount})` : ""}`}
-        </Button>
+        ) : (
+          <Button
+            className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
+            onClick={handleAddToCart}
+            disabled={isPending}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to cart
+          </Button>
+        )}
 
         <Button 
           className="flex-1 bg-[#001F5F]"

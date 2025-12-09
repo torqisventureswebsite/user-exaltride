@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
@@ -10,39 +10,16 @@ import { User, Tag, Menu, X, ShoppingBag, MapPin, Car, LogOut } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import CarSelector from "./CarSelector";
 import { CartBadge } from "@/components/cart/CartBadge";
-// import CartSidebar from "@/components/cart/CartSidebar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
+import { useCart } from "@/lib/cart/context";
 
 export default function Header() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { count: cartCount } = useCart();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<any[]>([]);
-  const [cartCount, setCartCount] = useState(0);
-
-  // Load cart data from API
-  useEffect(() => {
-    const loadCart = async () => {
-      try {
-        const response = await fetch("/api/cart");
-        if (response.ok) {
-          const data = await response.json();
-          setCartItems(data.items || []);
-          setCartCount(data.count || 0);
-        }
-      } catch (error) {
-        console.error("Error loading cart:", error);
-      }
-    };
-    loadCart();
-
-    // Poll for cart updates every 2 seconds
-    const interval = setInterval(loadCart, 2000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Smooth scroll to deals section
   const scrollToDeals = () => {

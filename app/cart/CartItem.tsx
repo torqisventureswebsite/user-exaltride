@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { updateCartQuantity, removeFromCart } from "@/lib/cart-actions";
+import { useCart } from "@/lib/cart/context";
 import { useState, useTransition } from "react";
 
 interface CartItemProps {
@@ -22,6 +22,7 @@ interface CartItemProps {
 export default function CartItem({ item }: CartItemProps) {
   const [isPending, startTransition] = useTransition();
   const [isRemoving, setIsRemoving] = useState(false);
+  const { updateQuantity, removeItem } = useCart();
 
   const handleUpdateQuantity = (newQuantity: number) => {
     if (newQuantity < 1) {
@@ -31,14 +32,14 @@ export default function CartItem({ item }: CartItemProps) {
     }
     
     startTransition(async () => {
-      await updateCartQuantity(item.productId, newQuantity);
+      await updateQuantity(item.productId, newQuantity);
     });
   };
 
   const handleRemove = () => {
     setIsRemoving(true);
     startTransition(async () => {
-      await removeFromCart(item.productId);
+      await removeItem(item.productId);
     });
   };
 

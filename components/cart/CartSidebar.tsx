@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { removeFromCart, updateCartQuantity } from "@/lib/cart-actions";
+import { useCart } from "@/lib/cart/context";
 
 interface CartItem {
   productId: string;
@@ -132,18 +132,19 @@ export default function CartSidebar({ isOpen, onClose, items }: CartSidebarProps
 function CartSidebarItem({ item }: { item: CartItem }) {
   const [isPending, startTransition] = useTransition();
   const [isRemoving, setIsRemoving] = useState(false);
+  const { updateQuantity, removeItem } = useCart();
 
   const handleUpdateQuantity = (newQuantity: number) => {
     if (newQuantity < 1) return;
     startTransition(async () => {
-      await updateCartQuantity(item.productId, newQuantity);
+      await updateQuantity(item.productId, newQuantity);
     });
   };
 
   const handleRemove = () => {
     setIsRemoving(true);
     startTransition(async () => {
-      await removeFromCart(item.productId);
+      await removeItem(item.productId);
     });
   };
 

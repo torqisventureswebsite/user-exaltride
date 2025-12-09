@@ -48,7 +48,7 @@ async function saveCart(cart: CartItem[]) {
   const cookieStore = await cookies();
   cookieStore.set(CART_COOKIE_NAME, JSON.stringify(cart), {
     maxAge: MAX_AGE,
-    httpOnly: true,
+    httpOnly: false, // Allow client-side access for Cart Context
     sameSite: "lax",
     path: "/",
   });

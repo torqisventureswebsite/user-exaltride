@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Star, TruckIcon } from "lucide-react";
+import { ShoppingCart, Star, TruckIcon, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { addToCart } from "@/lib/cart-actions";
-import { useState, useTransition } from "react";
+import { useCart } from "@/lib/cart/context";
+import { useTransition } from "react";
 
 export interface Product {
   id: string;
@@ -61,7 +61,8 @@ export function ProductCard({
   showOffers = true,
 }: ProductCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isAdded, setIsAdded] = useState(false);
+  const { addItem, updateQuantity, getItemQuantity } = useCart();
+  const quantityInCart = getItemQuantity(product.id);
 
   const discountAmount =
     product.compare_at_price && product.price
@@ -81,33 +82,35 @@ export function ProductCard({
       return;
     }
 
-    const productData = {
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.primary_image || "/images/image1.jpg",
-      categoryId: product.category_id,
-    };
-
     startTransition(async () => {
       try {
-        const result = await addToCart(
-          productData.id,
-          productData.title,
-          productData.price,
-          productData.image,
-          1,
-          productData.categoryId,
-          product.slug
-        );
-        
-        if (result.success) {
-          setIsAdded(true);
-          setTimeout(() => setIsAdded(false), 2000);
-        }
+        await addItem({
+          productId: product.id,
+          name: product.title || "",
+          price: product.price || 0,
+          image: product.primary_image || "/images/image1.jpg",
+          categoryId: product.category_id,
+          slug: product.slug,
+        });
       } catch (error) {
         console.error("Error adding to cart:", error);
       }
+    });
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart + 1);
+    });
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart - 1);
     });
   };
 
@@ -203,28 +206,44 @@ export function ProductCard({
 
           {/* Action Buttons */}
           <div className="flex gap-1 md:gap-2">
-            <Button
-              size="sm"
-              className={`flex-1 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9 font-semibold transition-colors ${
-                isAdded
-                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                  : "bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
-              }`}
-              onClick={handleAddToCart}
-              disabled={isPending}
-            >
-              <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
-              {isPending ? (
-                <span className="hidden sm:inline">Adding...</span>
-              ) : isAdded ? (
-                <span className="hidden sm:inline">Added ✓</span>
-              ) : (
-                <>
-                  <span className="hidden sm:inline">Add to cart</span>
-                  <span className="sm:hidden">Add</span>
-                </>
-              )}
-            </Button>
+            {quantityInCart > 0 ? (
+              <div className="flex-1 flex items-center justify-center gap-2 bg-[#FFC107] rounded-md h-7 md:h-9">
+                <button
+                  onClick={handleDecrement}
+                  disabled={isPending}
+                  className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-l-md transition-colors"
+                >
+                  <Minus className="h-3 w-3 md:h-4 md:w-4" />
+                </button>
+                <span className="text-xs md:text-sm font-bold text-gray-900 min-w-[20px] text-center">
+                  {quantityInCart}
+                </span>
+                <button
+                  onClick={handleIncrement}
+                  disabled={isPending}
+                  className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-r-md transition-colors"
+                >
+                  <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                </button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                className="flex-1 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9 font-semibold transition-colors bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
+                onClick={handleAddToCart}
+                disabled={isPending}
+              >
+                <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
+                {isPending ? (
+                  <span className="hidden sm:inline">Adding...</span>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Add to cart</span>
+                    <span className="sm:hidden">Add</span>
+                  </>
+                )}
+              </Button>
+            )}
             <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
               Buy Now
             </Button>

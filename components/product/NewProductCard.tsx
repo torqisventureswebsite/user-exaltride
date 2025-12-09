@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Star } from "lucide-react";
-import { addToCart } from "@/lib/cart-actions";
-import { useState, useTransition } from "react";
+import { ShoppingCart, Star, Plus, Minus } from "lucide-react";
+import { useCart } from "@/lib/cart/context";
+import { useTransition } from "react";
 import type { Product } from "./ProductCard";
 
 interface NewProductCardProps {
@@ -13,26 +13,33 @@ interface NewProductCardProps {
 
 export function NewProductCard({ product }: NewProductCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isAdded, setIsAdded] = useState(false);
+  const { addItem, updateQuantity, getItemQuantity } = useCart();
+  const quantityInCart = getItemQuantity(product.id);
 
   const handleAddToCart = async () => {
     if (!product.id || !product.title || !product.price) return;
 
     startTransition(async () => {
-      const result = await addToCart(
-        product.id,
-        product.title || "",
-        product.price || 0,
-        product.primary_image || "/images/image1.jpg",
-        1,
-        product.category_id,
-        product.slug
-      );
+      await addItem({
+        productId: product.id,
+        name: product.title || "",
+        price: product.price || 0,
+        image: product.primary_image || "/images/image1.jpg",
+        categoryId: product.category_id,
+        slug: product.slug,
+      });
+    });
+  };
 
-      if (result?.success) {
-        setIsAdded(true);
-        setTimeout(() => setIsAdded(false), 2000);
-      }
+  const handleIncrement = () => {
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart + 1);
+    });
+  };
+
+  const handleDecrement = () => {
+    startTransition(async () => {
+      await updateQuantity(product.id, quantityInCart - 1);
     });
   };
 
@@ -84,25 +91,55 @@ export function NewProductCard({ product }: NewProductCardProps) {
           )}
         </div>
 
-        {/* SINGLE ADD TO CART BUTTON */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleAddToCart();
-          }}
-          disabled={isPending}
-          className={`w-full flex items-center justify-center gap-2 rounded-md text-xs font-semibold py-2 transition
-            ${
-              isAdded
-                ? "bg-yellow-500 text-white"
-                : "bg-[#FBC84C] hover:bg-[#F5B800] text-black"
-            }
-          `}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {isPending ? "Adding..." : isAdded ? "Added ✓" : "Add to Cart"}
-        </button>
+        {/* ADD TO CART / QUANTITY CONTROLS */}
+        {quantityInCart > 0 ? (
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="w-full flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md py-1.5"
+          >
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDecrement();
+              }}
+              disabled={isPending}
+              className="w-7 h-7 flex items-center justify-center text-black hover:bg-yellow-600 rounded transition-colors"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-bold text-black min-w-[24px] text-center">
+              {quantityInCart}
+            </span>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleIncrement();
+              }}
+              disabled={isPending}
+              className="w-7 h-7 flex items-center justify-center text-black hover:bg-yellow-600 rounded transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleAddToCart();
+            }}
+            disabled={isPending}
+            className="w-full flex items-center justify-center gap-2 rounded-md text-xs font-semibold py-2 transition bg-[#FBC84C] hover:bg-[#F5B800] text-black"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {isPending ? "Adding..." : "Add to Cart"}
+          </button>
+        )}
       </div>
     </div>
     </Link>

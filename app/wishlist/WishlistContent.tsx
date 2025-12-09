@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getWishlistItems, removeFromWishlist, clearWishlist, WishlistItem } from "@/lib/wishlist-actions";
-import { addToCart } from "@/lib/cart-actions";
+import { useCart } from "@/lib/cart/context";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 export default function WishlistContent() {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addItem, updateQuantity, getItemQuantity } = useCart();
 
   useEffect(() => {
     loadWishlist();
@@ -50,21 +51,30 @@ export default function WishlistContent() {
   };
 
   const handleAddToCart = async (item: WishlistItem) => {
-    const res = await addToCart(
-      item.id,
-      item.title,
-      item.price,
-      item.image,
-      1
-    );
-    
-    if (res.success) {
+    try {
+      await addItem({
+        productId: item.id,
+        name: item.title,
+        price: item.price,
+        image: item.image,
+        slug: item.slug,
+      });
       toast.success("Added to cart!", {
         description: `${item.title} has been added to your cart`,
       });
-    } else {
+    } catch (error) {
       toast.error("Failed to add to cart");
     }
+  };
+
+  const handleIncrement = async (item: WishlistItem) => {
+    const currentQty = getItemQuantity(item.id);
+    await updateQuantity(item.id, currentQty + 1);
+  };
+
+  const handleDecrement = async (item: WishlistItem) => {
+    const currentQty = getItemQuantity(item.id);
+    await updateQuantity(item.id, currentQty - 1);
   };
 
   if (loading) {
@@ -187,15 +197,35 @@ export default function WishlistContent() {
               </p>
 
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-                  onClick={() => handleAddToCart(item)}
-                  disabled={item.in_stock === false}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
-                  Add to Cart
-                </Button>
+                {getItemQuantity(item.id) > 0 ? (
+                  <div className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 rounded-md py-1">
+                    <button
+                      onClick={() => handleDecrement(item)}
+                      className="w-7 h-7 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="text-sm font-bold text-gray-900 min-w-[24px] text-center">
+                      {getItemQuantity(item.id)}
+                    </span>
+                    <button
+                      onClick={() => handleIncrement(item)}
+                      className="w-7 h-7 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+                    onClick={() => handleAddToCart(item)}
+                    disabled={item.in_stock === false}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    Add to Cart
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="outline"
