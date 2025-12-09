@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-[#000B5C] to-[#000842] text-white">
       <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-8">
           {/* Logo Section */}
           <div className="md:col-span-1">
             <div className="mb-4">
@@ -19,8 +19,8 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quicklinks */}
-          <div>
+          {/* Quicklinks - with border box */}
+          <div className="border border-white/20 bg-white/5 rounded-xl p-5">
             <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
               <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Quicklinks
@@ -49,8 +49,8 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Help & Policy */}
-          <div>
+          {/* Help & Policy - with border box */}
+          <div className="border border-white/20 bg-white/5  rounded-xl p-5">
             <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
               <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Help & Policy
@@ -89,8 +89,8 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Us */}
-          <div>
+          {/* Contact Us - with border box */}
+          <div className="border border-white/20 bg-white/5 rounded-xl p-5">
             <h3 className="flex items-center gap-2 text-yellow-400 font-semibold text-sm md:text-base mb-4">
               <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
               Contact Us
@@ -126,7 +126,7 @@ export default function Footer() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="bg-[#001070] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="border border-white/20 bg-white/5 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* Newsletter Text */}
           <div className="flex items-center gap-4">
             <div className="bg-[#1a2a7a] p-3 rounded-full">

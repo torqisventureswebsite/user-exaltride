@@ -66,8 +66,8 @@ export default function CategoryOfferCarousel() {
   );
 
   return (
-    <div className="w-full mb-8 -mx-4 md:-mx-8 lg:-mx-12">
-      <div className="relative">
+    <div className="w-full mb-8">
+      <div className="relative ">
         <Carousel
           setApi={setApi}
           opts={{ align: "start", loop: true }}
@@ -76,9 +76,9 @@ export default function CategoryOfferCarousel() {
               delay: 5000,
             }),
           ]}
-          className="w-full"
+          className="w-full rounded-xl"
         >
-          <CarouselContent className="-ml-0">
+          <CarouselContent className="-ml-0 rounded-xl">
             {slides.map((slide) => (
               <CarouselItem key={slide.id} className="pl-0">
                 <div

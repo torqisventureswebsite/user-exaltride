@@ -30,7 +30,7 @@ export default function CategoryPageClient({
 }) {
 
   const searchParams = useSearchParams();
-const brandFromUrl = searchParams.get("brand"); // e.g. "mann-filter"
+  const brandFromUrl = searchParams.get("brand"); // e.g. "mann-filter"
   // ---------- FILTER STATE ----------
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -54,17 +54,17 @@ const brandFromUrl = searchParams.get("brand"); // e.g. "mann-filter"
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-  fetchBrands().then((data) => setAllBrands(data));
-}, []);
+    fetchBrands().then((data) => setAllBrands(data));
+  }, []);
 
-useEffect(() => {
-  if (brandFromUrl && allBrands.length) {
-    const match = allBrands.find((b) => b.slug === brandFromUrl);
-    if (match) {
-      setSelectedBrands([match.name]); // auto-tick the sidebar brand
+  useEffect(() => {
+    if (brandFromUrl && allBrands.length) {
+      const match = allBrands.find((b) => b.slug === brandFromUrl);
+      if (match) {
+        setSelectedBrands([match.name]); // auto-tick the sidebar brand
+      }
     }
-  }
-}, [brandFromUrl, allBrands]);
+  }, [brandFromUrl, allBrands]);
 
 
   // ---------- DERIVED DATA ----------
@@ -164,18 +164,18 @@ useEffect(() => {
   const totalResults = filtered.length;
 
   return (
-    <div>
-<div className="mb-0">
-  <CategoryHero
-    name={category.name}
-    productCount={initialProducts.length}
-    description={category.description}
-  />
-</div>
+    <div className="min-h-screen">
+      <div className="mb-0">
+        <CategoryHero
+          name={category.name}
+          productCount={initialProducts.length}
+          description={category.description}
+        />
+      </div>
 
-<div className="-mt-1">
-  <CategoryOfferCarousel />
-</div>
+      <div className="-mt-1">
+        <CategoryOfferCarousel />
+      </div>
       {/* Top mobile filter row (mobile-only) */}
       <div className="md:hidden max-w-[480px] mx-auto px-4">
         <div className="flex items-center gap-3 py-3">
@@ -210,18 +210,18 @@ useEffect(() => {
         <aside className="col-span-12 lg:col-span-3">
           {/* show on md/lg as sidebar, hide on mobile */}
           {/* ✅ DEAL OF THE DAY FIRST */}
-    <DealOfDay />
+          <DealOfDay />
           <div className="hidden md:block">
             <SidebarFilters
-            categories={[category, ...subCategories]}  // OR full API category list if you fetch it
-            brands={allBrands} 
-            selectedBrands={selectedBrands}
-            toggleBrand={toggleBrand}
-            priceRange={priceRange}
-            localRange={localRange}
-            setLocalRange={setLocalRange}
-            clearAll={clearAll}
-          />
+              categories={[category, ...subCategories]}  // OR full API category list if you fetch it
+              brands={allBrands}
+              selectedBrands={selectedBrands}
+              toggleBrand={toggleBrand}
+              priceRange={priceRange}
+              localRange={localRange}
+              setLocalRange={setLocalRange}
+              clearAll={clearAll}
+            />
           </div>
         </aside>
 
