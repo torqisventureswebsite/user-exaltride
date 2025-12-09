@@ -45,11 +45,12 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
               <p className="text-blue-100 text-xs md:text-sm mt-1">Curated by Industry Professionals</p>
             </div>
           </div>
-          <Link href="/products" className="self-start md:self-auto hidden md:block">
-            <Button className="bg-white hover:bg-gray-100 text-blue-700 font-semibold gap-2 text-sm md:text-base">
-              View All Picks
-              <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
-            </Button>
+          <Link
+            href="/products"
+            className="flex items-center gap-1 text-white hover:text-yellow-400 font-medium text-sm md:text-base"
+          >
+            View all
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 

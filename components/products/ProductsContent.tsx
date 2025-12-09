@@ -9,11 +9,9 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
-import { X, Filter, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
-import categoriesDataImport from "@/data/categories.json";
+import { X, Filter, ArrowUpDown, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { fetchCategories, type Category } from "@/lib/api/categories";
 import type { Product } from "@/components/product/ProductCard";
-
-const categoriesData = categoriesDataImport as any[];
 
 interface ProductsContentProps {
   initialProducts: Product[];
@@ -29,7 +27,22 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({
+    category: true,
+    price: true,
+    brand: true,
+  });
+
+  const toggleFilterSection = (section: string) => {
+    setExpandedFilters((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
   const itemsPerPage = 10;
+
+  // Fetch categories from API
+  useEffect(() => {
+    fetchCategories().then((data) => setAllCategories(data));
+  }, []);
 
   // Handle URL category parameter
   useEffect(() => {
@@ -47,8 +60,11 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
     return Array.from(brandSet).sort();
   }, [initialProducts]);
 
-  // Get categories
-  const categories = categoriesData.filter((c: any) => c.level === 0);
+  // Get top-level categories from API
+  const categories = useMemo(() => 
+    allCategories.filter((c) => c.level === 0 || !c.parent_id),
+    [allCategories]
+  );
 
   const filteredProducts = useMemo(() => {
     let filtered = [...initialProducts];
@@ -195,117 +211,152 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
                 </div>
 
                 {/* Category Filter */}
-                <div className="mb-6">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900">
+                <div className="mb-4 border-b border-gray-100 pb-4">
+                  <button
+                    onClick={() => toggleFilterSection("category")}
+                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                  >
                     Category
-                  </h3>
-                  <div className="space-y-2">
-                    {categories.map((category: any) => (
-                      <label
-                        key={category.id}
-                        className="flex cursor-pointer items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(category.id)}
-                          onChange={() => toggleCategory(category.id)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {category.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range Filter */}
-                <div className="mb-6">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                    Price Range
-                  </h3>
-                  <div className="space-y-2">
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={priceRange === "all"}
-                        onChange={() => setPriceRange("all")}
-                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">All Prices</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={priceRange === "under-1000"}
-                        onChange={() => setPriceRange("under-1000")}
-                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">Under ₹1,000</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={priceRange === "1000-3000"}
-                        onChange={() => setPriceRange("1000-3000")}
-                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">
-                        ₹1,000 - ₹3,000
+                    {selectedCategories.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
+                        {selectedCategories.length}
                       </span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={priceRange === "3000-5000"}
-                        onChange={() => setPriceRange("3000-5000")}
-                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">
-                        ₹3,000 - ₹5,000
-                      </span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={priceRange === "above-5000"}
-                        onChange={() => setPriceRange("above-5000")}
-                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">Above ₹5,000</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Brand Filter */}
-                <div className="mb-6">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                    Brand
-                  </h3>
-                  <div className="space-y-2">
-                    {brands.map((brand) => {
-                      if (!brand) return null;
-                      return (
+                    )}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${expandedFilters.category ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {expandedFilters.category && (
+                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+                      {categories.map((category) => (
                         <label
-                          key={brand}
+                          key={category.id}
                           className="flex cursor-pointer items-center gap-2"
                         >
                           <input
                             type="checkbox"
-                            checked={selectedBrands.includes(brand)}
-                            onChange={() => toggleBrand(brand)}
+                            checked={selectedCategories.includes(category.id)}
+                            onChange={() => toggleCategory(category.id)}
                             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{brand}</span>
+                          <span className="text-sm text-gray-700">
+                            {category.name}
+                          </span>
                         </label>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Price Range Filter */}
+                <div className="mb-4 border-b border-gray-100 pb-4">
+                  <button
+                    onClick={() => toggleFilterSection("price")}
+                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                  >
+                    Price Range
+                    {priceRange !== "all" && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
+                        1
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${expandedFilters.price ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {expandedFilters.price && (
+                    <div className="space-y-2 mt-2">
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={priceRange === "all"}
+                          onChange={() => setPriceRange("all")}
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">All Prices</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={priceRange === "under-1000"}
+                          onChange={() => setPriceRange("under-1000")}
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">Under ₹1,000</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={priceRange === "1000-3000"}
+                          onChange={() => setPriceRange("1000-3000")}
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">₹1,000 - ₹3,000</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={priceRange === "3000-5000"}
+                          onChange={() => setPriceRange("3000-5000")}
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">₹3,000 - ₹5,000</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={priceRange === "above-5000"}
+                          onChange={() => setPriceRange("above-5000")}
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">Above ₹5,000</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* Brand Filter */}
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleFilterSection("brand")}
+                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                  >
+                    Brand
+                    {selectedBrands.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
+                        {selectedBrands.length}
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${expandedFilters.brand ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {expandedFilters.brand && (
+                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+                      {brands.map((brand) => {
+                        if (!brand) return null;
+                        return (
+                          <label
+                            key={brand}
+                            className="flex cursor-pointer items-center gap-2"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBrands.includes(brand)}
+                              onChange={() => toggleBrand(brand)}
+                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm text-gray-700">{brand}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </Card>
             </aside>
@@ -328,7 +379,7 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
 
                   {/* Active Filter Badges */}
                   {selectedCategories.map((catId) => {
-                    const cat = categories.find((c: any) => c.id === catId);
+                    const cat = categories.find((c) => c.id === catId);
                     return (
                       <Badge
                         key={catId}
@@ -572,107 +623,158 @@ export default function ProductsContent({ initialProducts }: ProductsContentProp
               </div>
             </div>
 
-            <div className="p-4 space-y-6">
+            <div className="p-4 space-y-4">
               {/* Category Filter */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">Category</h3>
-                <div className="space-y-2">
-                  {categories.map((category: any) => (
-                    <label
-                      key={category.id}
-                      className="flex cursor-pointer items-center gap-2"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category.id)}
-                        onChange={() => toggleCategory(category.id)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{category.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range Filter */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">Price Range</h3>
-                <div className="space-y-2">
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price-mobile"
-                      checked={priceRange === "all"}
-                      onChange={() => setPriceRange("all")}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">All Prices</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price-mobile"
-                      checked={priceRange === "under-1000"}
-                      onChange={() => setPriceRange("under-1000")}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Under ₹1,000</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price-mobile"
-                      checked={priceRange === "1000-3000"}
-                      onChange={() => setPriceRange("1000-3000")}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">₹1,000 - ₹3,000</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price-mobile"
-                      checked={priceRange === "3000-5000"}
-                      onChange={() => setPriceRange("3000-5000")}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">₹3,000 - ₹5,000</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <input
-                      type="radio"
-                      name="price-mobile"
-                      checked={priceRange === "above-5000"}
-                      onChange={() => setPriceRange("above-5000")}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Above ₹5,000</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Brand Filter */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">Brand</h3>
-                <div className="space-y-2">
-                  {brands.map((brand) => {
-                    if (!brand) return null;
-                    return (
+              <div className="border-b border-gray-100 pb-4">
+                <button
+                  onClick={() => toggleFilterSection("category")}
+                  className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    Category
+                    {selectedCategories.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
+                        {selectedCategories.length}
+                      </span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${expandedFilters.category ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {expandedFilters.category && (
+                  <div className="space-y-2 mt-2 max-h-40 overflow-y-auto">
+                    {categories.map((category) => (
                       <label
-                        key={brand}
+                        key={category.id}
                         className="flex cursor-pointer items-center gap-2"
                       >
                         <input
                           type="checkbox"
-                          checked={selectedBrands.includes(brand)}
-                          onChange={() => toggleBrand(brand)}
+                          checked={selectedCategories.includes(category.id)}
+                          onChange={() => toggleCategory(category.id)}
                           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm text-gray-700">{brand}</span>
+                        <span className="text-sm text-gray-700">{category.name}</span>
                       </label>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="border-b border-gray-100 pb-4">
+                <button
+                  onClick={() => toggleFilterSection("price")}
+                  className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    Price Range
+                    {priceRange !== "all" && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
+                        1
+                      </span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${expandedFilters.price ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {expandedFilters.price && (
+                  <div className="space-y-2 mt-2">
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="price-mobile"
+                        checked={priceRange === "all"}
+                        onChange={() => setPriceRange("all")}
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">All Prices</span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="price-mobile"
+                        checked={priceRange === "under-1000"}
+                        onChange={() => setPriceRange("under-1000")}
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Under ₹1,000</span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="price-mobile"
+                        checked={priceRange === "1000-3000"}
+                        onChange={() => setPriceRange("1000-3000")}
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">₹1,000 - ₹3,000</span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="price-mobile"
+                        checked={priceRange === "3000-5000"}
+                        onChange={() => setPriceRange("3000-5000")}
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">₹3,000 - ₹5,000</span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="price-mobile"
+                        checked={priceRange === "above-5000"}
+                        onChange={() => setPriceRange("above-5000")}
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Above ₹5,000</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* Brand Filter */}
+              <div>
+                <button
+                  onClick={() => toggleFilterSection("brand")}
+                  className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    Brand
+                    {selectedBrands.length > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
+                        {selectedBrands.length}
+                      </span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${expandedFilters.brand ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {expandedFilters.brand && (
+                  <div className="space-y-2 mt-2 max-h-40 overflow-y-auto">
+                    {brands.map((brand) => {
+                      if (!brand) return null;
+                      return (
+                        <label
+                          key={brand}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedBrands.includes(brand)}
+                            onChange={() => toggleBrand(brand)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{brand}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 

@@ -93,8 +93,8 @@ export default function CartSidebar({ isOpen, onClose, items }: CartSidebarProps
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>Tax (GST 18%)</span>
-                  <span className="font-medium">₹{tax.toFixed(2)}</span>
+                  <span>Taxes</span>
+                  <span className="font-medium text-gray-500 italic">Included</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Total</span>
