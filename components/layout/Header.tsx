@@ -227,7 +227,7 @@ export default function Header() {
             </div>
 
             {/* Quick Actions */}
-            <div className="px-4 pb-4 grid grid-cols-2 gap-3">
+            <div className="px-4 pb-4 grid grid-cols-1 gap-3">
               <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
                 <CarSelector />
               </div>
@@ -292,26 +292,6 @@ export default function Header() {
                 </span>
               </button>
             </nav>
-
-            {/* Categories Section */}
-            <div className="px-4 mt-6">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
-                Categories
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {["Engine Parts", "Brakes", "Filters", "Batteries"].map((cat) => (
-                  <Link 
-                    key={cat} 
-                    href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <div className="bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white transition-colors text-center">
-                      {cat}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
 
             {/* Footer */}
             <div className="mt-auto p-4 border-t border-white/10 mt-6">
