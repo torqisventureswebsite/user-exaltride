@@ -76,13 +76,13 @@ export default function CategoryOfferCarousel() {
               delay: 5000,
             }),
           ]}
-          className="w-full rounded-xl overflow-hidden"
+          className="w-full md:rounded-xl overflow-hidden"
         >
-          <CarouselContent className="-ml-0 rounded-xl">
+          <CarouselContent className="-ml-0 md:rounded-xl">
             {slides.map((slide) => (
               <CarouselItem key={slide.id} className="pl-0">
                 <div
-                  className="relative h-[160px] md:h-[240px] w-full overflow-hidden rounded-xl"
+                  className="relative h-[160px] md:h-[240px] w-full overflow-hidden md:rounded-xl"
                   style={{
                     background:
                       "linear-gradient(90deg, #FBC84C 0%, #FFD666 50%, #FBC84C 100%)",
