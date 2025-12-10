@@ -192,9 +192,9 @@ export function ProductCard({
             <span className="font-medium">FREE Delivery</span>
           </div>
 
-          {/* Offer Tags */}
+          {/* Offer Tags - Hidden on very small screens */}
           {showOffers && (
-            <div className="mb-2 md:mb-3 flex flex-wrap gap-1 md:gap-2">
+            <div className="hidden sm:flex mb-2 md:mb-3 flex-wrap gap-1 md:gap-2">
               <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
                 Today Offer
               </Badge>
@@ -245,7 +245,8 @@ export function ProductCard({
               </Button>
             )}
             <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
-              Buy Now
+              <span className="hidden sm:inline">Buy Now</span>
+              <span className="sm:hidden">Buy</span>
             </Button>
           </div>
         </div>

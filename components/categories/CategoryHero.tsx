@@ -15,11 +15,10 @@ export default function CategoryHero({
 }) {
   return (
     <section
-      className="w-full bg-[#001F5F] rounded-t-xl text-white px-4 py-5 md:py-8 md:px-6"
+      className="w-full bg-[#001F5F] text-white px-4 py-4 md:py-8 md:px-6"
     >
-
       <div
-        className="max-w-[480px] mx-auto md:max-w-none flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4"
       >
         <div>
           <h1 className="text-xl font-bold md:text-3xl">{name}</h1>

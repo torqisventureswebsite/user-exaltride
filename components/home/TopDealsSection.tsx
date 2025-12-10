@@ -100,11 +100,11 @@ export function TopDealsSection({ products }: TopDealsSectionProps) {
 
         {/* ✅ REAL SCROLLER */}
         <div className="relative">
-          {/* ✅ LEFT ARROW — hidden only at extreme left */}
+          {/* ✅ LEFT ARROW — hidden on mobile and at extreme left */}
           <button
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
-            className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
+            className={`hidden md:flex absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
               ${
                 canScrollLeft
                   ? "bg-white shadow-lg hover:bg-gray-100"
@@ -115,11 +115,11 @@ export function TopDealsSection({ products }: TopDealsSectionProps) {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          {/* ✅ RIGHT ARROW — hidden only at extreme right */}
+          {/* ✅ RIGHT ARROW — hidden on mobile and at extreme right */}
           <button
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
-            className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
+            className={`hidden md:flex absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
               ${
                 canScrollRight
                   ? "bg-white shadow-lg hover:bg-gray-100"
@@ -133,12 +133,12 @@ export function TopDealsSection({ products }: TopDealsSectionProps) {
           {/* ✅ SCROLL CONTAINER */}
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-6"
+            className="flex gap-3 md:gap-6 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-6"
           >
             {topDeals.slice(0, 40).map((product) => (
               <div
                 key={product.id}
-                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0"
+                className="min-w-[150px] max-w-[150px] md:min-w-[280px] md:max-w-[280px] shrink-0"
               >
                 <ProductCard product={product} />
               </div>

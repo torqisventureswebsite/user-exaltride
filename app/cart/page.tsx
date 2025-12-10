@@ -37,9 +37,7 @@ export default async function CartPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* ✅ NAVIGATION - Same as homepage */}
       <Header />
-      <div className="hidden md:block">
-        <TopBar />
-      </div>
+      <TopBar />
 
       {/* ✅ CART HEADER */}
       <div className="container mx-auto px-4 pt-8">

@@ -12,7 +12,7 @@ export default function CategoryExtras() {
       <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
         <HighlightsRow />
       </div>
-     <div className="rounded-xl bg-white p-4 md:p-6 shadow-sm">
+     <div className="">
         <SponsoredBrands />
       </div>
        <div className="mt-10">

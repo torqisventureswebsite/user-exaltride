@@ -187,29 +187,30 @@ export function CategoriesSection() {
         ) : (
           // ✅ REAL SCROLLER WITH ARROWS
           <div className="relative">
-<button
-  onClick={() => scroll("left")}
-  className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
->
-  <ChevronLeft className="h-5 w-5" />
-</button>
+            {/* Left Arrow - Hidden on mobile */}
+            <button
+              onClick={() => scroll("left")}
+              className="hidden md:flex absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-<button
-  onClick={() => scroll("right")}
-  className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
->
-  <ChevronRight className="h-5 w-5" />
-</button>
-
+            {/* Right Arrow - Hidden on mobile */}
+            <button
+              onClick={() => scroll("right")}
+              className="hidden md:flex absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
             <div
               ref={scrollRef}
-              className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-6"
+              className="flex gap-3 md:gap-6 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-6"
             >
               {categoryData.map((data) => (
                 <div
                   key={data.category.id}
-                  className="min-w-[320px] max-w-[320px] shrink-0"
+                  className="min-w-[260px] max-w-[260px] md:min-w-[320px] md:max-w-[320px] shrink-0"
                 >
                   <CategoryCard
                     category={data.category}

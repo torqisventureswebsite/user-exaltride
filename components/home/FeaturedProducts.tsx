@@ -98,21 +98,21 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 
         {/* ✅ REAL HORIZONTAL SCROLLER */}
         <div className="relative">
-          {/* LEFT ARROW */}
+          {/* LEFT ARROW - Hidden on mobile */}
           {canScrollLeft && (
             <button
               onClick={() => scroll("left")}
-              className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+              className="hidden md:flex absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
           )}
 
-          {/* RIGHT ARROW */}
+          {/* RIGHT ARROW - Hidden on mobile */}
           {canScrollRight && (
             <button
               onClick={() => scroll("right")}
-              className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+              className="hidden md:flex absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -121,12 +121,12 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
           {/* SCROLL CONTAINER */}
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-10"
+            className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-10"
           >
             {featuredProducts.map(({ product, badges }) => (
               <div
                 key={product.id}
-                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0"
+                className="min-w-[150px] max-w-[150px] md:min-w-[280px] md:max-w-[280px] shrink-0"
               >
                 <ProductCard product={product} badges={badges} showOffers />
               </div>

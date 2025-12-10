@@ -47,9 +47,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="hidden md:block">
-        <TopBar />
-      </div>
+      <TopBar />
 
       <main className="container mx-auto px-4 py-4 md:py-8">
 
@@ -63,10 +61,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {/* ✅ TRUE 3 COLUMN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 lg:gap-8">
 
           {/* ✅ LEFT COLUMN → IMAGES */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="md:col-span-1 lg:col-span-5 flex flex-col gap-4 md:gap-6">
             <ProductImages
               images={
                 product.images?.length
@@ -78,18 +76,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
               title={product.title}
               discount={discountAmount}
             />
-                <PurchaseActions
-              id={product.id}
-              title={product.title}
-              price={product.price}
-              image={product.primary_image}
-              categoryId={product.category?.id} // ✅ FIXED for new API
-            />
+            {/* Hide PurchaseActions on mobile - sticky bottom bar handles it */}
+            <div className="hidden md:block">
+              <PurchaseActions
+                id={product.id}
+                title={product.title}
+                price={product.price}
+                image={product.primary_image}
+                categoryId={product.category?.id}
+              />
+            </div>
             <InstallationGuide/>
           </div>
 
           {/* ✅ CENTER COLUMN → PRODUCT INFO */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6">
             <ProductInfo product={product} />
             <OffersSection />
             <DeliveryAndServices/>
@@ -103,9 +104,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* ✅ RIGHT COLUMN → INSTALLATION / SELLER / TRUST */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="md:col-span-2 lg:col-span-3 space-y-4 md:space-y-6">
 
- <div className="lg:col-span-3 space-y-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
   <ProfessionalInstallationCard />
   <SellerInfoCard />
 <WhyBuyFromUs />
@@ -141,9 +142,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <RecentlyViewedSection title="Customers Who Bought Also Purchased" />
       <RecentlyViewedSection title="Customers Who Bought Also Viewed" />
 
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

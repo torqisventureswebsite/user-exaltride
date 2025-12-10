@@ -41,9 +41,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="hidden md:block">
-        <TopBar />
-      </div>
+      <TopBar />
       <main>
         <HeroCarousel />
         <FeaturedProducts products={displayFeatured} />

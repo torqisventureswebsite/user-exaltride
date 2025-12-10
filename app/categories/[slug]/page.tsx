@@ -45,7 +45,7 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
         ]}
       />
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-0 pb-6">
         <CategoryPageClient
           category={{
             id: category.id,
