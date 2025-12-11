@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import Header from "@/components/layout/Header";
+import TopBar from "@/components/layout/TopBar";
+import Footer from "@/components/layout/Footer";
+import Image from "next/image";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -25,7 +28,7 @@ export default function ContactPage() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast.success("Message sent successfully!", {
-      description: "We'll get back to you within 24 hours",
+      description: "We'll get back to you within 24-48 hours",
     });
 
     setFormData({
@@ -40,208 +43,211 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-blue-100">
-            We're here to help! Get in touch with our team
+      <Header />
+      <TopBar />
+
+      {/* Page Header */}
+      <div className="bg-white py-8 md:py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#001F5F] mb-3">Contact Us</h1>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Have questions or need assistance? We're here to help you every step of the way.
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Contact Information */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Phone className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Phone</h3>
-                    <p className="text-gray-600">+91 1800-123-4567</p>
-                    <p className="text-sm text-gray-500">Mon-Sat, 9AM-6PM</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Mail className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-gray-600">support@exaltride.com</p>
-                    <p className="text-sm text-gray-500">24/7 Support</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <MapPin className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Address</h3>
-                    <p className="text-gray-600">
-                      123 Business Park, Sector 18<br />
-                      Gurugram, Haryana 122001<br />
-                      India
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Clock className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Business Hours</h3>
-                    <p className="text-gray-600">Monday - Saturday</p>
-                    <p className="text-sm text-gray-500">9:00 AM - 6:00 PM IST</p>
-                    <p className="text-sm text-gray-500 mt-1">Sunday: Closed</p>
-                  </div>
-                </div>
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          
+          {/* Left Column - Contact Info Cards */}
+          <div className="space-y-6">
+            {/* Hero Card with Image */}
+            <div className="relative rounded-2xl overflow-hidden h-[280px] md:h-[320px]">
+              <Image
+                src="/images/image1.jpg"
+                alt="Customer Support"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">We're Here to Help</h2>
+                <p className="text-white/80 text-sm md:text-base">
+                  Our dedicated team is ready to assist you with any questions or concerns.
+                </p>
               </div>
-            </Card>
+            </div>
 
-            {/* Quick Links */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Quick Links</h3>
-              <div className="space-y-2">
-                <a href="/faq" className="block text-blue-600 hover:underline">
-                  FAQs
-                </a>
-                <a href="/shipping" className="block text-blue-600 hover:underline">
-                  Shipping Information
-                </a>
-                <a href="/returns" className="block text-blue-600 hover:underline">
-                  Returns & Refunds
-                </a>
-                <a href="/warranty" className="block text-blue-600 hover:underline">
-                  Warranty Policy
-                </a>
+            {/* Contact Cards Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#001F5F] rounded-xl p-5 text-white">
+                <div className="w-10 h-10 bg-[#FBC84C] rounded-lg flex items-center justify-center mb-4">
+                  <Mail className="w-5 h-5 text-[#001F5F]" />
+                </div>
+                <h3 className="font-semibold mb-1">Email Us</h3>
+                <p className="text-white/70 text-sm">support@exaltride.com</p>
               </div>
-            </Card>
+
+              <div className="bg-[#001F5F] rounded-xl p-5 text-white">
+                <div className="w-10 h-10 bg-[#FBC84C] rounded-lg flex items-center justify-center mb-4">
+                  <Phone className="w-5 h-5 text-[#001F5F]" />
+                </div>
+                <h3 className="font-semibold mb-1">Call Us</h3>
+                <p className="text-white/70 text-sm">+91 1800-XXX-XXXX</p>
+              </div>
+            </div>
+
+            {/* Quick Response Card with Image */}
+            <div className="relative rounded-2xl overflow-hidden h-[240px] md:h-[280px]">
+              <Image
+                src="/images/image2.jpg"
+                alt="Quick Response"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <Headphones className="w-5 h-5 text-[#FBC84C]" />
+                  <span className="font-semibold">Quick Response Time</span>
+                </div>
+                <p className="text-white/80 text-sm">
+                  We typically respond within 24-48 business hours. Your satisfaction is our priority.
+                </p>
+              </div>
+            </div>
+
+            {/* Info Cards Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-xl p-5 border border-gray-200">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                  <Clock className="w-5 h-5 text-[#001F5F]" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">Business Hours</h3>
+                <p className="text-gray-600 text-sm">Mon-Fri: 9 AM - 7 PM</p>
+                <p className="text-gray-600 text-sm">Sat: 10 AM - 5 PM</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-5 border border-gray-200">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                  <Headphones className="w-5 h-5 text-[#001F5F]" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">24/7 Support</h3>
+                <p className="text-gray-600 text-sm">Online support portal and live chat available.</p>
+              </div>
+            </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject *
-                    </label>
-                    <select
-                      id="subject"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="order">Order Status</option>
-                      <option value="product">Product Question</option>
-                      <option value="technical">Technical Support</option>
-                      <option value="feedback">Feedback</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Message *
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={6}
-                    placeholder="Tell us how we can help you..."
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 px-8"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </form>
-            </Card>
-
-            {/* Map Section */}
-            <Card className="mt-6 p-6">
-              <h3 className="font-semibold mb-4">Our Location</h3>
-              <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Map integration placeholder</p>
+          {/* Right Column - Contact Form */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Send Us a Message</h2>
+            <p className="text-gray-500 mb-6">
+              Fill out the form below and we'll get back to you soon.
+            </p>
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
               </div>
-            </Card>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phone Number <span className="text-gray-400">(Optional)</span>
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Subject <span className="text-gray-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full h-11 rounded-md border border-gray-300 px-3 pr-10 text-gray-900 focus:border-[#001F5F] focus:outline-none focus:ring-1 focus:ring-[#001F5F] appearance-none bg-white"
+                  >
+                    <option value="">Select a subject</option>
+                    <option value="general">General Inquiry</option>
+                    <option value="order">Order Status</option>
+                    <option value="product">Product Question</option>
+                    <option value="technical">Technical Support</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Message <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  rows={5}
+                  placeholder="Please provide details about your inquiry..."
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="w-full rounded-md border border-gray-300 px-3 py-3 text-gray-900 focus:border-[#001F5F] focus:outline-none focus:ring-1 focus:ring-[#001F5F] resize-none"
+                  required
+                />
+              </div>
+
+              {/* Note */}
+              <div className="bg-[#FFF8E7] border border-[#FBC84C]/30 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Note:</span> All fields marked with <span className="text-red-500">*</span> are required. We'll respond to your inquiry within 24-48 business hours.
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-12 bg-[#001F5F] hover:bg-[#001845] text-white font-medium text-base"
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Submit"}
+              </Button>
+            </form>
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
