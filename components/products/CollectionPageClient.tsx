@@ -357,6 +357,15 @@ export default function CollectionPageClient({
                 </Button>
 
                 {/* Active Filter Badges */}
+                {selectedCategories.map((catId) => {
+                  const cat = allCategories.find((c) => c.id === catId);
+                  return (
+                    <Badge key={catId} variant="secondary" className="gap-1 px-2 py-1">
+                      {cat?.name || catId}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => toggleCategory(catId)} />
+                    </Badge>
+                  );
+                })}
                 {selectedBrands.map((brand) => (
                   <Badge key={brand} variant="secondary" className="gap-1 px-2 py-1">
                     {brand}
@@ -485,7 +494,7 @@ export default function CollectionPageClient({
             Filter
             {hasActiveFilters && (
               <Badge className="bg-blue-600 text-white px-1.5 py-0.5 text-xs rounded-full">
-                {selectedBrands.length + (priceRange !== "all" ? 1 : 0)}
+                {selectedCategories.length + selectedBrands.length + (priceRange !== "all" ? 1 : 0)}
               </Badge>
             )}
           </button>
@@ -519,6 +528,28 @@ export default function CollectionPageClient({
             </div>
 
             <div className="p-4 space-y-4">
+              {/* Category */}
+              <div className="border-b border-gray-100 pb-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Category</h3>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {loadingFilters ? (
+                    <p className="text-xs text-gray-500">Loading...</p>
+                  ) : (
+                    allCategories.map((category) => (
+                      <label key={category.id} className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(category.id)}
+                          onChange={() => toggleCategory(category.id)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                        />
+                        <span className="text-sm text-gray-700">{category.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
               {/* Price Range */}
               <div className="border-b border-gray-100 pb-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Price Range</h3>
@@ -548,17 +579,21 @@ export default function CollectionPageClient({
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Brand</h3>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {brands.map((brand) => (
-                    <label key={brand} className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(brand)}
-                        onChange={() => toggleBrand(brand)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
-                      />
-                      <span className="text-sm text-gray-700">{brand}</span>
-                    </label>
-                  ))}
+                  {loadingFilters ? (
+                    <p className="text-xs text-gray-500">Loading...</p>
+                  ) : (
+                    displayBrands.map((brand) => (
+                      <label key={brand.id} className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedBrands.includes(brand.name)}
+                          onChange={() => toggleBrand(brand.name)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                        />
+                        <span className="text-sm text-gray-700">{brand.name}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
