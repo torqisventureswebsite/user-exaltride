@@ -57,34 +57,34 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5">
               <li>
-                <a href="#faq" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/contact" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/shipping" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Shipping Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#return-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/returns" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Return Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#cancellation-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/cancellation" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Cancellation Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/privacy" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/terms" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

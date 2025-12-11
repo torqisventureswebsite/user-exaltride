@@ -98,6 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     authService.logout();
+    // Clear cart cookie on logout
+    if (typeof window !== "undefined") {
+      document.cookie = "cart=; path=/; max-age=0; samesite=lax";
+    }
     setState({
       user: null,
       tokens: null,

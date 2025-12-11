@@ -46,7 +46,7 @@ export function RecommendationsSection({ products }: RecommendationsSectionProps
             </div>
           </div>
           <Link
-            href="/products"
+            href={"/collections/recommendations" as any}
             className="flex items-center gap-1 text-white hover:text-yellow-400 font-medium text-sm md:text-base"
           >
             View all

@@ -3,11 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Star, TruckIcon, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Star, TruckIcon, Plus, Minus, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/context";
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
+import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
+import { toast } from "sonner";
 
 export interface Product {
   id: string;
@@ -63,6 +65,17 @@ export function ProductCard({
   const [isPending, startTransition] = useTransition();
   const { addItem, updateQuantity, getItemQuantity } = useCart();
   const quantityInCart = getItemQuantity(product.id);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Check if product is in wishlist on mount
+  useEffect(() => {
+    async function checkWishlist() {
+      const items = await getWishlistItems();
+      setIsInWishlist(items.some((item) => item.id === product.id));
+    }
+    checkWishlist();
+  }, [product.id]);
 
   const discountAmount =
     product.compare_at_price && product.price
@@ -114,13 +127,54 @@ export function ProductCard({
     });
   };
 
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (wishlistLoading) return;
+    setWishlistLoading(true);
+
+    try {
+      if (isInWishlist) {
+        const result = await removeFromWishlist(product.id);
+        if (result.success) {
+          setIsInWishlist(false);
+          toast.success("Removed from wishlist");
+        }
+      } else {
+        const result = await addToWishlist(
+          product.id,
+          product.title || "",
+          product.price || 0,
+          product.primary_image || "/images/image1.jpg",
+          product.slug || "",
+          product.brand_name,
+          true
+        );
+        if (result.success) {
+          setIsInWishlist(true);
+          toast.success("Added to wishlist!", {
+            description: product.title,
+          });
+        } else if (result.message === "Item already in wishlist") {
+          setIsInWishlist(true);
+          toast.info("Already in wishlist");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to update wishlist");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   return (
     <Link href={`/products/${product.slug || ""}`}>
       <Card className="group overflow-hidden transition-all hover:shadow-xl">
         <div className="relative aspect-square overflow-hidden">
           {/* Product Image */}
           <Image
-            src="/images/image1.jpg"
+            src={product.primary_image || "/images/image1.jpg"}
             alt={product.title || "Product"}
             fill
             className="object-cover transition-transform group-hover:scale-105"
@@ -150,6 +204,22 @@ export function ProductCard({
               {discountAmount}% off
             </Badge>
           )}
+
+          {/* Wishlist Heart Button */}
+          <button
+            onClick={handleWishlistToggle}
+            disabled={wishlistLoading}
+            className={`absolute bottom-2 md:bottom-3 right-2 md:right-3 p-1.5 md:p-2 rounded-full shadow-md transition-all duration-200 ${
+              isInWishlist 
+                ? "bg-red-500 text-white" 
+                : "bg-white text-gray-600 hover:text-red-500"
+            } ${wishlistLoading ? "opacity-50" : "hover:scale-110"}`}
+            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart 
+              className={`h-4 w-4 md:h-5 md:w-5 ${isInWishlist ? "fill-current" : ""}`} 
+            />
+          </button>
         </div>
 
         {/* Card Content */}

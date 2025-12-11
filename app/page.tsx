@@ -8,35 +8,30 @@ import { RecommendationsSection } from "@/components/home/RecommendationsSection
 import { TrendingSection } from "@/components/home/TrendingSection";
 import Footer from "@/components/layout/Footer";
 import { TopDealsSection } from "@/components/home/TopDealsSection";
-import { 
-  fetchFeaturedProducts, 
-  fetchTopDeals, 
-  fetchBestRatedProducts,
-  fetchNewArrivals,
-  fetchAllProducts
-} from "@/lib/api/products";
+import { fetchHomepageData, fetchNewArrivals } from "@/lib/api/products";
 
 export default async function HomePage() {
-  // Fetch different product sets from specialized API endpoints
-  const [featuredProducts, topDeals, bestRated, newArrivals, allProducts] = await Promise.all([
-    fetchFeaturedProducts(12),
-    fetchTopDeals(12),
-    fetchBestRatedProducts(12),
-    fetchNewArrivals(12),
-    fetchAllProducts(),
+  // Fetch homepage data from unified /homepage API for displaying cards
+  // View All links will use their respective individual APIs
+  const [homepageData, newArrivals] = await Promise.all([
+    fetchHomepageData(),
+    fetchNewArrivals(12), // For trending section
   ]);
 
-  console.log("Featured products count:", featuredProducts.length);
-  console.log("Top deals count:", topDeals.length);
-  console.log("Best rated count:", bestRated.length);
-  console.log("New arrivals count:", newArrivals.length);
-  console.log("All products count:", allProducts.length);
+  const { best_selling, shop_by_categories, top_brands, top_deals, best_rated } = homepageData;
 
-  // Use allProducts as fallback if specialized endpoints return empty
-  const displayFeatured = featuredProducts.length > 0 ? featuredProducts : allProducts.slice(0, 12);
-  const displayDeals = topDeals.length > 0 ? topDeals : allProducts.filter(p => p.discount_percentage && p.discount_percentage > 0).slice(0, 12);
-  const displayBestRated = bestRated.length > 0 ? bestRated : allProducts.slice(0, 12);
-  const displayNewArrivals = newArrivals.length > 0 ? newArrivals : allProducts.slice(0, 12);
+  console.log("Homepage API - Best selling:", best_selling.length);
+  console.log("Homepage API - Categories:", shop_by_categories.length);
+  console.log("Homepage API - Top brands:", top_brands.length);
+  console.log("Homepage API - Top deals:", top_deals.length);
+  console.log("Homepage API - Best rated:", best_rated.length);
+  console.log("New arrivals API:", newArrivals.length);
+
+  // Use homepage data for sections, fallback to newArrivals if empty
+  const displayFeatured = best_selling.length > 0 ? best_selling : newArrivals;
+  const displayDeals = top_deals.length > 0 ? top_deals : newArrivals;
+  const displayBestRated = best_rated.length > 0 ? best_rated : newArrivals;
+  const displayTrending = newArrivals;
 
   return (
     <div className="min-h-screen">
@@ -45,11 +40,11 @@ export default async function HomePage() {
       <main>
         <HeroCarousel />
         <FeaturedProducts products={displayFeatured} />
-        <CategoriesSection />
-        <BrandsSection />
+        <CategoriesSection categories={shop_by_categories} />
+        <BrandsSection brands={top_brands} />
         <TopDealsSection products={displayDeals} />
         <RecommendationsSection products={displayBestRated} />
-        <TrendingSection products={displayNewArrivals} />
+        <TrendingSection products={displayTrending} />
       </main>
       <Footer />
     </div>

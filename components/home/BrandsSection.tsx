@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { fetchBrands } from "@/lib/api/brands";
+import type { HomepageBrand } from "@/lib/api/products";
 
 // Map brand names to icons (fallback = Music)
 const brandIcons: Record<string, any> = {
@@ -19,9 +20,14 @@ const brandIcons: Record<string, any> = {
   Sony: Music,
   Philips: Music,
   Blaupunkt: Music,
+  Brembo: Wrench,
 };
 
-export function BrandsSection() {
+interface BrandsSectionProps {
+  brands?: HomepageBrand[];
+}
+
+export function BrandsSection({ brands: propBrands }: BrandsSectionProps) {
   const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,10 +71,21 @@ export function BrandsSection() {
     };
   }, []);
 
-  // ✅ FETCH ALL BRANDS
+  // ✅ FETCH ALL BRANDS - Use props if provided, otherwise fetch
   useEffect(() => {
     async function loadBrands() {
       try {
+        // If brands are provided via props, use them directly
+        if (propBrands && propBrands.length > 0) {
+          const sorted = [...propBrands].sort(
+            (a, b) => (b.product_count || 0) - (a.product_count || 0)
+          );
+          setBrands(sorted);
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: fetch brands from API
         const apiBrands = await fetchBrands();
 
         // Sort by product_count DESC
@@ -85,7 +102,7 @@ export function BrandsSection() {
     }
 
     loadBrands();
-  }, []);
+  }, [propBrands]);
 
   if (loading) {
     return (

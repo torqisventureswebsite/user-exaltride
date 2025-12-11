@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,16 @@ export default function SignupPage() {
   const [session, setSession] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resendTimer, setResendTimer] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  // Timer countdown for resend OTP
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +47,7 @@ export default function SignupPage() {
       const sessionId = await login(formData.phoneNumber);
       setSession(sessionId);
       setStep("otp");
+      setResendTimer(30); // Start 30 second countdown
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Signup failed";
       
@@ -48,6 +59,23 @@ export default function SignupPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    
+    setResendLoading(true);
+    setError("");
+
+    try {
+      const sessionId = await login(formData.phoneNumber);
+      setSession(sessionId);
+      setResendTimer(30); // Reset 30 second countdown
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resend OTP");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -152,9 +180,25 @@ export default function SignupPage() {
                   maxLength={6}
                   className="w-full h-11 text-center text-xl tracking-widest border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
                 />
-                <p className="mt-2 text-sm text-gray-500">
-                  OTP sent to {formData.phoneNumber} via WhatsApp
-                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-sm text-gray-500">
+                    OTP sent to {formData.phoneNumber} via WhatsApp
+                  </p>
+                  {resendTimer > 0 ? (
+                    <span className="text-sm text-gray-400">
+                      Resend in {resendTimer}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={resendLoading}
+                      className="text-sm text-[#001F5F] hover:underline font-medium disabled:opacity-50"
+                    >
+                      {resendLoading ? "Sending..." : "Resend OTP"}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {error && (
@@ -180,6 +224,7 @@ export default function SignupPage() {
                     setStep("details");
                     setOtp("");
                     setError("");
+                    setResendTimer(0);
                   }}
                 >
                   Back to Details

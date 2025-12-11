@@ -1,4 +1,5 @@
 import { IndianRupee, Medal, Gauge, Calendar, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function HighlightsRow() {
   const items = [
@@ -6,33 +7,38 @@ export default function HighlightsRow() {
       title: "Budget Friendly",
       desc: "Under ₹2,000",
       count: "145 items",
-      icon: <IndianRupee className="h-5 w-5 text-[#FBC84C33]" />,
+      icon: <IndianRupee className="h-5 w-5 text-[#FBC84C]" />,
+      href: "/products?maxPrice=2000",
     },
     {
       title: "Best Sellers",
       desc: "Top rated products",
       count: "89 items",
-      icon: <Medal className="h-5 w-5 text-[#FBC84C33]" />,
+      icon: <Medal className="h-5 w-5 text-[#FBC84C]" />,
+      href: "/collections/recommendations",
     },
     {
       title: "Premium Range",
       desc: "High-end systems",
       count: "56 items",
-      icon: <Gauge className="h-5 w-5 text-[#FBC84C33]" />,
+      icon: <Gauge className="h-5 w-5 text-[#FBC84C]" />,
+      href: "/products?minPrice=10000",
     },
     {
       title: "Latest Arrivals",
       desc: "New this month",
       count: "34 items",
-      icon: <Calendar className="h-5 w-5 text-[#FBC84C33]" />,
+      icon: <Calendar className="h-5 w-5 text-[#FBC84C]" />,
+      href: "/collections/trending",
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-4">
       {items.map((item, i) => (
-        <div
+        <Link
           key={i}
+          href={item.href as any}
           className="
             bg-white border border-gray-200 rounded-2xl 
             p-4 flex items-center gap-4
@@ -53,7 +59,7 @@ export default function HighlightsRow() {
 
           {/* Arrow Icon */}
           <ArrowRight className="h-4 w-4 text-gray-400" />
-        </div>
+        </Link>
       ))}
     </div>
   );

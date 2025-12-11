@@ -193,6 +193,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, fetchCartFromAPI]);
 
+  // Track previous auth state to detect logout
+  const [wasAuthenticated, setWasAuthenticated] = useState(false);
+
   // Initialize cart on mount and auth change
   useEffect(() => {
     const initCart = async () => {
@@ -201,10 +204,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (isAuthenticated) {
           // Merge carts on login
           await mergeCartsOnLogin();
+          setWasAuthenticated(true);
         } else {
-          // Load from server action for guest (more reliable than client-side cookie reading)
-          const serverCart = await serverGetCartItems();
-          setItems(serverCart);
+          // Check if user just logged out
+          if (wasAuthenticated) {
+            // Clear cart state on logout
+            setItems([]);
+            setWasAuthenticated(false);
+          } else {
+            // Load from server action for guest (more reliable than client-side cookie reading)
+            const serverCart = await serverGetCartItems();
+            setItems(serverCart);
+          }
         }
       } finally {
         setIsLoading(false);
@@ -212,7 +223,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     initCart();
-  }, [isAuthenticated, mergeCartsOnLogin]);
+  }, [isAuthenticated, mergeCartsOnLogin, wasAuthenticated]);
 
   // Add item to cart
   const addItem = useCallback(async (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {

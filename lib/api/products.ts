@@ -473,3 +473,85 @@ export async function fetchRelatedProducts(slug: string, limit: number = 4): Pro
     return [];
   }
 }
+
+/**
+ * Homepage API response types
+ */
+export interface HomepageCategory {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  product_count: number;
+}
+
+export interface HomepageBrand {
+  id: string;
+  name: string;
+  slug: string;
+  product_count: number;
+  total_reviews: number;
+}
+
+export interface HomepageData {
+  best_selling: Product[];
+  shop_by_categories: HomepageCategory[];
+  top_brands: HomepageBrand[];
+  top_deals: Product[];
+  best_rated: Product[];
+}
+
+/**
+ * Fetch homepage data from the unified homepage API
+ */
+export async function fetchHomepageData(): Promise<HomepageData> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/homepage`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!response.ok) {
+      console.error(`Homepage API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch homepage data: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Homepage API raw response keys:", Object.keys(data));
+
+    // Transform products to match our Product interface
+    const transformProduct = (apiProduct: any): Product => ({
+      id: apiProduct.id,
+      slug: apiProduct.slug,
+      title: apiProduct.title,
+      primary_image: apiProduct.primary_image,
+      price: apiProduct.price,
+      compare_at_price: apiProduct.compare_at_price,
+      discount_percentage: apiProduct.discount_percentage
+        ? parseFloat(String(apiProduct.discount_percentage))
+        : null,
+      rating: apiProduct.rating ?? 0,
+      review_count: apiProduct.review_count ?? 0,
+      in_stock: apiProduct.in_stock ?? true,
+      brand_name: apiProduct.brand_name,
+      stock: apiProduct.in_stock ? 100 : 0,
+      status: apiProduct.in_stock ? "active" : "out_of_stock",
+    });
+
+    return {
+      best_selling: (data.best_selling || []).map(transformProduct),
+      shop_by_categories: data.shop_by_categories || [],
+      top_brands: data.top_brands || [],
+      top_deals: (data.top_deals || []).map(transformProduct),
+      best_rated: (data.best_rated || []).map(transformProduct),
+    };
+  } catch (error) {
+    console.error("Error fetching homepage data:", error);
+    return {
+      best_selling: [],
+      shop_by_categories: [],
+      top_brands: [],
+      top_deals: [],
+      best_rated: [],
+    };
+  }
+}
