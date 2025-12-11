@@ -104,14 +104,13 @@ class AuthService {
   // SSO Login with Google
   initiateGoogleSSO(): void {
     const params = new URLSearchParams({
-      client_id: cognitoConfig.ssoClientId,
+      client_id: cognitoConfig.clientId,
       response_type: "code",
       scope: "email openid profile",
       redirect_uri: cognitoConfig.redirectUri,
-      identity_provider: "Google",
     });
 
-    window.location.href = `${authEndpoints.ssoAuthorize}?${params.toString()}`;
+    window.location.href = `${authEndpoints.cognitoLogin}?${params.toString()}`;
   }
 
   // Exchange authorization code for tokens (SSO callback)
@@ -119,7 +118,8 @@ class AuthService {
     try {
       const params = new URLSearchParams({
         grant_type: "authorization_code",
-        client_id: cognitoConfig.ssoClientId,
+        client_id: cognitoConfig.clientId,
+        client_secret: cognitoConfig.clientSecret,
         code,
         redirect_uri: cognitoConfig.redirectUri,
       });
@@ -128,9 +128,6 @@ class AuthService {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(
-            `${cognitoConfig.ssoClientId}:${cognitoConfig.ssoClientSecret}`
-          )}`,
         },
         body: params.toString(),
       });

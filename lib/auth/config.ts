@@ -57,7 +57,8 @@ export const authEndpoints = {
     const base = getBaseUrl();
     return useLocalAuth ? `${base}/api/auth/verify-otp` : `${base}/api/proxy/auth/verify-otp`;
   },
-  ssoAuthorize: `https://${cognitoConfig.domain}/oauth2/authorize`,
+  // Cognito hosted UI endpoints for SSO
+  cognitoLogin: `https://${cognitoConfig.domain}/login`,
   token: `https://${cognitoConfig.domain}/oauth2/token`,
   logout: `https://${cognitoConfig.domain}/logout`,
 };
