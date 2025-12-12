@@ -229,11 +229,12 @@ class AuthService {
   logout(): void {
     if (typeof window === "undefined") return;
 
+    console.log("Logging out - clearing all auth data");
     this.clearTokens();
     localStorage.removeItem(STORAGE_KEYS.USER);
-
-    // Optionally redirect to Cognito logout
-    // window.location.href = `${authEndpoints.logout}?client_id=${cognitoConfig.ssoClientId}&logout_uri=${cognitoConfig.logoutUri}`;
+    
+    // Double-check tokens are cleared
+    console.log("After logout - tokens:", this.getTokens());
   }
 
   // Decode JWT token to get user info

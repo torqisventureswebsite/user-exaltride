@@ -21,6 +21,16 @@ export default function LoginPage() {
   const [resendTimer, setResendTimer] = useState(0);
   const [resendLoading, setResendLoading] = useState(false);
 
+  // Reset form state on mount (handles logout -> re-login scenario)
+  useEffect(() => {
+    setStep("phone");
+    setPhoneNumber("+91");
+    setOtp("");
+    setSession("");
+    setError("");
+    setResendTimer(0);
+  }, []);
+
   // Timer countdown for resend OTP
   useEffect(() => {
     if (resendTimer > 0) {

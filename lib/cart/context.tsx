@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/lib/auth/context";
 import { 
   addToCart as serverAddToCart, 
@@ -225,22 +225,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     initCart();
   }, [isAuthenticated, mergeCartsOnLogin, wasAuthenticated]);
 
-  // Add item to cart
+  // Add item to cart - optimistic update, fire-and-forget API sync
   const addItem = useCallback(async (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
     const quantity = item.quantity || 1;
     
-    // Use server action to add item (this updates the cookie on server)
-    await serverAddToCart(
-      item.productId,
-      item.name,
-      item.price,
-      item.image,
-      quantity,
-      item.categoryId,
-      item.slug
-    );
-
-    // Update local state
+    // Optimistic update - update UI immediately
     setItems((prev) => {
       const existingIndex = prev.findIndex((i) => i.productId === item.productId);
       let newCart: CartItem[];
@@ -255,106 +244,116 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return newCart;
     });
 
-    // Sync to API if authenticated
+    // Fire-and-forget: sync to server cookie (non-blocking)
+    serverAddToCart(
+      item.productId,
+      item.name,
+      item.price,
+      item.image,
+      quantity,
+      item.categoryId,
+      item.slug
+    ).catch((error) => console.error("Error syncing to server:", error));
+
+    // Fire-and-forget: sync to API if authenticated (non-blocking)
     if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch("/api/cart/items", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-          body: JSON.stringify({
-            product_id: item.productId,
-            quantity,
-          }),
-        });
-      } catch (error) {
-        console.error("Error adding item to API cart:", error);
-      }
+      fetch("/api/cart/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens.authToken}`,
+        },
+        body: JSON.stringify({
+          product_id: item.productId,
+          quantity,
+        }),
+      }).catch((error) => console.error("Error adding item to API cart:", error));
     }
   }, [isAuthenticated, tokens]);
 
-  // Remove item from cart
+  // Remove item from cart - optimistic update, fire-and-forget API sync
   const removeItem = useCallback(async (productId: string) => {
-    // Use server action to remove item
-    await serverRemoveFromCart(productId);
+    // Optimistic update - update UI immediately
+    setItems((prev) => prev.filter((item) => item.productId !== productId));
 
-    // Update local state
-    setItems((prev) => {
-      const newCart = prev.filter((item) => item.productId !== productId);
-      return newCart;
-    });
+    // Fire-and-forget: sync to server cookie (non-blocking)
+    serverRemoveFromCart(productId).catch((error) => 
+      console.error("Error syncing remove to server:", error)
+    );
 
-    // Sync to API if authenticated
+    // Fire-and-forget: sync to API if authenticated (non-blocking)
     if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch(`/api/cart/items/${productId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-        });
-      } catch (error) {
-        console.error("Error removing item from API cart:", error);
-      }
+      fetch(`/api/cart/items/${productId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokens.authToken}`,
+        },
+      }).catch((error) => console.error("Error removing item from API cart:", error));
     }
   }, [isAuthenticated, tokens]);
 
-  // Update item quantity
+  // Debounce ref for quantity updates
+  const quantityDebounceRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Update item quantity - optimistic update with debounced API sync
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
     if (quantity < 1) {
       return removeItem(productId);
     }
 
-    // Use server action to update quantity
-    await serverUpdateQuantity(productId, quantity);
-
-    // Update local state
-    setItems((prev) => {
-      const newCart = prev.map((item) =>
+    // Optimistic update - update UI immediately
+    setItems((prev) =>
+      prev.map((item) =>
         item.productId === productId ? { ...item, quantity } : item
-      );
-      return newCart;
-    });
+      )
+    );
 
-    // Sync to API if authenticated
-    if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch(`/api/cart/items/${productId}`, {
+    // Clear existing debounce timer for this product
+    if (quantityDebounceRef.current[productId]) {
+      clearTimeout(quantityDebounceRef.current[productId]);
+    }
+
+    // Debounce the server sync (300ms) to batch rapid quantity changes
+    quantityDebounceRef.current[productId] = setTimeout(() => {
+      // Sync to server cookie
+      serverUpdateQuantity(productId, quantity).catch((error) =>
+        console.error("Error syncing quantity to server:", error)
+      );
+
+      // Sync to API if authenticated
+      if (isAuthenticated && tokens?.authToken) {
+        fetch(`/api/cart/items/${productId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${tokens.authToken}`,
           },
           body: JSON.stringify({ quantity }),
-        });
-      } catch (error) {
-        console.error("Error updating item in API cart:", error);
+        }).catch((error) => console.error("Error updating item in API cart:", error));
       }
-    }
+
+      delete quantityDebounceRef.current[productId];
+    }, 300);
   }, [isAuthenticated, tokens, removeItem]);
 
-  // Clear cart
+  // Clear cart - optimistic update, fire-and-forget API sync
   const clearCart = useCallback(async () => {
-    // Use server action to clear cart
-    await serverClearCart();
-
-    // Update local state
+    // Optimistic update - update UI immediately
     setItems([]);
 
-    // Sync to API if authenticated
+    // Fire-and-forget: sync to server cookie (non-blocking)
+    serverClearCart().catch((error) =>
+      console.error("Error syncing clear to server:", error)
+    );
+
+    // Fire-and-forget: sync to API if authenticated (non-blocking)
     if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch("/api/cart", {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-        });
-      } catch (error) {
-        console.error("Error clearing API cart:", error);
-      }
+      fetch("/api/cart", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokens.authToken}`,
+        },
+      }).catch((error) => console.error("Error clearing API cart:", error));
     }
   }, [isAuthenticated, tokens]);
 

@@ -49,4 +49,5 @@ export interface SignupResponse {
 
 export interface VerifyOtpResponse extends AuthTokens {
   user?: User;
+  accessToken?: string; // API may return accessToken instead of authToken
 }

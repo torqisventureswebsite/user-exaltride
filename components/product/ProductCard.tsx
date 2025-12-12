@@ -280,7 +280,6 @@ export function ProductCard({
               <div className="flex-1 flex items-center justify-center gap-2 bg-[#FFC107] rounded-md h-7 md:h-9">
                 <button
                   onClick={handleDecrement}
-                  disabled={isPending}
                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-l-md transition-colors"
                 >
                   <Minus className="h-3 w-3 md:h-4 md:w-4" />
@@ -290,7 +289,6 @@ export function ProductCard({
                 </span>
                 <button
                   onClick={handleIncrement}
-                  disabled={isPending}
                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-r-md transition-colors"
                 >
                   <Plus className="h-3 w-3 md:h-4 md:w-4" />
@@ -301,17 +299,10 @@ export function ProductCard({
                 size="sm"
                 className="flex-1 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9 font-semibold transition-colors bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
                 onClick={handleAddToCart}
-                disabled={isPending}
               >
                 <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
-                {isPending ? (
-                  <span className="hidden sm:inline">{isRemoving ? "Removing..." : "Adding..."}</span>
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">Add to cart</span>
-                    <span className="sm:hidden">Add</span>
-                  </>
-                )}
+                <span className="hidden sm:inline">Add to cart</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             )}
             <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">

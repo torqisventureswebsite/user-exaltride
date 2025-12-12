@@ -150,7 +150,7 @@ export default function Header() {
             {isAuthenticated ? (
               <button
                 onClick={() => router.push("/account")}
-                className="flex items-center gap-1.5 text-gray-700"
+                className="flex items-center gap-1.5 text-gray-700 cursor-pointer"
               >
                 <User size={20} />
                 <span className="text-xs font-medium max-w-[60px] truncate">
@@ -160,7 +160,7 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => router.push("/auth/login")}
-                className="flex items-center gap-1 text-gray-700"
+                className="flex items-center gap-1 text-gray-700 cursor-pointer"
               >
                 <User size={20} />
                 <span className="text-xs font-medium">Login</span>

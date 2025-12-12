@@ -61,13 +61,9 @@ export default function PurchaseActions({
           categoryId,
           slug,
         });
-        toast.success("Added to cart!", {
-          description: `${title} has been added to your cart`,
-        });
+        toast.success("Added to cart!");
       } catch (error) {
-        toast.error("Failed to add to cart", {
-          description: "Please try again",
-        });
+        toast.error("Failed to add to cart");
       }
     });
   };
@@ -190,7 +186,6 @@ export default function PurchaseActions({
             <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
               <button
                 onClick={handleDecrement}
-                disabled={isPending}
                 className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
               >
                 <Minus className="h-5 w-5" />
@@ -200,7 +195,6 @@ export default function PurchaseActions({
               </span>
               <button
                 onClick={handleIncrement}
-                disabled={isPending}
                 className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
               >
                 <Plus className="h-5 w-5" />
@@ -210,7 +204,6 @@ export default function PurchaseActions({
             <Button
               className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
               onClick={handleAddToCart}
-              disabled={isPending}
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Add to cart
@@ -220,7 +213,6 @@ export default function PurchaseActions({
           <Button 
             className="flex-1 bg-[#001F5F]"
             onClick={handleBuyNow}
-            disabled={isPending}
           >
             Buy Now
           </Button>
@@ -233,7 +225,6 @@ export default function PurchaseActions({
           <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
             <button
               onClick={handleDecrement}
-              disabled={isPending}
               className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
             >
               <Minus className="h-5 w-5" />
@@ -243,7 +234,6 @@ export default function PurchaseActions({
             </span>
             <button
               onClick={handleIncrement}
-              disabled={isPending}
               className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
             >
               <Plus className="h-5 w-5" />
@@ -253,7 +243,6 @@ export default function PurchaseActions({
           <Button
             className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
             onClick={handleAddToCart}
-            disabled={isPending}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to cart
@@ -263,7 +252,6 @@ export default function PurchaseActions({
         <Button 
           className="flex-1 bg-[#001F5F]"
           onClick={handleBuyNow}
-          disabled={isPending}
         >
           Buy Now
         </Button>
