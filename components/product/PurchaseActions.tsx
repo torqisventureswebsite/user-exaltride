@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, ShoppingCart, Plus, Minus } from "lucide-react";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart/context";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ export default function PurchaseActions({
   in_stock,
 }: PurchaseActionsProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const { addItem, updateQuantity, getItemQuantity, count: cartCount } = useCart();
@@ -51,37 +50,31 @@ export default function PurchaseActions({
 
     if (!id || !title || !price) return;
 
-    startTransition(async () => {
-      try {
-        await addItem({
-          productId: id,
-          name: title,
-          price: price,
-          image: image || "",
-          categoryId,
-          slug,
-        });
-        toast.success("Added to cart!");
-      } catch (error) {
-        toast.error("Failed to add to cart");
-      }
-    });
+    try {
+      addItem({
+        productId: id,
+        name: title,
+        price: price,
+        image: image || "",
+        categoryId,
+        slug,
+      });
+      toast.success("Added to cart!");
+    } catch (error) {
+      toast.error("Failed to add to cart");
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(id, quantityInCart + 1);
-    });
+    updateQuantity(id, quantityInCart + 1);
   };
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(id, quantityInCart - 1);
-    });
+    updateQuantity(id, quantityInCart - 1);
   };
 
   const handleBuyNow = async (e: React.MouseEvent) => {

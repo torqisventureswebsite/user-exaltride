@@ -7,7 +7,7 @@ import { ShoppingCart, Star, TruckIcon, Plus, Minus, Heart } from "lucide-react"
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/context";
-import { useTransition, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
 
@@ -62,12 +62,10 @@ export function ProductCard({
   badges = {},
   showOffers = true,
 }: ProductCardProps) {
-  const [isPending, startTransition] = useTransition();
   const { addItem, updateQuantity, getItemQuantity } = useCart();
   const quantityInCart = getItemQuantity(product.id);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [isRemoving, setIsRemoving] = useState(false);
 
   // Check if product is in wishlist on mount
   useEffect(() => {
@@ -96,45 +94,32 @@ export function ProductCard({
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await addItem({
-          productId: product.id,
-          name: product.title || "",
-          price: product.price || 0,
-          image: product.primary_image || "/images/image1.jpg",
-          categoryId: product.category_id,
-          slug: product.slug,
-        });
-        toast.success("Added to cart!");
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-        toast.error("Failed to add to cart");
-      }
-    });
+    try {
+      addItem({
+        productId: product.id,
+        name: product.title || "",
+        price: product.price || 0,
+        image: product.primary_image || "/images/image1.jpg",
+        categoryId: product.category_id,
+        slug: product.slug,
+      });
+      toast.success("Added to cart!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add to cart");
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(product.id, quantityInCart + 1);
-    });
+    updateQuantity(product.id, quantityInCart + 1);
   };
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Track if we're removing the last item
-    if (quantityInCart === 1) {
-      setIsRemoving(true);
-    }
-    
-    startTransition(async () => {
-      await updateQuantity(product.id, quantityInCart - 1);
-      setIsRemoving(false);
-    });
+    updateQuantity(product.id, quantityInCart - 1);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
