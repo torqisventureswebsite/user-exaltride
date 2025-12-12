@@ -149,33 +149,59 @@ export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total
 
       const shippingAddress = getShippingAddress();
 
-      // Create order
-      const orderItems = cartItems.map(item => ({
-        productId: item.productId,
-        title: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        subtotal: item.price * item.quantity,
-      }));
+      // First, verify cart has items on the backend
+      console.log("Verifying backend cart...");
+      const cartResponse = await fetch("/api/cart", {
+        headers: {
+          Authorization: `Bearer ${tokens?.idToken}`,
+        },
+      });
+      const cartData = await cartResponse.json();
+      console.log("Backend cart data:", JSON.stringify(cartData, null, 2));
 
-      const orderResponse = await fetch("/api/orders", {
+      const backendCartItems = cartData.data || cartData.items || [];
+      if (backendCartItems.length === 0) {
+        throw new Error("Your cart is empty on the server. Please add items to cart again.");
+      }
+
+      // Build order request body - matching backend API format
+      const orderRequestBody = {
+        shippingAddress: {
+          name: `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim(),
+          phone: shippingAddress.phone,
+          address: `${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state}`,
+          pincode: shippingAddress.zipCode,
+        },
+        paymentMethod: "online",
+      };
+
+      console.log("Creating order with:", JSON.stringify(orderRequestBody, null, 2));
+      
+      // Debug: Log full idToken to compare with working Postman token
+      console.log("Full idToken being sent:", tokens?.idToken);
+      
+      // Debug: Decode JWT to see the sub (user ID)
+      if (tokens?.idToken) {
+        try {
+          const payload = JSON.parse(atob(tokens.idToken.split('.')[1]));
+          console.log("Token payload (sub is buyer_id):", payload);
+        } catch (e) {
+          console.error("Failed to decode token:", e);
+        }
+      }
+
+      const orderResponse = await fetch("https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokens?.authToken}`,
+          Authorization: `Bearer ${tokens?.idToken}`,
         },
-        body: JSON.stringify({
-          items: orderItems,
-          shippingAddress,
-          subtotal,
-          shippingFee: shipping,
-          taxAmount: tax,
-          total,
-          paymentMethod: "online",
-        }),
+        body: JSON.stringify(orderRequestBody),
       });
+      console.log("Order response:", orderResponse)
 
       const orderData = await orderResponse.json();
+      console.log("Order response:", JSON.stringify(orderData, null, 2));
 
       if (!orderResponse.ok) {
         const errorMsg = orderData.error || orderData.message || "Failed to create order";
@@ -183,26 +209,32 @@ export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total
         throw new Error(errorMsg);
       }
 
-      const orderId = orderData.data?.orderId || orderData.orderId;
+      const orderId = orderData.data?.orderId || orderData.orderId || orderData.id;
 
       if (!orderId) {
         throw new Error("Order created but no order ID returned");
       }
 
-      // Initiate PhonePe payment
-      const paymentResponse = await fetch(`/api/payments/${orderId}/initiate`, {
+      // Initiate PhonePe payment using /v1/payments/initiate endpoint
+      const paymentRequestBody = {
+        orderId: orderId,
+        callbackUrl: `${window.location.origin}/api/payments/callback`,
+        redirectUrl: `${window.location.origin}/order-confirmation?orderId=${orderId}`,
+      };
+
+      console.log("Initiating payment with:", JSON.stringify(paymentRequestBody, null, 2));
+
+      const paymentResponse = await fetch(`/api/payments/initiate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokens?.authToken}`,
+          Authorization: `Bearer ${tokens?.idToken}`,
         },
-        body: JSON.stringify({
-          amount: total,
-          orderId: orderId,
-        }),
+        body: JSON.stringify(paymentRequestBody),
       });
 
       const paymentData = await paymentResponse.json();
+      console.log("Payment response:", JSON.stringify(paymentData, null, 2));
 
       if (!paymentResponse.ok) {
         const errorMsg = paymentData.error || paymentData.message || "Failed to initiate payment";
@@ -210,13 +242,17 @@ export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total
         throw new Error(errorMsg);
       }
 
-      // If payment gateway returns a redirect URL, redirect to it
-      if (paymentData.data?.redirectUrl || paymentData.redirectUrl) {
-        window.location.href = paymentData.data?.redirectUrl || paymentData.redirectUrl;
+      // Get redirect URL from response - check multiple possible locations
+      const redirectUrl = paymentData.data?.redirectUrl || paymentData.redirectUrl || paymentData.data?.paymentUrl || paymentData.paymentUrl;
+      
+      if (redirectUrl) {
+        // Clear cart before redirecting to payment
+        clearCart();
+        window.location.href = redirectUrl;
         return;
       }
 
-      // If no redirect, assume payment was successful
+      // If no redirect URL, go to order confirmation
       clearCart();
       (router.push as (url: string) => void)(`/order-confirmation?orderId=${orderId}`);
     } catch (error) {

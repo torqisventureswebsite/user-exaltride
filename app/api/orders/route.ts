@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log("Order API - Request body:", JSON.stringify(body, null, 2));
 
     const response = await fetch(`${API_BASE_URL}/v1/orders`, {
       method: "POST",
@@ -27,11 +28,20 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const responseText = await response.text();
+    console.log("Order API - Response status:", response.status);
+    console.log("Order API - Response body:", responseText);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      data = { message: responseText };
+    }
 
     if (!response.ok) {
       return NextResponse.json(
-        { success: false, error: data.message || "Failed to create order" },
+        { success: false, error: data.message || data.error || "Failed to create order", details: data },
         { status: response.status }
       );
     }
@@ -40,7 +50,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Create order error:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Internal server error", details: String(error) },
       { status: 500 }
     );
   }
