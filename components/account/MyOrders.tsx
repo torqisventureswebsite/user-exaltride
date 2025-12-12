@@ -21,14 +21,14 @@ export function MyOrders() {
 
   useEffect(() => {
     async function fetchOrders() {
-      if (!tokens?.authToken) {
+      if (!tokens?.idToken) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const data = await getAllOrders(tokens.authToken);
+        const data = await getAllOrders(tokens.idToken);
         setOrders(data);
         setError(null);
       } catch (err) {
@@ -40,7 +40,7 @@ export function MyOrders() {
     }
 
     fetchOrders();
-  }, [tokens?.authToken]);
+  }, [tokens?.idToken]);
 
   const filteredOrders = orders.filter((order) => {
     // Filter by tab

@@ -55,7 +55,7 @@ export default function OrderDetailsPage() {
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
-      if (!orderId || !tokens?.authToken) {
+      if (!orderId || !tokens?.idToken) {
         setIsLoading(false);
         return;
       }
@@ -63,7 +63,7 @@ export default function OrderDetailsPage() {
       try {
         const response = await fetch(`/api/orders/${orderId}`, {
           headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
+            Authorization: `Bearer ${tokens.idToken}`,
           },
         });
 
@@ -83,14 +83,14 @@ export default function OrderDetailsPage() {
   }, [orderId, tokens]);
 
   const handleCancelOrder = async () => {
-    if (!order || !tokens?.authToken) return;
+    if (!order || !tokens?.idToken) return;
 
     setIsCancelling(true);
     try {
       const response = await fetch(`/api/orders/${orderId}/cancel`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${tokens.authToken}`,
+          Authorization: `Bearer ${tokens.idToken}`,
         },
       });
 

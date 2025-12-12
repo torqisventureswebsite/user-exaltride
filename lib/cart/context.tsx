@@ -128,10 +128,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Get headers for API calls
   const getHeaders = useCallback((): HeadersInit => {
-    if (isAuthenticated && tokens?.authToken) {
+    if (isAuthenticated && tokens?.idToken) {
       return {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${tokens.authToken}`,
+        Authorization: `Bearer ${tokens.idToken}`,
       };
     }
     return {
@@ -170,7 +170,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Merge guest cart with user cart on login
   const mergeGuestCart = useCallback(async (): Promise<void> => {
-    if (!isAuthenticated || !tokens?.authToken) return;
+    if (!isAuthenticated || !tokens?.idToken) return;
     
     // Only merge if there was a guest session
     const guestSessionId = localStorage.getItem(GUEST_SESSION_KEY);
@@ -181,7 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokens.authToken}`,
+          Authorization: `Bearer ${tokens.idToken}`,
           "X-Session-Id": guestSessionId,
         },
       });
@@ -235,7 +235,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const initCart = async () => {
       setIsLoading(true);
       try {
-        if (isAuthenticated && tokens?.authToken) {
+        if (isAuthenticated && tokens?.idToken) {
           // User just logged in
           if (!wasAuthenticated) {
             // Merge guest cart with user cart

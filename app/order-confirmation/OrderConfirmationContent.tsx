@@ -42,7 +42,7 @@ export default function OrderConfirmationContent() {
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
-      if (!orderId || !tokens?.authToken) {
+      if (!orderId || !tokens?.idToken) {
         setIsLoading(false);
         return;
       }
@@ -50,7 +50,7 @@ export default function OrderConfirmationContent() {
       try {
         const response = await fetch(`/api/orders/${orderId}`, {
           headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
+            Authorization: `Bearer ${tokens.idToken}`,
           },
         });
 

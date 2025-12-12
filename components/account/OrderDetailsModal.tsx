@@ -35,7 +35,7 @@ export function OrderDetailsModal({ orderId, onClose }: OrderDetailsModalProps) 
 
   useEffect(() => {
     async function fetchOrderDetails() {
-      if (!tokens?.authToken) {
+      if (!tokens?.idToken) {
         setLoading(false);
         setError("Please login to view order details");
         return;
@@ -43,7 +43,7 @@ export function OrderDetailsModal({ orderId, onClose }: OrderDetailsModalProps) 
 
       try {
         setLoading(true);
-        const data = await getOrderDetails(orderId, tokens.authToken);
+        const data = await getOrderDetails(orderId, tokens.idToken);
         setOrder(data);
         setError(null);
       } catch (err) {
@@ -55,17 +55,17 @@ export function OrderDetailsModal({ orderId, onClose }: OrderDetailsModalProps) 
     }
 
     fetchOrderDetails();
-  }, [orderId, tokens?.authToken]);
+  }, [orderId, tokens?.idToken]);
 
   const handleCancelOrder = async () => {
-    if (!tokens?.authToken || !order) return;
+    if (!tokens?.idToken || !order) return;
 
     const confirmed = window.confirm("Are you sure you want to cancel this order?");
     if (!confirmed) return;
 
     try {
       setCancelling(true);
-      await cancelOrder(orderId, tokens.authToken);
+      await cancelOrder(orderId, tokens.idToken);
       setOrder({ ...order, orderStatus: "cancelled" });
     } catch (err) {
       console.error("Failed to cancel order:", err);

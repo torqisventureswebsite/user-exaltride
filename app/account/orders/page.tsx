@@ -48,7 +48,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!tokens?.authToken) {
+      if (!tokens?.idToken) {
         setIsLoading(false);
         return;
       }
@@ -56,7 +56,7 @@ export default function OrdersPage() {
       try {
         const response = await fetch("/api/orders", {
           headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
+            Authorization: `Bearer ${tokens.idToken}`,
           },
         });
 
