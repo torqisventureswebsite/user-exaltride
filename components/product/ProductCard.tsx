@@ -106,9 +106,7 @@ export function ProductCard({
           categoryId: product.category_id,
           slug: product.slug,
         });
-        toast.success("Added to cart!", {
-          description: `${product.title} has been added to your cart`,
-        });
+        toast.success("Added to cart!");
       } catch (error) {
         console.error("Error adding to cart:", error);
         toast.error("Failed to add to cart");
@@ -159,9 +157,7 @@ export function ProductCard({
     if (wasInWishlist) {
       toast.success("Removed from wishlist");
     } else {
-      toast.success("Added to wishlist!", {
-        description: product.title,
-      });
+      toast.success("Added to wishlist!");
     }
 
     // Sync with server in background

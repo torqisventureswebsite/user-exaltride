@@ -120,42 +120,68 @@ export default function Header() {
 
       {/* Mobile Header */}
       <div className="lg:hidden border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between py-0 px-4">
+        <div className="flex items-center justify-between py-2 px-4">
           
-          {/* Hamburger */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-1.5 text-gray-700"
-          >
-            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Left: Hamburger + Logo */}
+          <div className="flex items-center gap-3">
+            {/* Hamburger */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-1.5 text-gray-700"
+            >
+              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
 
-          {/* Logo (Image, centered — matches Figma) */}
-          <Link href="/" className="flex items-center">
-            <Image 
-              src="/images/dark_logo.png"
-              alt="ExaltRide Logo"
-              width={95}
-              height={20}
-              priority
-            />
-          </Link>
+            {/* Logo */}
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/images/dark_logo.png"
+                alt="ExaltRide Logo"
+                width={85}
+                height={18}
+                priority
+              />
+            </Link>
+          </div>
 
-          {/* Cart */}
-          <button
-            onClick={() => router.push("/cart")}
-            className="relative p-1.5 text-gray-700"
-          >
-            <ShoppingBag size={22} />
-            <CartBadge count={cartCount} />
-          </button>
+          {/* Right: User + Cart */}
+          <div className="flex items-center gap-3">
+            {/* User/Login */}
+            {isAuthenticated ? (
+              <button
+                onClick={() => router.push("/account")}
+                className="flex items-center gap-1.5 text-gray-700"
+              >
+                <User size={20} />
+                <span className="text-xs font-medium max-w-[60px] truncate">
+                  {user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/auth/login")}
+                className="flex items-center gap-1 text-gray-700"
+              >
+                <User size={20} />
+                <span className="text-xs font-medium">Login</span>
+              </button>
+            )}
+
+            {/* Cart */}
+            <button
+              onClick={() => router.push("/cart")}
+              className="relative p-1.5 text-gray-700"
+            >
+              <ShoppingBag size={22} />
+              <CartBadge count={cartCount} />
+            </button>
+          </div>
 
         </div>
 
-        {/* Mobile Search Container (Figma blue border box style) */}
+        {/* Mobile Search Container */}
         <div className="px-4 pb-3">
-            <SearchBar />
-          
+          <SearchBar />
         </div>
       </div>
 
@@ -187,56 +213,6 @@ export default function Header() {
                   <X size={22} />
                 </button>
               </div>
-            </div>
-
-            {/* User Section */}
-            <div className="p-4">
-              {isAuthenticated ? (
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <User size={24} className="text-[#001F5F]" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{user?.name?.split(" ")[0] || user?.email?.split("@")[0]}</p>
-                      {user?.email && <p className="text-xs text-white/60">{user.email}</p>}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      router.push("/account");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mb-2 text-sm text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors"
-                  >
-                    <User size={16} />
-                    <span>My Account</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg transition-colors"
-                  >
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    router.push("/auth/login");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 bg-yellow-400 hover:bg-yellow-500 text-[#001F5F] font-semibold px-4 py-3.5 rounded-xl transition-colors"
-                >
-                  <div className="w-10 h-10 bg-[#001F5F]/10 rounded-full flex items-center justify-center">
-                    <User size={20} />
-                  </div>
-                  <span>Login / Sign Up</span>
-                </button>
-              )}
             </div>
 
             {/* Quick Actions */}
@@ -304,6 +280,36 @@ export default function Header() {
                   HOT
                 </span>
               </button>
+
+              {/* Account & Logout for authenticated users */}
+              {isAuthenticated && (
+                <>
+                  <div className="border-t border-white/10 my-3" />
+                  <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
+                    Account
+                  </p>
+                  <Link href="/account" onClick={() => setIsMobileMenuOpen(false)}>
+                    <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                      <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+                        <User size={18} />
+                      </div>
+                      <span className="font-medium">My Account</span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
+                  >
+                    <div className="w-9 h-9 bg-red-500/20 rounded-lg flex items-center justify-center">
+                      <LogOut size={18} />
+                    </div>
+                    <span className="font-medium">Logout</span>
+                  </button>
+                </>
+              )}
             </nav>
 
             {/* Footer */}

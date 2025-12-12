@@ -100,8 +100,17 @@ export default function SignupPage() {
     if (!value.startsWith("+91")) {
       setFormData({ ...formData, phoneNumber: "+91" });
     } else {
-      setFormData({ ...formData, phoneNumber: value });
+      // Remove any non-digit characters after +91
+      const prefix = "+91";
+      const rest = value.slice(3).replace(/\D/g, ""); // Only digits after +91
+      setFormData({ ...formData, phoneNumber: prefix + rest });
     }
+  };
+
+  const isValidPhone = () => {
+    // Phone should be +91 followed by exactly 10 digits
+    const phoneRegex = /^\+91[0-9]{10}$/;
+    return phoneRegex.test(formData.phoneNumber);
   };
 
   return (
@@ -159,10 +168,15 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#001F5F] hover:bg-[#001845] text-white font-medium"
-                disabled={loading}
+                disabled={loading || !isValidPhone() || !formData.name.trim()}
               >
                 {loading ? "Creating account..." : "Create account"}
               </Button>
+              {formData.phoneNumber.length > 3 && !isValidPhone() && (
+                <p className="text-xs text-red-500 mt-1">
+                  Please enter a valid 10-digit phone number
+                </p>
+              )}
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
