@@ -30,31 +30,6 @@ export default function DeliveryAndServices() {
           Check
         </button>
       </div>
-
-      {/* SERVICES GRID */}
-      <div className="grid grid-cols-2 gap-4 pt-2 text-sm text-gray-700">
-
-        <div className="flex items-center gap-2">
-          <RotateCcw className="h-4 w-4 text-blue-600" />
-          <span>7 Days Return</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-blue-600" />
-          <span>1 Year Warranty</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-yellow-600" />
-          <span>Secure Payment</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Wallet className="h-4 w-4 text-orange-600" />
-          <span>Cash on Delivery</span>
-        </div>
-
-      </div>
     </div>
   );
 }

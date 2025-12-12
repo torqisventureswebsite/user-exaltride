@@ -1,9 +1,9 @@
 "use client";
 
-import { Package, Shield, MapPin, HelpCircle } from "lucide-react";
+import { Package, Shield, MapPin, HelpCircle, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type AccountSection = "orders" | "security" | "addresses" | "support";
+export type AccountSection = "orders" | "wishlist" | "security" | "addresses" | "support";
 
 interface AccountSidebarProps {
   activeSection: AccountSection;
@@ -12,6 +12,7 @@ interface AccountSidebarProps {
 
 const menuItems = [
   { id: "orders" as const, label: "My Orders", icon: Package },
+  { id: "wishlist" as const, label: "My Wishlist", icon: Heart },
   { id: "security" as const, label: "Login & Security", icon: Shield },
   { id: "addresses" as const, label: "Your Addresses", icon: MapPin },
   { id: "support" as const, label: "Help & Support", icon: HelpCircle },

@@ -5,3 +5,4 @@ export { OrderDetailsModal } from './OrderDetailsModal';
 export { LoginSecurity } from './LoginSecurity';
 export { YourAddresses } from './YourAddresses';
 export { HelpSupport } from './HelpSupport';
+export { MyWishlist } from './MyWishlist';

@@ -9,6 +9,7 @@ import {
   AccountSidebar,
   AccountSection,
   MyOrders,
+  MyWishlist,
   LoginSecurity,
   YourAddresses,
   HelpSupport,
@@ -41,6 +42,8 @@ export default function AccountPage() {
     switch (activeSection) {
       case "orders":
         return <MyOrders />;
+      case "wishlist":
+        return <MyWishlist />;
       case "security":
         return <LoginSecurity />;
       case "addresses":

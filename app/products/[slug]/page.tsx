@@ -38,10 +38,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const discountAmount =
     product.compare_at_price && product.price
       ? Math.round(
-          ((product.compare_at_price - product.price) /
-            product.compare_at_price) *
-            100
-        )
+        ((product.compare_at_price - product.price) /
+          product.compare_at_price) *
+        100
+      )
       : 0;
 
   return (
@@ -64,14 +64,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 lg:gap-8">
 
           {/* ✅ LEFT COLUMN → IMAGES */}
-          <div className="md:col-span-1 lg:col-span-5 flex flex-col gap-4 md:gap-6">
+          <div className="lg:sticky lg:top-32 lg:self-start md:col-span-1 lg:col-span-5 flex flex-col gap-4 md:gap-6">
             <ProductImages
               images={
                 product.images?.length
                   ? product.images
                   : product.primary_image
-                  ? [product.primary_image]
-                  : ["/images/fallback.jpg"]
+                    ? [product.primary_image]
+                    : ["/images/fallback.jpg"]
               }
               title={product.title}
               discount={discountAmount}
@@ -86,42 +86,37 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 categoryId={product.category?.id}
               />
             </div>
-            <InstallationGuide/>
+            {/* <InstallationGuide/> */}
           </div>
 
           {/* ✅ CENTER COLUMN → PRODUCT INFO */}
           <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6">
             <ProductInfo product={product} />
-            <OffersSection />
-            <DeliveryAndServices/>
+            {/* <OffersSection /> */}
+            <DeliveryAndServices />
             <KeyHighlights />
-            <VehicleCompatibility />
-        
 
-            <ProductFeatures warranty={product.warranty_months} />
+            {/* <ProductFeatures warranty={product.warranty_months} /> */}
 
-            
+
+
           </div>
 
           {/* ✅ RIGHT COLUMN → INSTALLATION / SELLER / TRUST */}
           <div className="md:col-span-2 lg:col-span-3 space-y-4 md:space-y-6">
 
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-  <ProfessionalInstallationCard />
-  <SellerInfoCard />
-<WhyBuyFromUs />
-<BundlePriceBox 
-  totalPrice={product.price || 0}
-  originalPrice={product.compare_at_price || product.price || 0}
-  savings={(product.compare_at_price || 0) - (product.price || 0)}
-/>
- 
-</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+            <VehicleCompatibility />
+              <ProfessionalInstallationCard />
+              {/* <SellerInfoCard /> */}
+              {/* <WhyBuyFromUs /> */}
+
+            </div>
 
           </div>
         </div>
 
- 
+
 
         {/* ✅ FREQUENTLY BOUGHT */}
         {/* <div className="mt-12">
@@ -138,9 +133,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div> */}
 
       </main>
-      <RecentlyViewedSection/>  
-      <RecentlyViewedSection title="Customers Who Bought Also Purchased" />
-      <RecentlyViewedSection title="Customers Who Bought Also Viewed" />
+      <RecentlyViewedSection />
+      {/* <RecentlyViewedSection title="Customers Who Bought Also Purchased" /> */}
+      {/* <RecentlyViewedSection title="Customers Who Bought Also Viewed" /> */}
 
       <Footer />
     </div>
