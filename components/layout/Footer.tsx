@@ -57,11 +57,6 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5">
               <li>
-                <Link href={"/contact" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
-                  FAQ
-                </Link>
-              </li>
-              <li>
                 <Link href={"/policies/shipping" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Shipping Policy
                 </Link>
@@ -69,11 +64,6 @@ export default function Footer() {
               <li>
                 <Link href={"/policies/returns" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Return Policy
-                </Link>
-              </li>
-              <li>
-                <Link href={"/policies/cancellation" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Cancellation Policy
                 </Link>
               </li>
               <li>

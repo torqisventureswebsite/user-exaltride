@@ -98,7 +98,7 @@ export async function fetchProducts(params?: {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch products: ${response.statusText}`);
+      throw new Error(`Failed to fetch products: ${response.status} ${response.statusText || 'Unknown error'}`);
     }
 
     const data = await response.json();
