@@ -255,12 +255,12 @@ export default function Header() {
           />
 
           {/* Sidebar */}
-          <div className="fixed top-0 left-0 h-full w-[85%] max-w-[320px] bg-gradient-to-b from-[#001F5F] to-[#000B3D] z-50 shadow-2xl overflow-y-auto lg:hidden">
+          <div className="fixed top-0 left-0 h-full w-[85%] max-w-[320px] bg-white z-50 shadow-2xl overflow-y-auto lg:hidden">
             {/* Header with Logo */}
             <div className="p-5 border-b border-white/10">
               <div className="flex items-center justify-between">
                 <Image 
-                  src="/images/logo.png"
+                  src="/images/dark_logo.png"
                   alt="ExaltRide Logo"
                   width={100}
                   height={30}
@@ -268,7 +268,7 @@ export default function Header() {
                 />
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                  className="p-2 text-black/70 hover:text-black hover:bg-white/10 rounded-full transition-colors"
                 >
                   <X size={22} />
                 </button>
@@ -277,10 +277,10 @@ export default function Header() {
 
             {/* Quick Actions */}
             <div className="px-4 py-4 grid grid-cols-1 gap-3">
-              <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
+              <div className="bg-white/5 hover:bg-white/10 border border-gray-500 rounded-xl p-3 transition-colors">
                 <CarSelector />
               </div>
-              <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
+              <div className="bg-white/5 hover:bg-white/10 border border-gray-500 rounded-xl p-3 transition-colors">
                 <LocationSelector />
               </div>
             </div>
@@ -289,11 +289,11 @@ export default function Header() {
               {isAuthenticated && (
                 <>
                   <div className="border-t border-white/10 my-3" />
-                  <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
+                  <p className="text-xs font-semibold text-black/40 uppercase tracking-wider px-3 mb-2">
                     Account
                   </p>
                   <Link href="/account" onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                    <div className="flex items-center gap-3 px-3 py-3 text-black/80 hover:text-black hover:bg-white/10 rounded-xl transition-colors">
                       <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
                         <User size={18} />
                       </div>
@@ -317,7 +317,7 @@ export default function Header() {
 
             {/* Footer */}
             <div className="mt-auto p-4 border-t border-white/10 mt-6">
-              <p className="text-xs text-white/40 text-center">
+              <p className="text-xs text-black/40 text-center">
                 © 2025 ExaltRide. All rights reserved.
               </p>
             </div>

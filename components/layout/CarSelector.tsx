@@ -102,7 +102,7 @@ export default function CarSelector() {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-between gap-2 text-gray-200 px-3 py-2 bg-transparent font-medium cursor-pointer hover:text-gray-100 transition"
+        className="flex items-center justify-between gap-2 text-gray-800 px-0 py-2 bg-transparent font-medium cursor-pointer hover:text-gray-100 transition"
       >
         <Car className="h-4 w-4" />
         <span className="whitespace-nowrap text-sm">{displayText}</span>
