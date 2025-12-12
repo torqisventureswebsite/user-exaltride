@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/context";
 import Link from "next/link";
+import Image from "next/image";
 import { Zap, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
@@ -147,6 +148,17 @@ export default function LoginPage() {
       {/* Right Panel - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-md">
+          {/* Logo - visible on mobile, links to homepage */}
+          <Link href="/" className="flex items-center justify-center mb-8">
+            <Image 
+              src="/images/dark_logo.png"
+              alt="ExaltRide Logo"
+              width={120}
+              height={30}
+              priority
+            />
+          </Link>
+
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Sign in to<br />your account
