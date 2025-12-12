@@ -1,26 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Eye, EyeOff, LogOut, Car } from "lucide-react";
+import { Pencil, Check, X, LogOut, Car } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
-import { cn } from "@/lib/utils";
+import { useCar } from "@/lib/car/context";
+import { toast } from "sonner";
 
 export function LoginSecurity() {
   const { user, logout } = useAuth();
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { selectedCar } = useCar();
   
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  // Edit states
+  const [editingField, setEditingField] = useState<"name" | "email" | "phone" | null>(null);
+  const [editValues, setEditValues] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phoneNumber || "",
   });
 
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement password change API
-    alert("Password change functionality will be implemented with the backend API");
+  const handleEdit = (field: "name" | "email" | "phone") => {
+    setEditingField(field);
+    setEditValues({
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phoneNumber || "",
+    });
+  };
+
+  const handleSave = async (field: "name" | "email" | "phone") => {
+    // TODO: Implement API call to update user profile
+    toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`);
+    setEditingField(null);
+  };
+
+  const handleCancel = () => {
+    setEditingField(null);
+    setEditValues({
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phoneNumber || "",
+    });
   };
 
   const handleLogoutAllDevices = () => {
@@ -39,60 +58,152 @@ export function LoginSecurity() {
         <div className="space-y-4">
           {/* Full Name */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <div>
+            <div className="flex-1">
               <p className="text-sm text-gray-500">Full Name</p>
-              <p className="font-medium text-gray-900">{user?.name || "Not set"}</p>
+              {editingField === "name" ? (
+                <input
+                  type="text"
+                  value={editValues.name}
+                  onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                  className="mt-1 w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
+                  autoFocus
+                />
+              ) : (
+                <p className="font-medium text-gray-900">{user?.name || "Not set"}</p>
+              )}
             </div>
-            <button className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
-              <Pencil size={14} />
-              Edit
-            </button>
+            {editingField === "name" ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSave("name")}
+                  className="flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
+                >
+                  <Check size={14} />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  <X size={14} />
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleEdit("name")}
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              >
+                <Pencil size={14} />
+                Edit
+              </button>
+            )}
           </div>
 
           {/* Email Address */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <div>
+            <div className="flex-1">
               <p className="text-sm text-gray-500">Email Address</p>
-              <p className="font-medium text-gray-900">{user?.email || "Not set"}</p>
+              {editingField === "email" ? (
+                <input
+                  type="email"
+                  value={editValues.email}
+                  onChange={(e) => setEditValues({ ...editValues, email: e.target.value })}
+                  className="mt-1 w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
+                  autoFocus
+                />
+              ) : (
+                <p className="font-medium text-gray-900">{user?.email || "Not set"}</p>
+              )}
             </div>
-            <button className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
-              <Pencil size={14} />
-              Edit
-            </button>
+            {editingField === "email" ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSave("email")}
+                  className="flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
+                >
+                  <Check size={14} />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  <X size={14} />
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleEdit("email")}
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              >
+                <Pencil size={14} />
+                Edit
+              </button>
+            )}
           </div>
 
           {/* Phone Number */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <div>
+            <div className="flex-1">
               <p className="text-sm text-gray-500">Phone Number</p>
-              <p className="font-medium text-gray-900">{user?.phoneNumber || "Not set"}</p>
+              {editingField === "phone" ? (
+                <input
+                  type="tel"
+                  value={editValues.phone}
+                  onChange={(e) => setEditValues({ ...editValues, phone: e.target.value })}
+                  className="mt-1 w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
+                  autoFocus
+                />
+              ) : (
+                <p className="font-medium text-gray-900">{user?.phoneNumber || "Not set"}</p>
+              )}
             </div>
-            <button className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
-              <Pencil size={14} />
-              Edit
-            </button>
+            {editingField === "phone" ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSave("phone")}
+                  className="flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
+                >
+                  <Check size={14} />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  <X size={14} />
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleEdit("phone")}
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              >
+                <Pencil size={14} />
+                Edit
+              </button>
+            )}
           </div>
 
-          {/* Car Models */}
-          <div className="flex items-center justify-between py-3">
+          {/* Car Models - mapped from CarContext */}
+          <div className="py-3">
             <div>
               <p className="text-sm text-gray-500">Car Models</p>
               <div className="flex flex-wrap gap-2 mt-2">
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#001F5F] text-white text-sm rounded-full">
-                  <Car size={14} />
-                  Honda City
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#001F5F] text-white text-sm rounded-full">
-                  <Car size={14} />
-                  Toyota Fortuner
-                </span>
+                {selectedCar ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#001F5F] text-white text-sm rounded-full">
+                    <Car size={14} />
+                    {selectedCar.make} {selectedCar.model} {selectedCar.year}
+                  </span>
+                ) : (
+                  <p className="text-gray-400 text-sm">No car added yet. Use "Add Your Car" to add one.</p>
+                )}
               </div>
               <p className="text-xs text-gray-400 mt-2">We'll use this to personalize your product recommendations</p>
             </div>
-            <button className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
-              <Pencil size={14} />
-              Edit
-            </button>
           </div>
         </div>
       </div>
@@ -122,92 +233,6 @@ export function LoginSecurity() {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Change Password */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Change Password</h3>
-        
-        <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-          {/* Current Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Current Password
-            </label>
-            <div className="relative">
-              <input
-                type={showCurrentPassword ? "text" : "password"}
-                value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                placeholder="Enter current password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          {/* New Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <div className="relative">
-              <input
-                type={showNewPassword ? "text" : "password"}
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                placeholder="Enter new password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Must be at least 8 characters with uppercase, lowercase, and numbers
-            </p>
-          </div>
-
-          {/* Confirm New Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm New Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                placeholder="Re-enter new password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#001F5F] focus:border-transparent"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="px-6 py-2.5 bg-[#001F5F] hover:bg-[#001845] text-white font-medium rounded-lg transition-colors"
-          >
-            Update Password
-          </button>
-        </form>
       </div>
 
       {/* Session Management */}

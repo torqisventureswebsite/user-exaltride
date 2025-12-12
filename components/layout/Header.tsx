@@ -109,13 +109,14 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <button
-                  onClick={() => router.push("/auth/login")}
+                <Link
+                  href="/auth/login"
+                  prefetch={true}
                   className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   <User size={22} className="mb-1" />
                   <span className="text-xs">Login</span>
-                </button>
+                </Link>
               )}
 
               {/* Cart */}
@@ -216,13 +217,14 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => router.push("/auth/login")}
+              <Link
+                href="/auth/login"
+                prefetch={true}
                 className="flex items-center gap-1 text-gray-700 cursor-pointer"
               >
                 <User size={20} />
                 <span className="text-xs font-medium">Login</span>
-              </button>
+              </Link>
             )}
 
             {/* Cart */}
