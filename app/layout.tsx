@@ -6,7 +6,6 @@ import { CartProvider } from "@/lib/cart/context";
 import { CarProvider } from "@/lib/car/context";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
-import { NavigationLoader } from "@/components/ui/NavigationLoader";
 import { OAuthCallbackHandler } from "@/components/auth/OAuthCallbackHandler";
 
 const interTight = Inter_Tight({
@@ -37,7 +36,6 @@ export default function RootLayout({
           <CarProvider>
             <CartProvider>
               <Suspense fallback={null}>
-                <NavigationLoader />
                 <OAuthCallbackHandler />
               </Suspense>
               {children}

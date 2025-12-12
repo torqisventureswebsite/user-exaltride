@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
 
     if (authHeader) {
       headers["Authorization"] = authHeader;
-    } else if (sessionId) {
-      headers["X-session-id"] = sessionId;
+    }
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
     }
 
     const response = await fetch(`${API_BASE_URL}/v1/cart/items`, {

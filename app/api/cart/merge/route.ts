@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
       "Authorization": authHeader,
-      "X-session-id": sessionId,
+      "X-Session-Id": sessionId,
     };
 
     const response = await fetch(`${API_BASE_URL}/v1/cart/merge`, {

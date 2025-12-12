@@ -62,16 +62,6 @@ export default function OrderSummary({
           </div>
         </div>
 
-        {/* ✅ YOU'RE SAVING (YELLOW PILL) */}
-        <div className="mb-5">
-          <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 rounded-lg py-3 px-4 flex items-center justify-between text-sm">
-            <div className="text-gray-700">You're saving</div>
-            <div className="font-semibold text-yellow-800">
-              ₹{saving.toFixed(2)}
-            </div>
-          </div>
-        </div>
-
         {/* ✅ TOTAL */}
         <div className="mb-6">
           <div className="text-xs text-gray-400 uppercase mb-1">Total</div>
@@ -87,48 +77,6 @@ export default function OrderSummary({
             Proceed to Checkout →
           </Button>
         </Link>
-
-        {/* ✅ TRUST POINTS */}
-        <div className="mt-5 space-y-3 text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <CheckCircle className="w-4 h-4 text-yellow-500" />
-            <span>100% Secure Payments</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-gray-600">
-            <Truck className="w-4 h-4 text-blue-500" />
-            <span>Fast & Reliable Delivery</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-gray-600">
-            <Wallet className="w-4 h-4 text-purple-500" />
-            <span>Multiple Payment Options</span>
-          </div>
-        </div>
-
-        {/* ✅ PAYMENT METHODS */}
-        <div className="mt-6">
-          <div className="text-[11px] text-gray-400 mb-2 uppercase">
-            We Accept
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="border rounded px-2 py-1 text-xs text-gray-600">
-              VISA
-            </div>
-            <div className="border rounded px-2 py-1 text-xs text-gray-600">
-              Mastercard
-            </div>
-            <div className="border rounded px-2 py-1 text-xs text-gray-600">
-              UPI
-            </div>
-            <div className="border rounded px-2 py-1 text-xs text-gray-600">
-              Wallet
-            </div>
-            <div className="border rounded px-2 py-1 text-xs text-gray-600">
-              COD
-            </div>
-          </div>
-        </div>
       </div>
     </aside>
   );

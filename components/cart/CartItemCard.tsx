@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Heart, Trash2, Truck } from "lucide-react";
 import { useCart } from "@/lib/cart/context";
 import { useTransition, useState } from "react";
+import { saveForLater } from "@/lib/saved-for-later";
+import { toast } from "sonner";
 
 interface CartItemCardProps {
   item: {
@@ -39,6 +41,19 @@ export default function CartItemCard({ item }: CartItemCardProps) {
     startTransition(async () => {
       await removeItem(item.productId);
     });
+  };
+
+  const handleSaveForLater = () => {
+    saveForLater({
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      categoryId: item.categoryId,
+      slug: item.slug,
+    });
+    removeItem(item.productId);
+    toast.success("Saved for later!");
   };
 
   return (
@@ -129,16 +144,18 @@ export default function CartItemCard({ item }: CartItemCardProps) {
 
             {/* ✅ ACTION BUTTONS */}
             <div className="flex items-center gap-2 md:gap-3">
-              <button className="hidden sm:flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-xs md:text-sm font-medium">
+              <button
+                onClick={handleSaveForLater}
+                className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-xs md:text-sm font-medium"
+              >
                 <Heart size={14} className="md:w-4 md:h-4" />
-                <span className="hidden md:inline">Save for Later</span>
-                <span className="md:hidden">Save</span>
+                <span className="hidden sm:inline">Save for Later</span>
               </button>
 
               <button
                 onClick={handleRemove}
                 disabled={isPending}
-                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-xs md:text-sm font-medium"
+                className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-xs md:text-sm font-medium"
               >
                 <Trash2 size={14} className="md:w-4 md:h-4" />
                 <span className="hidden sm:inline">Remove</span>
