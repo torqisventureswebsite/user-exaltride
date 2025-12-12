@@ -27,7 +27,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const GUEST_SESSION_KEY = "guest_cart_session_id";
+const GUEST_SESSION_KEY = "guest_session_id";
 const LOCAL_CART_KEY = "cart_items";
 const PRODUCT_CACHE_KEY = "product_details_cache";
 
@@ -206,29 +206,84 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchCart]);
 
-  // Merge API cart with cached product details
-  const mergeCartData = useCallback((apiCart: CartItem[]): CartItem[] => {
-    return apiCart.map(apiItem => {
+  // Fetch product details from API for items missing details
+  const fetchProductDetails = useCallback(async (productId: string): Promise<Omit<CartItem, "quantity"> | null> => {
+    try {
+      const response = await fetch(`https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1/products/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const product = data.data || data;
+        if (product) {
+          const details: Omit<CartItem, "quantity"> = {
+            productId: product.slug || product.id || productId,
+            name: product.title || product.name || "",
+            price: product.price || 0,
+            image: product.primary_image || product.image || "",
+            categoryId: product.category?.id || product.category_id,
+            slug: product.slug,
+          };
+          // Cache for future use
+          cacheProductDetails({ ...details, quantity: 1 });
+          return details;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
+    return null;
+  }, []);
+
+  // Merge API cart with cached product details and fetch missing ones
+  const mergeCartData = useCallback(async (apiCart: CartItem[]): Promise<CartItem[]> => {
+    const mergedItems: CartItem[] = [];
+    
+    for (const apiItem of apiCart) {
       // Check if API item has complete data
       if (apiItem.name && apiItem.price > 0) {
         // Cache the product details for future use
         cacheProductDetails(apiItem);
-        return apiItem;
+        mergedItems.push(apiItem);
+        continue;
       }
       
       // Try to get product details from cache
       const cachedDetails = getCachedProductDetails(apiItem.productId);
-      if (cachedDetails) {
-        return {
+      if (cachedDetails && cachedDetails.name && cachedDetails.price > 0) {
+        mergedItems.push({
           ...cachedDetails,
           quantity: apiItem.quantity,
-        };
+        });
+        continue;
       }
       
-      // No cached data, use API data as-is
-      return apiItem;
-    });
-  }, []);
+      // Try to get from local cart storage
+      const localCart = getCartFromLocal();
+      const localItem = localCart.find(item => item.productId === apiItem.productId);
+      if (localItem && localItem.name && localItem.price > 0) {
+        cacheProductDetails(localItem);
+        mergedItems.push({
+          ...localItem,
+          quantity: apiItem.quantity,
+        });
+        continue;
+      }
+      
+      // Fetch product details from API as last resort
+      const fetchedDetails = await fetchProductDetails(apiItem.productId);
+      if (fetchedDetails && fetchedDetails.name && fetchedDetails.price > 0) {
+        mergedItems.push({
+          ...fetchedDetails,
+          quantity: apiItem.quantity,
+        });
+        continue;
+      }
+      
+      // No data found, use API data as-is (will show incomplete)
+      mergedItems.push(apiItem);
+    }
+    
+    return mergedItems;
+  }, [fetchProductDetails]);
 
   // Initialize cart on mount and handle auth changes
   useEffect(() => {
@@ -246,7 +301,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           
           if (apiCart.length > 0) {
             // Merge API cart with cached product details
-            const mergedCart = mergeCartData(apiCart);
+            const mergedCart = await mergeCartData(apiCart);
             setItems(mergedCart);
             saveCartToLocal(mergedCart);
           } else {
@@ -270,7 +325,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             
             if (apiCart.length > 0) {
               // Merge API cart with cached product details
-              const mergedCart = mergeCartData(apiCart);
+              const mergedCart = await mergeCartData(apiCart);
               setItems(mergedCart);
               saveCartToLocal(mergedCart);
             } else {

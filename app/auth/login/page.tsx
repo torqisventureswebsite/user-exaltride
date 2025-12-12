@@ -1,15 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/context";
 import Link from "next/link";
 import Image from "next/image";
-import { Zap, ShieldCheck } from "lucide-react";
+import { Zap, ShieldCheck, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+// Component that handles SSO redirect
+function SSORedirectHandler() {
+  const searchParams = useSearchParams();
+  const { loginWithGoogle } = useAuth();
+
+  useEffect(() => {
+    const ssoParam = searchParams.get("sso");
+    if (ssoParam === "true") {
+      // Small delay to ensure page is fully loaded
+      const timer = setTimeout(() => {
+        loginWithGoogle();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, loginWithGoogle]);
+
+  return null;
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const { login, verifyOtp, loginWithGoogle } = useAuth();
   
@@ -331,5 +350,16 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <SSORedirectHandler />
+      </Suspense>
+      <LoginPageContent />
+    </>
   );
 }

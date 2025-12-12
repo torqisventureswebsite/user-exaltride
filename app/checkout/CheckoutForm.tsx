@@ -151,10 +151,21 @@ export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total
 
       // First, verify cart has items on the backend
       console.log("Verifying backend cart...");
+      
+      // Build headers - use auth token if available, otherwise use guest session ID
+      const cartHeaders: HeadersInit = {};
+      if (tokens?.idToken) {
+        cartHeaders["Authorization"] = `Bearer ${tokens.idToken}`;
+      } else {
+        // Fallback to guest session ID from localStorage
+        const guestSessionId = typeof window !== "undefined" ? localStorage.getItem("guest_session_id") : null;
+        if (guestSessionId) {
+          cartHeaders["X-Session-Id"] = guestSessionId;
+        }
+      }
+      
       const cartResponse = await fetch("/api/cart", {
-        headers: {
-          Authorization: `Bearer ${tokens?.idToken}`,
-        },
+        headers: cartHeaders,
       });
       const cartData = await cartResponse.json();
       console.log("Backend cart data:", JSON.stringify(cartData, null, 2));

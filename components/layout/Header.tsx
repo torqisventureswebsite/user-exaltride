@@ -74,7 +74,7 @@ export default function Header() {
                 >
                   <button
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                    className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer pb-2"
+                    className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                   >
                     <User size={22} className="mb-1" />
                     <span className="text-xs font-medium">{user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}</span>
@@ -82,7 +82,7 @@ export default function Header() {
                   
                   {/* Dropdown Menu - pt-2 creates invisible hover bridge */}
                   {isUserDropdownOpen && (
-                    <div className="absolute right-0 top-full pt-2 z-50">
+                    <div className="absolute right-0 top-full pt-0 z-50">
                       <div className="w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                         <button
                           onClick={() => {
@@ -119,16 +119,16 @@ export default function Header() {
               )}
 
               {/* Cart */}
-              <button
-              onClick={() => router.push("/cart")}
-              className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              <div className="relative mb-1">
-                <CartIcon />
-                <CartBadge count={cartCount} />
-              </div>
-              <span className="text-xs font-medium">Cart</span>
-            </button>
+              <Link
+                href="/cart"
+                className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors p-2 -m-2"
+              >
+                <div className="relative mb-1">
+                  <CartIcon />
+                  <CartBadge count={cartCount} />
+                </div>
+                <span className="text-xs font-medium">Cart</span>
+              </Link>
 
             </div>
 
@@ -226,13 +226,13 @@ export default function Header() {
             )}
 
             {/* Cart */}
-            <button
-              onClick={() => router.push("/cart")}
-              className="relative p-1.5 text-gray-700"
+            <Link
+              href="/cart"
+              className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors"
             >
               <ShoppingBag size={22} />
               <CartBadge count={cartCount} />
-            </button>
+            </Link>
           </div>
 
         </div>

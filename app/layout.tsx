@@ -39,7 +39,7 @@ export default function RootLayout({
                 <OAuthCallbackHandler />
               </Suspense>
               {children}
-              <Toaster position="top-right" richColors />
+              <Toaster position="top-right" richColors duration={1000} />
             </CartProvider>
           </CarProvider>
         </AuthProvider>

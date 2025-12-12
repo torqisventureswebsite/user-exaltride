@@ -118,6 +118,26 @@ class AuthService {
 
   // SSO Login with Google
   initiateGoogleSSO(): void {
+    // Check if we need to force account selection (user logged out previously)
+    const forceSelect = typeof window !== "undefined" && localStorage.getItem("force_sso_account_select") === "true";
+    
+    if (forceSelect) {
+      // Clear the flag
+      localStorage.removeItem("force_sso_account_select");
+      
+      // First logout from Cognito to clear the session, then redirect back to login
+      // Store intent to login after logout
+      localStorage.setItem("sso_login_after_logout", "true");
+      
+      // Redirect to Cognito logout, which will redirect to home, then we check for the flag
+      const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
+      logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
+      logoutUrl.searchParams.set("logout_uri", `${cognitoConfig.redirectUri.replace("/auth/callback", "")}/auth/login?sso=true`);
+      
+      window.location.href = logoutUrl.toString();
+      return;
+    }
+    
     const params = new URLSearchParams({
       client_id: cognitoConfig.clientId ?? "",
       response_type: "code",
@@ -233,8 +253,27 @@ class AuthService {
     this.clearTokens();
     localStorage.removeItem(STORAGE_KEYS.USER);
     
+    // Mark that we need to force account selection on next SSO login
+    localStorage.setItem("force_sso_account_select", "true");
+    
     // Double-check tokens are cleared
     console.log("After logout - tokens:", this.getTokens());
+  }
+
+  // Full logout including Cognito session (for switching accounts)
+  logoutWithCognito(): void {
+    if (typeof window === "undefined") return;
+
+    console.log("Logging out with Cognito session clear");
+    this.clearTokens();
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    
+    // Redirect to Cognito logout to clear the Cognito session
+    const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
+    logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
+    logoutUrl.searchParams.set("logout_uri", cognitoConfig.logoutUri);
+    
+    window.location.href = logoutUrl.toString();
   }
 
   // Decode JWT token to get user info
