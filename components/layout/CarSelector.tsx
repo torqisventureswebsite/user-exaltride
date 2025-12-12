@@ -1,77 +1,100 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { ChevronDown, Car, X, Check } from "lucide-react";
-
-const STORAGE_KEY = "user_car";
-
-// Generate years from current year to 1990
-const generateYears = () => {
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let year = currentYear; year >= 1990; year--) {
-    years.push(year.toString());
-  }
-  return years;
-};
-
-const YEARS = generateYears();
+import { useState, useCallback, useEffect } from "react";
+import { ChevronDown, Car, X, Check, Loader2 } from "lucide-react";
+import { useCar } from "@/lib/car/context";
 
 export default function CarSelector() {
+  const {
+    selectedCar,
+    setSelectedCar,
+    clearSelectedCar,
+    makes,
+    getModelsForMake,
+    getYearsForMakeModel,
+    getVariantsForMakeModelYear,
+    getCarId,
+    isLoading,
+  } = useCar();
+
   const [isOpen, setIsOpen] = useState(false);
-  const [savedCar, setSavedCar] = useState<{
-    brand: string;
-    car: string;
-    model: string;
-    year: string;
-  } | null>(null);
 
   // Form state
-  const [brand, setBrand] = useState("");
-  const [car, setCar] = useState("");
+  const [make, setMake] = useState("");
   const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
+  const [year, setYear] = useState<number | "">("");
+  const [variant, setVariant] = useState("");
 
-  // Load saved car on mount
+  // Derived dropdown options
+  const [models, setModels] = useState<string[]>([]);
+  const [years, setYears] = useState<number[]>([]);
+  const [variants, setVariants] = useState<string[]>([]);
+
+  // Update models when make changes
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setSavedCar(JSON.parse(saved));
-      } catch {
-        // Invalid saved data
-      }
+    if (make) {
+      setModels(getModelsForMake(make));
+    } else {
+      setModels([]);
     }
-  }, []);
+    // Reset dependent fields
+    setModel("");
+    setYear("");
+    setVariant("");
+  }, [make, getModelsForMake]);
+
+  // Update years when model changes
+  useEffect(() => {
+    if (make && model) {
+      setYears(getYearsForMakeModel(make, model));
+    } else {
+      setYears([]);
+    }
+    // Reset dependent fields
+    setYear("");
+    setVariant("");
+  }, [make, model, getYearsForMakeModel]);
+
+  // Update variants when year changes
+  useEffect(() => {
+    if (make && model && year) {
+      setVariants(getVariantsForMakeModelYear(make, model, year as number));
+    } else {
+      setVariants([]);
+    }
+    // Reset variant
+    setVariant("");
+  }, [make, model, year, getVariantsForMakeModelYear]);
 
   const handleSave = useCallback(() => {
-    if (!brand.trim() || !car.trim()) return;
+    if (!make || !model || !year) return;
 
+    const carId = getCarId(make, model, year as number, variant);
+    
     const carData = {
-      brand: brand.trim(),
-      car: car.trim(),
-      model: model.trim(),
-      year: year,
+      id: carId || `${make}-${model}-${year}-${variant}`,
+      make,
+      model,
+      year: year as number,
+      variant,
     };
 
-    setSavedCar(carData);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(carData));
+    setSelectedCar(carData);
     setIsOpen(false);
     
     // Reset form
-    setBrand("");
-    setCar("");
+    setMake("");
     setModel("");
     setYear("");
-  }, [brand, car, model, year]);
+    setVariant("");
+  }, [make, model, year, variant, getCarId, setSelectedCar]);
 
   const handleRemove = useCallback(() => {
-    setSavedCar(null);
-    localStorage.removeItem(STORAGE_KEY);
-  }, []);
+    clearSelectedCar();
+  }, [clearSelectedCar]);
 
-  const displayText = savedCar
-    ? `${savedCar.brand} ${savedCar.car}${savedCar.year ? ` (${savedCar.year})` : ""}`
+  const displayText = selectedCar
+    ? `${selectedCar.make} ${selectedCar.model}${selectedCar.year ? ` (${selectedCar.year})` : ""}`
     : "Add Your Car";
 
   return (
@@ -116,15 +139,23 @@ export default function CarSelector() {
               </button>
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="mb-5 p-4 bg-gray-50 rounded-lg flex items-center justify-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                <span className="text-sm text-gray-500">Loading cars...</span>
+              </div>
+            )}
+
             {/* Current Car Display */}
-            {savedCar && (
+            {selectedCar && (
               <div className="mb-5 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-yellow-800">
-                    {savedCar.brand} {savedCar.car} {savedCar.model}
+                    {selectedCar.make} {selectedCar.model} {selectedCar.variant}
                   </p>
-                  {savedCar.year && (
-                    <p className="text-xs text-yellow-600">Year: {savedCar.year}</p>
+                  {selectedCar.year && (
+                    <p className="text-xs text-yellow-600">Year: {selectedCar.year}</p>
                   )}
                 </div>
                 <button
@@ -138,62 +169,81 @@ export default function CarSelector() {
 
             {/* Form Fields */}
             <div className="space-y-4">
-              {/* Brand */}
+              {/* Brand/Make */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Brand <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                  placeholder="e.g., Toyota, Honda, Maruti"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                <select
+                  value={make}
+                  onChange={(e) => setMake(e.target.value)}
+                  disabled={isLoading}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white disabled:bg-gray-100"
+                >
+                  <option value="">Select Brand</option>
+                  {makes.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Car */}
+              {/* Model */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Car <span className="text-red-500">*</span>
+                  Model <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={car}
-                  onChange={(e) => setCar(e.target.value)}
-                  placeholder="e.g., Innova, City, Swift"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
-
-              {/* Model/Variant */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Model / Variant
-                </label>
-                <input
-                  type="text"
+                <select
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder="e.g., VX, ZX, LXI"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                  disabled={!make || isLoading}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white disabled:bg-gray-100"
+                >
+                  <option value="">Select Model</option>
+                  {models.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Year of Make */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Year of Make
+                  Year of Make <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                  onChange={(e) => setYear(e.target.value ? Number(e.target.value) : "")}
+                  disabled={!model || isLoading}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white disabled:bg-gray-100"
                 >
                   <option value="">Select Year</option>
-                  {YEARS.map((y) => (
+                  {years.map((y) => (
                     <option key={y} value={y}>
                       {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Variant */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Variant
+                </label>
+                <select
+                  value={variant}
+                  onChange={(e) => setVariant(e.target.value)}
+                  disabled={!year || isLoading}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white disabled:bg-gray-100"
+                >
+                  <option value="">Select Variant (Optional)</option>
+                  {variants.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
                     </option>
                   ))}
                 </select>
@@ -203,7 +253,7 @@ export default function CarSelector() {
             {/* Save Button */}
             <button
               onClick={handleSave}
-              disabled={!brand.trim() || !car.trim()}
+              disabled={!make || !model || !year || isLoading}
               className="w-full mt-6 flex items-center justify-center gap-2 bg-[#001F5F] hover:bg-[#001844] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
             >
               <Check className="h-5 w-5" />

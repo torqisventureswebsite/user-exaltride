@@ -22,46 +22,8 @@ export default function CategoryHero({
       >
         <div>
           <h1 className="text-xl font-bold md:text-3xl">{name}</h1>
-
-          <p className="text-sm opacity-90 mt-1 md:text-base">
-            Showing {productCount.toLocaleString()} products
-          </p>
-
-          {description && <p className="hidden md:block text-sm opacity-80 mt-1">{description}</p>}
-
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Badge className="bg-white text-blue-700 px-3 py-1 text-xs">
-              ⚡ Fast Delivery
-            </Badge>
-            <Badge className="bg-white text-blue-700 px-3 py-1 text-xs">
-              Up to 60% OFF
-            </Badge>
-            <Badge className="bg-white text-blue-700 px-3 py-1 text-xs">
-              Warranty Included
-            </Badge>
-            <Badge className="bg-white text-blue-700 px-3 py-1 text-xs">
-              COD Available
-            </Badge>
-          </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-1">
-          <Button
-            variant="outline"
-            className="bg-white text-blue-700 p-2 h-9 w-9 flex items-center justify-center md:w-auto md:px-4"
-          >
-            <Share2 className="h-4 w-4" />
-            <span className="hidden md:inline ml-2">Share</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="bg-white text-blue-700 p-2 h-9 w-9 flex items-center justify-center md:w-auto md:px-4"
-          >
-            <HelpCircle className="h-4 w-4" />
-            <span className="hidden md:inline ml-2">Guide</span>
-          </Button>
-        </div>
       </div>
     </section>
   );

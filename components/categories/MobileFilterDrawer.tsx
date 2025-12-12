@@ -13,6 +13,8 @@ export default function MobileFilterDrawer({
   brands,
   selectedBrands,
   toggleBrand,
+  selectedCategory,
+  setSelectedCategory,
   localRange,
   setLocalRange,
   priceRange,
@@ -25,6 +27,8 @@ export default function MobileFilterDrawer({
   brands: { id: string; name: string; slug: string; product_count?: number }[];
   selectedBrands: string[];
   toggleBrand: (b: string) => void;
+  selectedCategory: string | null;
+  setSelectedCategory: (id: string | null) => void;
   localRange: [number, number];
   setLocalRange: (r: [number, number]) => void;
   priceRange: [number, number];
@@ -97,10 +101,18 @@ export default function MobileFilterDrawer({
             <h4 className="text-sm font-medium mb-3">Categories</h4>
             <div className="flex flex-col gap-2">
               {parentCategories.map((c) => (
-                <label key={c.id} className="flex items-center justify-between">
+                <label key={c.id} className="flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <span className="text-base">{/* optional icon mapping */}</span>
-                    <span className="text-sm">{c.name}</span>
+                    <input
+                      type="radio"
+                      name="mobile-category"
+                      checked={selectedCategory === c.id}
+                      onChange={() => setSelectedCategory(selectedCategory === c.id ? null : c.id)}
+                      className="h-4 w-4 accent-[#001F5F]"
+                    />
+                    <span className={`text-sm ${selectedCategory === c.id ? 'font-medium text-[#001F5F]' : ''}`}>
+                      {c.name}
+                    </span>
                   </div>
                   <span className="text-xs text-gray-500">({c.product_count || 0})</span>
                 </label>

@@ -24,7 +24,7 @@ export default async function TrendingPage() {
         products={products}
         title="Trending This Week"
         description="Hot picks that car enthusiasts are loving right now"
-        icon={<Flame className="h-8 w-8 text-white" />}
+        icon=''
         iconBgColor="bg-orange-500"
       />
 

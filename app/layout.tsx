@@ -3,6 +3,7 @@ import { Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/context";
 import { CartProvider } from "@/lib/cart/context";
+import { CarProvider } from "@/lib/car/context";
 import { Toaster } from "sonner";
 
 const interTight = Inter_Tight({
@@ -30,10 +31,12 @@ export default function RootLayout({
     <html lang="en" className={interTight.variable}>
       <body className="antialiased">
         <AuthProvider>
-          <CartProvider>
-            {children}
-            <Toaster position="top-right" richColors />
-          </CartProvider>
+          <CarProvider>
+            <CartProvider>
+              {children}
+              <Toaster position="top-right" richColors />
+            </CartProvider>
+          </CarProvider>
         </AuthProvider>
       </body>
     </html>

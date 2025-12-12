@@ -3,12 +3,26 @@
 import { useState, useMemo, useEffect } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { X, Filter, ArrowUpDown, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronDown, 
+  ChevronUp, 
+  Truck, 
+  ShieldCheck, 
+  LayoutGrid, 
+  Tag, 
+  ArrowRight,
+  X,
+  ArrowUpDown
+} from "lucide-react";
 import type { Product } from "@/lib/api/products";
-import { fetchCategories, type Category } from "@/lib/api/categories";
 import { fetchBrands } from "@/lib/api/brands";
+import { fetchCategories, type Category } from "@/lib/api/categories";
+import Link from "next/link";
 
 interface CollectionPageClientProps {
   products: Product[];
@@ -32,19 +46,28 @@ export default function CollectionPageClient({
   icon,
   iconBgColor = "bg-[#001F5F]",
 }: CollectionPageClientProps) {
+  // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("featured");
+  const [sortBy, setSortBy] = useState<string>("price-high");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
-  const [showFilters, setShowFilters] = useState(true);
-  const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({
-    category: true,
-    price: true,
-    brand: true,
-  });
+  
+  // Dropdown states
+  const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const [brandsOpen, setBrandsOpen] = useState(true);
+  const [priceOpen, setPriceOpen] = useState(true);
+
+  // Price range state
+  const priceRangeValues = useMemo(() => {
+    const prices = initialProducts.map((p) => p.price || 0).filter(p => p > 0);
+    const min = prices.length > 0 ? Math.min(...prices) : 0;
+    const max = prices.length > 0 ? Math.max(...prices) : 10000;
+    return [min, max] as [number, number];
+  }, [initialProducts]);
+  
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>(priceRangeValues);
 
   // API data
   const [allCategories, setAllCategories] = useState<Category[]>([]);
@@ -72,10 +95,6 @@ export default function CollectionPageClient({
     loadFilterData();
   }, []);
 
-  const toggleFilterSection = (section: string) => {
-    setExpandedFilters((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
   // Get unique brands from products as fallback
   const productBrands = useMemo(() => {
     const brandSet = new Set(
@@ -84,9 +103,19 @@ export default function CollectionPageClient({
     return Array.from(brandSet).sort();
   }, [initialProducts]);
 
+  // Deduplicate products
+  const uniqueProducts = useMemo(() => {
+    const seen = new Set<string>();
+    return initialProducts.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  }, [initialProducts]);
+
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let filtered = [...initialProducts];
+    let filtered = [...uniqueProducts];
 
     // Filter by category
     if (selectedCategories.length > 0) {
@@ -103,23 +132,10 @@ export default function CollectionPageClient({
     }
 
     // Filter by price range
-    if (priceRange !== "all") {
-      filtered = filtered.filter((p) => {
-        const price = p.price || 0;
-        switch (priceRange) {
-          case "under-1000":
-            return price < 1000;
-          case "1000-3000":
-            return price >= 1000 && price < 3000;
-          case "3000-5000":
-            return price >= 3000 && price < 5000;
-          case "above-5000":
-            return price >= 5000;
-          default:
-            return true;
-        }
-      });
-    }
+    filtered = filtered.filter((p) => {
+      const price = p.price || 0;
+      return price >= localPriceRange[0] && price <= localPriceRange[1];
+    });
 
     // Sort products
     switch (sortBy) {
@@ -140,7 +156,7 @@ export default function CollectionPageClient({
     }
 
     return filtered;
-  }, [initialProducts, selectedCategories, selectedBrands, priceRange, sortBy]);
+  }, [uniqueProducts, selectedCategories, selectedBrands, localPriceRange, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -150,7 +166,7 @@ export default function CollectionPageClient({
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, selectedBrands, priceRange, sortBy]);
+  }, [selectedCategories, selectedBrands, localPriceRange, sortBy]);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -167,12 +183,14 @@ export default function CollectionPageClient({
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
-    setPriceRange("all");
-    setSortBy("featured");
+    setLocalPriceRange(priceRangeValues);
+    setSortBy("price-high");
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0 || priceRange !== "all";
+  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0 || 
+    localPriceRange[0] !== priceRangeValues[0] || 
+    localPriceRange[1] !== priceRangeValues[1];
   
   // Use API brands if available, otherwise use brands from products
   const displayBrands: BrandItem[] = allBrands.length > 0 
@@ -181,240 +199,214 @@ export default function CollectionPageClient({
 
   return (
     <>
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 mb-20 md:mb-0">
-        {/* Header */}
-        <div className="mb-6 md:mb-8 flex items-center gap-4">
-          <div className={`${iconBgColor} p-3 rounded-xl`}>
-            {icon}
-          </div>
-          <div>
-            <h1 className="text-xl md:text-3xl font-bold text-gray-900">{title}</h1>
-            <p className="text-gray-600 text-sm md:text-base mt-1">
-              {description} • {filteredProducts.length} products
-            </p>
+      {/* Hero Section */}
+      <div className="bg-[#001F5F] text-white py-6 md:py-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-xl md:text-3xl font-bold">{title}</h1>
+        </div>
+      </div>
+
+      {/* Yellow Promo Banner */}
+      <div className="w-full">
+        <div
+          className="relative h-[140px] md:h-[180px] w-full overflow-hidden"
+          style={{
+            background: "linear-gradient(90deg, #FBC84C 0%, #FFD666 50%, #FBC84C 100%)",
+          }}
+        >
+          <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-10">
+            <div className="max-w-[65%] md:max-w-lg">
+              <h2 className="text-lg md:text-2xl font-bold text-[#001F5F] mb-1 md:mb-2 leading-tight">
+                Best Prices on Car Electronics
+              </h2>
+              <p className="text-xs md:text-base text-[#001F5F]/80 mb-2 md:mb-4">
+                Top brands, unbeatable prices
+              </p>
+            </div>
+            <div className="relative w-[70px] h-[70px] md:w-[120px] md:h-[120px] shrink-0 bg-[#001F5F]/10 rounded-xl md:rounded-2xl flex items-center justify-center">
+              <Tag className="w-8 h-8 md:w-14 md:h-14 text-[#001F5F]" strokeWidth={1.5} />
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex gap-6">
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 mb-20 md:mb-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar Filters - Desktop */}
-          {showFilters && (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <Card className="sticky top-4 p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-semibold text-gray-900">Filters</h2>
+          <aside className="hidden lg:block lg:col-span-3">
+            <div className="sticky top-4">
+              <Card className="p-0 overflow-hidden border rounded-xl shadow-sm">
+                {/* Filter Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-600" />
+                    <span className="font-medium text-gray-900">Filters</span>
+                  </div>
                   {hasActiveFilters && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="text-xs text-blue-600"
+                    <button 
+                      onClick={clearFilters} 
+                      className="text-sm text-blue-600 hover:underline"
                     >
                       Clear All
-                    </Button>
+                    </button>
                   )}
                 </div>
+                <div className="p-4">
+                  <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white w-full text-gray-600 text-sm px-4 py-2 rounded-lg border border-black/20 focus:outline-none"
+                >
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="discount">Biggest Discount</option>
+                </select>
+                </div>
 
-                {/* Category Filter */}
-                <div className="mb-4 border-b border-gray-100 pb-4">
-                  <button
-                    onClick={() => toggleFilterSection("category")}
-                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
-                  >
-                    Category
-                    {selectedCategories.length > 0 && (
-                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
-                        {selectedCategories.length}
-                      </span>
-                    )}
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${expandedFilters.category ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {expandedFilters.category && (
-                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
-                      {loadingFilters ? (
-                        <p className="text-xs text-gray-500">Loading...</p>
-                      ) : allCategories.length === 0 ? (
-                        <p className="text-xs text-gray-500">No categories</p>
+                <div className="p-4 space-y-1">
+                  {/* CATEGORIES DROPDOWN */}
+                  <div className="overflow-hidden">
+                    <button
+                      onClick={() => setCategoriesOpen(!categoriesOpen)}
+                      className="w-full flex items-center justify-between py-3 transition-colors"
+                    >
+                      <span className="text-sm font-medium">Categories</span>
+                      {categoriesOpen ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
                       ) : (
-                        allCategories.map((category) => (
-                          <label key={category.id} className="flex cursor-pointer items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedCategories.includes(category.id)}
-                              onChange={() => toggleCategory(category.id)}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">{category.name}</span>
-                            {category.item_count && (
-                              <span className="text-xs text-gray-400">({category.item_count})</span>
-                            )}
-                          </label>
-                        ))
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
                       )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Price Range Filter */}
-                <div className="mb-4 border-b border-gray-100 pb-4">
-                  <button
-                    onClick={() => toggleFilterSection("price")}
-                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
-                  >
-                    Price Range
-                    {priceRange !== "all" && (
-                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
-                        1
-                      </span>
+                    </button>
+                    
+                    {categoriesOpen && (
+                      <div className="py-2 max-h-48 overflow-y-auto">
+                        <div className="flex flex-col gap-2">
+                          {loadingFilters ? (
+                            <p className="text-xs text-gray-500">Loading...</p>
+                          ) : allCategories.length === 0 ? (
+                            <p className="text-xs text-gray-500">No categories</p>
+                          ) : (
+                            allCategories.map((cat) => (
+                              <label key={cat.id} className="flex items-center gap-2 cursor-pointer py-1 hover:bg-gray-50 rounded px-1">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedCategories.includes(cat.id)}
+                                  onChange={() => toggleCategory(cat.id)}
+                                  className="h-4 w-4 accent-[#001F5F] rounded"
+                                />
+                                <span className={`text-sm ${selectedCategories.includes(cat.id) ? 'font-medium text-[#001F5F]' : ''}`}>
+                                  {cat.name}
+                                </span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
                     )}
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${expandedFilters.price ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {expandedFilters.price && (
-                    <div className="space-y-2 mt-2">
-                      {[
-                        { value: "all", label: "All Prices" },
-                        { value: "under-1000", label: "Under ₹1,000" },
-                        { value: "1000-3000", label: "₹1,000 - ₹3,000" },
-                        { value: "3000-5000", label: "₹3,000 - ₹5,000" },
-                        { value: "above-5000", label: "Above ₹5,000" },
-                      ].map((option) => (
-                        <label key={option.value} className="flex cursor-pointer items-center gap-2">
-                          <input
-                            type="radio"
-                            name="price"
-                            checked={priceRange === option.value}
-                            onChange={() => setPriceRange(option.value)}
-                            className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Brand Filter */}
-                <div className="mb-4">
-                  <button
-                    onClick={() => toggleFilterSection("brand")}
-                    className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 py-2"
-                  >
-                    Brand
-                    {selectedBrands.length > 0 && (
-                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mr-2">
-                        {selectedBrands.length}
-                      </span>
-                    )}
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${expandedFilters.brand ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {expandedFilters.brand && (
-                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
-                      {loadingFilters ? (
-                        <p className="text-xs text-gray-500">Loading...</p>
-                      ) : displayBrands.length === 0 ? (
-                        <p className="text-xs text-gray-500">No brands</p>
+                  {/* BRANDS DROPDOWN */}
+                  <div className="overflow-hidden border-t pt-2">
+                    <button
+                      onClick={() => setBrandsOpen(!brandsOpen)}
+                      className="w-full flex items-center justify-between py-3 transition-colors"
+                    >
+                      <span className="text-sm font-medium">Brands</span>
+                      {brandsOpen ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
                       ) : (
-                        displayBrands.map((brand) => (
-                          <label key={brand.id} className="flex cursor-pointer items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedBrands.includes(brand.name)}
-                              onChange={() => toggleBrand(brand.name)}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">{brand.name}</span>
-                            {brand.product_count && (
-                              <span className="text-xs text-gray-400">({brand.product_count})</span>
-                            )}
-                          </label>
-                        ))
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
                       )}
-                    </div>
-                  )}
+                    </button>
+                    
+                    {brandsOpen && (
+                      <div className="py-2 max-h-48 overflow-y-auto">
+                        <div className="flex flex-col gap-2">
+                          {loadingFilters ? (
+                            <p className="text-xs text-gray-500">Loading...</p>
+                          ) : (
+                            displayBrands.slice(0, 10).map((b) => (
+                              <label key={b.id} className="flex items-center gap-2 cursor-pointer py-1 hover:bg-gray-50 rounded px-1">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedBrands.includes(b.name)}
+                                  onChange={() => toggleBrand(b.name)}
+                                  className="h-4 w-4 accent-[#001F5F] rounded"
+                                />
+                                <span className={`text-sm ${selectedBrands.includes(b.name) ? 'font-medium text-[#001F5F]' : ''}`}>
+                                  {b.name}
+                                </span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* PRICE RANGE DROPDOWN */}
+                  <div className="overflow-hidden border-t pt-2">
+                    <button
+                      onClick={() => setPriceOpen(!priceOpen)}
+                      className="w-full flex items-center justify-between py-3 transition-colors"
+                    >
+                      <span className="text-sm font-medium">Price Range</span>
+                      {priceOpen ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
+                      )}
+                    </button>
+                    
+                    {priceOpen && (
+                      <div className="py-4">
+                        <Slider
+                          value={localPriceRange}
+                          min={priceRangeValues[0]}
+                          max={priceRangeValues[1]}
+                          step={100}
+                          onValueChange={(val) => setLocalPriceRange([val[0], val[1]])}
+                        />
+
+                        <div className="flex items-center justify-between mt-4 gap-2">
+                          <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-1 block">Min</label>
+                            <input
+                              type="number"
+                              value={localPriceRange[0]}
+                              className="w-full rounded-md border px-3 py-2 text-sm"
+                              onChange={(e) =>
+                                setLocalPriceRange([Number(e.target.value), localPriceRange[1]])
+                              }
+                            />
+                          </div>
+                          <span className="mt-5 text-gray-400">-</span>
+                          <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-1 block">Max</label>
+                            <input
+                              type="number"
+                              value={localPriceRange[1]}
+                              className="w-full rounded-md border px-3 py-2 text-sm"
+                              onChange={(e) =>
+                                setLocalPriceRange([localPriceRange[0], Number(e.target.value)])
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Card>
-            </aside>
-          )}
+            </div>
+          </aside>
 
           {/* Main Content */}
-          <div className="flex-1">
-            {/* Sort Bar - Desktop */}
-            <div className="mb-6 hidden md:flex flex-wrap items-center justify-between gap-4 rounded-lg bg-white p-4 shadow-sm">
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="hidden lg:flex items-center gap-1"
-                >
-                  <Filter className="h-4 w-4" />
-                  {showFilters ? "Hide Filters" : "Show Filters"}
-                </Button>
-
-                {/* Active Filter Badges */}
-                {selectedCategories.map((catId) => {
-                  const cat = allCategories.find((c) => c.id === catId);
-                  return (
-                    <Badge key={catId} variant="secondary" className="gap-1 px-2 py-1">
-                      {cat?.name || catId}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => toggleCategory(catId)} />
-                    </Badge>
-                  );
-                })}
-                {selectedBrands.map((brand) => (
-                  <Badge key={brand} variant="secondary" className="gap-1 px-2 py-1">
-                    {brand}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => toggleBrand(brand)} />
-                  </Badge>
-                ))}
-                {priceRange !== "all" && (
-                  <Badge variant="secondary" className="gap-1 px-2 py-1">
-                    {priceRange === "under-1000" && "Under ₹1,000"}
-                    {priceRange === "1000-3000" && "₹1,000 - ₹3,000"}
-                    {priceRange === "3000-5000" && "₹3,000 - ₹5,000"}
-                    {priceRange === "above-5000" && "Above ₹5,000"}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setPriceRange("all")} />
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">{filteredProducts.length} products</span>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Sort by:</label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="featured">Featured</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="discount">Biggest Discount</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Products Count - Mobile */}
-            <div className="mb-4 md:hidden flex items-center justify-between">
-              <span className="text-sm text-gray-600">{filteredProducts.length} products</span>
-              {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-blue-600">
-                  Clear All
-                </Button>
-              )}
-            </div>
-
+          <div className="lg:col-span-9">
             {/* Products Grid */}
             {paginatedProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} showOffers />
                 ))}
@@ -441,31 +433,8 @@ export default function CollectionPageClient({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
-                <div className="flex items-center gap-1 md:gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <Button
-                          key={page}
-                          variant={currentPage === page ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(page)}
-                          className={`h-8 w-8 md:h-10 md:w-10 p-0 text-xs md:text-sm ${
-                            currentPage === page ? "bg-blue-600" : ""
-                          }`}
-                        >
-                          {page}
-                        </Button>
-                      );
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return <span key={page} className="text-gray-400">...</span>;
-                    }
-                    return null;
-                  })}
+                <div className="px-4 py-2 bg-white rounded shadow-sm text-sm">
+                  {currentPage} / {totalPages}
                 </div>
 
                 <Button
@@ -493,9 +462,9 @@ export default function CollectionPageClient({
             <Filter className="h-4 w-4" />
             Filter
             {hasActiveFilters && (
-              <Badge className="bg-blue-600 text-white px-1.5 py-0.5 text-xs rounded-full">
-                {selectedCategories.length + selectedBrands.length + (priceRange !== "all" ? 1 : 0)}
-              </Badge>
+              <span className="bg-blue-600 text-white px-1.5 py-0.5 text-xs rounded-full">
+                {selectedBrands.length + (localPriceRange[0] !== priceRangeValues[0] || localPriceRange[1] !== priceRangeValues[1] ? 1 : 0)}
+              </span>
             )}
           </button>
           <button
@@ -528,61 +497,38 @@ export default function CollectionPageClient({
             </div>
 
             <div className="p-4 space-y-4">
-              {/* Category */}
+              {/* Categories */}
               <div className="border-b border-gray-100 pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Category</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Categories</h3>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {loadingFilters ? (
                     <p className="text-xs text-gray-500">Loading...</p>
+                  ) : allCategories.length === 0 ? (
+                    <p className="text-xs text-gray-500">No categories</p>
                   ) : (
-                    allCategories.map((category) => (
-                      <label key={category.id} className="flex cursor-pointer items-center gap-2">
+                    allCategories.map((cat) => (
+                      <label key={cat.id} className="flex cursor-pointer items-center gap-2">
                         <input
                           type="checkbox"
-                          checked={selectedCategories.includes(category.id)}
-                          onChange={() => toggleCategory(category.id)}
+                          checked={selectedCategories.includes(cat.id)}
+                          onChange={() => toggleCategory(cat.id)}
                           className="h-4 w-4 rounded border-gray-300 text-blue-600"
                         />
-                        <span className="text-sm text-gray-700">{category.name}</span>
+                        <span className="text-sm text-gray-700">{cat.name}</span>
                       </label>
                     ))
                   )}
                 </div>
               </div>
 
-              {/* Price Range */}
-              <div className="border-b border-gray-100 pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Price Range</h3>
-                <div className="space-y-2">
-                  {[
-                    { value: "all", label: "All Prices" },
-                    { value: "under-1000", label: "Under ₹1,000" },
-                    { value: "1000-3000", label: "₹1,000 - ₹3,000" },
-                    { value: "3000-5000", label: "₹3,000 - ₹5,000" },
-                    { value: "above-5000", label: "Above ₹5,000" },
-                  ].map((option) => (
-                    <label key={option.value} className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="radio"
-                        name="price-mobile"
-                        checked={priceRange === option.value}
-                        onChange={() => setPriceRange(option.value)}
-                        className="h-4 w-4 border-gray-300 text-blue-600"
-                      />
-                      <span className="text-sm text-gray-700">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Brand */}
-              <div>
+              <div className="border-b border-gray-100 pb-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Brand</h3>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {loadingFilters ? (
                     <p className="text-xs text-gray-500">Loading...</p>
                   ) : (
-                    displayBrands.map((brand) => (
+                    displayBrands.slice(0, 10).map((brand) => (
                       <label key={brand.id} className="flex cursor-pointer items-center gap-2">
                         <input
                           type="checkbox"
@@ -594,6 +540,32 @@ export default function CollectionPageClient({
                       </label>
                     ))
                   )}
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Price Range</h3>
+                <Slider
+                  value={localPriceRange}
+                  min={priceRangeValues[0]}
+                  max={priceRangeValues[1]}
+                  step={100}
+                  onValueChange={(val) => setLocalPriceRange([val[0], val[1]])}
+                />
+                <div className="flex items-center gap-2 mt-3">
+                  <input
+                    type="number"
+                    value={localPriceRange[0]}
+                    onChange={(e) => setLocalPriceRange([Number(e.target.value || 0), localPriceRange[1]])}
+                    className="w-1/2 rounded-md border px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="number"
+                    value={localPriceRange[1]}
+                    onChange={(e) => setLocalPriceRange([localPriceRange[0], Number(e.target.value || priceRangeValues[1])])}
+                    className="w-1/2 rounded-md border px-3 py-2 text-sm"
+                  />
                 </div>
               </div>
             </div>
@@ -620,9 +592,8 @@ export default function CollectionPageClient({
             </div>
             <div className="p-4 space-y-2">
               {[
-                { value: "featured", label: "Featured" },
-                { value: "price-low", label: "Price: Low to High" },
                 { value: "price-high", label: "Price: High to Low" },
+                { value: "price-low", label: "Price: Low to High" },
                 { value: "rating", label: "Highest Rated" },
                 { value: "discount", label: "Biggest Discount" },
               ].map((option) => (

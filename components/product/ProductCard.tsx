@@ -67,6 +67,7 @@ export function ProductCard({
   const quantityInCart = getItemQuantity(product.id);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   // Check if product is in wishlist on mount
   useEffect(() => {
@@ -105,8 +106,12 @@ export function ProductCard({
           categoryId: product.category_id,
           slug: product.slug,
         });
+        toast.success("Added to cart!", {
+          description: `${product.title} has been added to your cart`,
+        });
       } catch (error) {
         console.error("Error adding to cart:", error);
+        toast.error("Failed to add to cart");
       }
     });
   };
@@ -122,55 +127,84 @@ export function ProductCard({
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Track if we're removing the last item
+    if (quantityInCart === 1) {
+      setIsRemoving(true);
+    }
+    
     startTransition(async () => {
       await updateQuantity(product.id, quantityInCart - 1);
+      setIsRemoving(false);
     });
   };
 
-  const handleWishlistToggle = async (e: React.MouseEvent) => {
+  const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
+    // Prevent default touch behavior that causes scroll
+    if (e.nativeEvent) {
+      e.nativeEvent.stopImmediatePropagation();
+    }
+    
     if (wishlistLoading) return;
+    
+    // Optimistic update - update UI immediately
+    const wasInWishlist = isInWishlist;
+    setIsInWishlist(!wasInWishlist);
     setWishlistLoading(true);
 
-    try {
-      if (isInWishlist) {
-        const result = await removeFromWishlist(product.id);
-        if (result.success) {
-          setIsInWishlist(false);
-          toast.success("Removed from wishlist");
-        }
-      } else {
-        const result = await addToWishlist(
-          product.id,
-          product.title || "",
-          product.price || 0,
-          product.primary_image || "/images/image1.jpg",
-          product.slug || "",
-          product.brand_name,
-          true
-        );
-        if (result.success) {
-          setIsInWishlist(true);
-          toast.success("Added to wishlist!", {
-            description: product.title,
-          });
-        } else if (result.message === "Item already in wishlist") {
-          setIsInWishlist(true);
-          toast.info("Already in wishlist");
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to update wishlist");
-    } finally {
-      setWishlistLoading(false);
+    // Show toast immediately
+    if (wasInWishlist) {
+      toast.success("Removed from wishlist");
+    } else {
+      toast.success("Added to wishlist!", {
+        description: product.title,
+      });
     }
+
+    // Sync with server in background
+    const syncWithServer = async () => {
+      try {
+        if (wasInWishlist) {
+          const result = await removeFromWishlist(product.id);
+          if (!result.success) {
+            // Revert on failure
+            setIsInWishlist(true);
+            toast.error("Failed to remove from wishlist");
+          }
+        } else {
+          const result = await addToWishlist(
+            product.id,
+            product.title || "",
+            product.price || 0,
+            product.primary_image || "/images/image1.jpg",
+            product.slug || "",
+            product.brand_name,
+            true
+          );
+          if (!result.success && result.message !== "Item already in wishlist") {
+            // Revert on failure
+            setIsInWishlist(false);
+            toast.error("Failed to add to wishlist");
+          }
+        }
+      } catch (error) {
+        // Revert on error
+        setIsInWishlist(wasInWishlist);
+        toast.error("Failed to update wishlist");
+      } finally {
+        setWishlistLoading(false);
+      }
+    };
+
+    syncWithServer();
   };
 
   return (
     <Link href={`/products/${product.slug || ""}`}>
-      <Card className="group overflow-hidden transition-all hover:shadow-xl">
+      <Card className="group overflow-hidden transition-all hover:shadow-xl !p-0 !gap-0">
         <div className="relative aspect-square overflow-hidden">
           {/* Product Image */}
           <Image
@@ -179,24 +213,6 @@ export function ProductCard({
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
-
-          {/* Badges */}
-          <div className="absolute left-2 md:left-3 top-2 md:top-3 flex flex-col gap-1 md:gap-2">
-            {badges.primary && (
-              <Badge
-                className={`${badgeStyles[badges.primary] || "bg-blue-600 text-white"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
-              >
-                {badges.primary}
-              </Badge>
-            )}
-            {badges.secondary && (
-              <Badge
-                className={`${badgeStyles[badges.secondary] || "bg-yellow-500 text-gray-900"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
-              >
-                {badges.secondary}
-              </Badge>
-            )}
-          </div>
 
           {/* Discount Badge */}
           {discountAmount > 0 && (
@@ -207,7 +223,13 @@ export function ProductCard({
 
           {/* Wishlist Heart Button */}
           <button
+            type="button"
             onClick={handleWishlistToggle}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             disabled={wishlistLoading}
             className={`absolute bottom-2 md:bottom-3 right-2 md:right-3 p-1.5 md:p-2 rounded-full shadow-md transition-all duration-200 ${
               isInWishlist 
@@ -225,7 +247,7 @@ export function ProductCard({
         {/* Card Content */}
         <div className="p-2 md:p-4">
           {/* Product Title */}
-          <h3 className="mb-1 md:mb-2 line-clamp-2 h-8 md:h-12 text-xs md:text-sm font-medium text-gray-900">
+          <h3 className="mb-1 line-clamp-2 h-8 text-xs md:text-sm font-medium text-gray-900">
             {product.title || "Product"}
           </h3>
 
@@ -256,26 +278,8 @@ export function ProductCard({
             )}
           </div>
 
-          {/* Free Delivery Badge */}
-          <div className="mb-2 md:mb-3 flex items-center gap-1 md:gap-1.5 text-[10px] md:text-xs text-blue-600">
-            <TruckIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
-            <span className="font-medium">FREE Delivery</span>
-          </div>
-
-          {/* Offer Tags - Hidden on very small screens */}
-          {showOffers && (
-            <div className="hidden sm:flex mb-2 md:mb-3 flex-wrap gap-1 md:gap-2">
-              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
-                Today Offer
-              </Badge>
-              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
-                Bank Offers
-              </Badge>
-            </div>
-          )}
-
           {/* Action Buttons */}
-          <div className="flex gap-1 md:gap-2">
+          <div className="flex flex-col md:flex-row gap-1 md:gap-2">
             {quantityInCart > 0 ? (
               <div className="flex-1 flex items-center justify-center gap-2 bg-[#FFC107] rounded-md h-7 md:h-9">
                 <button
@@ -305,7 +309,7 @@ export function ProductCard({
               >
                 <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
                 {isPending ? (
-                  <span className="hidden sm:inline">Adding...</span>
+                  <span className="hidden sm:inline">{isRemoving ? "Removing..." : "Adding..."}</span>
                 ) : (
                   <>
                     <span className="hidden sm:inline">Add to cart</span>

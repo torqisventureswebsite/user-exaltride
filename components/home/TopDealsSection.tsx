@@ -3,22 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
 import type { Product } from "@/components/product/ProductCard";
+import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
 
 interface TopDealsSectionProps {
   products: Product[];
 }
 
-export function TopDealsSection({ products }: TopDealsSectionProps) {
+export function TopDealsSection({ products: initialProducts }: TopDealsSectionProps) {
+  const { products, isLoading, hasCarFilter } = useCarProducts({
+    endpoint: "products/top-deals",
+    limit: 40,
+    initialProducts: initialProducts as CarProduct[],
+  });
+
   // ✅ Filter discounted products
   const topDeals = products.filter(
     (p) => p.discount_percentage && p.discount_percentage > 0
   );
-
-  if (!topDeals || topDeals.length === 0) {
-    return null;
-  }
 
   // ✅ SCROLL STATE (SAME AS FEATURED)
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -68,13 +71,24 @@ export function TopDealsSection({ products }: TopDealsSectionProps) {
       <div className="container mx-auto px-4">
         {/* ✅ Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
-              Top Deals
-            </h2>
-            <p className="text-xs md:text-sm text-gray-600">
-              Exclusive discounts for you
-            </p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
+                Top Deals
+              </h2>
+              <p className="text-xs md:text-sm text-gray-600">
+                {hasCarFilter ? "Deals for your car" : "Exclusive discounts for you"}
+              </p>
+            </div>
+            {isLoading && (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            )}
+            {hasCarFilter && !isLoading && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                <Car className="h-3 w-3" />
+                Filtered
+              </span>
+            )}
           </div>
 
           <Link

@@ -3,17 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
 import type { Product } from "@/components/product/ProductCard";
+import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
 
 interface TrendingSectionProps {
   products: Product[];
 }
 
-export function TrendingSection({ products }: TrendingSectionProps) {
-  if (!products || products.length === 0) {
-    return null;
-  }
+export function TrendingSection({ products: initialProducts }: TrendingSectionProps) {
+  const { products, isLoading, hasCarFilter } = useCarProducts({
+    endpoint: "products/new-arrivals",
+    limit: 40,
+    initialProducts: initialProducts as CarProduct[],
+  });
 
   // ✅ take more items for scroll (not 4)
   const trendingProducts = products.slice(0, 40);
@@ -63,16 +66,26 @@ export function TrendingSection({ products }: TrendingSectionProps) {
       <div className="container mx-auto px-4">
         {/* ✅ Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl md:text-3xl">🔥</span>
-              <h2 className="text-xl md:text-3xl font-bold text-[#101828]">
-                Trending This Week
-              </h2>
+          <div className="flex items-center gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-xl md:text-3xl font-bold text-[#101828]">
+                  Trending This Week
+                </h2>
+              </div>
+              <p className="text-xs md:text-sm text-gray-600">
+                {hasCarFilter ? "Trending for your car" : "Hot picks that car enthusiasts are loving right now"}
+              </p>
             </div>
-            <p className="text-xs md:text-sm text-gray-600">
-              Hot picks that car enthusiasts are loving right now
-            </p>
+            {isLoading && (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            )}
+            {hasCarFilter && !isLoading && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                <Car className="h-3 w-3" />
+                Filtered
+              </span>
+            )}
           </div>
 
           <Link

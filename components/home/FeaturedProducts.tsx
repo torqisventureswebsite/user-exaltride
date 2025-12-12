@@ -4,13 +4,20 @@ import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
 import type { Product } from "@/components/product/ProductCard";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
+import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
 
 interface FeaturedProductsProps {
   products: Product[];
 }
 
-export function FeaturedProducts({ products }: FeaturedProductsProps) {
+export function FeaturedProducts({ products: initialProducts }: FeaturedProductsProps) {
+  const { products, isLoading, hasCarFilter } = useCarProducts({
+    endpoint: "products/best-selling",
+    limit: 40,
+    initialProducts: initialProducts as CarProduct[],
+  });
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -66,13 +73,24 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
-              Featured Products
-            </h2>
-            <p className="text-xs md:text-sm text-gray-600">
-              Handpicked selection
-            </p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
+                Featured Products
+              </h2>
+              <p className="text-xs md:text-sm text-gray-600">
+                {hasCarFilter ? "Products for your car" : "Handpicked selection"}
+              </p>
+            </div>
+            {isLoading && (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            )}
+            {hasCarFilter && !isLoading && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                <Car className="h-3 w-3" />
+                Filtered
+              </span>
+            )}
           </div>
 
           <Link
