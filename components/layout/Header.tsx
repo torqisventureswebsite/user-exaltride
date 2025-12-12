@@ -67,10 +67,13 @@ export default function Header() {
               {/* Login/Profile */}
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm font-medium text-gray-900">{user?.name}</span>
-                    <span className="text-xs text-gray-500 capitalize">{user?.role}</span>
-                  </div>
+                  <button
+                    onClick={() => router.push("/account")}
+                    className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <User size={22} className="mb-1" />
+                    <span className="text-xs font-medium">{user?.name || "Account"}</span>
+                  </button>
                   <button
                     onClick={logout}
                     className="flex flex-col items-center justify-center text-gray-700 hover:text-red-600 transition-colors"
@@ -196,9 +199,18 @@ export default function Header() {
                     </div>
                     <div>
                       <p className="font-semibold text-white">{user?.name}</p>
-                      <p className="text-xs text-white/60 capitalize">{user?.role}</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      router.push("/account");
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mb-2 text-sm text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors"
+                  >
+                    <User size={16} />
+                    <span>My Account</span>
+                  </button>
                   <button
                     onClick={() => {
                       logout();
