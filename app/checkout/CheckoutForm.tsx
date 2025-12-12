@@ -1,18 +1,230 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Building2, MapPin, User, Mail, Phone } from "lucide-react";
+import { CreditCard, MapPin, User, Wallet, Loader2, Plus, Check } from "lucide-react";
+import { useAuth } from "@/lib/auth/context";
+import { useCart, CartItem } from "@/lib/cart/context";
+import { toast } from "sonner";
 
-export default function CheckoutForm() {
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("card");
+interface CheckoutFormProps {
+  cartItems: CartItem[];
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+interface SavedAddress {
+  id: string;
+  label: string;
+  full_name: string;
+  phone: string;
+  address_line1: string;
+  address_line2: string | null;
+  landmark: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  is_default: boolean;
+}
+
+export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total }: CheckoutFormProps) {
+  const router = useRouter();
+  const { tokens, user } = useAuth();
+  const { clearCart } = useCart();
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Saved addresses state
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  
+  // Form state - pre-filled from user profile
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "India",
+  });
+
+  // Pre-fill user info from profile
+  useEffect(() => {
+    if (user) {
+      const nameParts = (user.name || "").split(" ");
+      setFormData(prev => ({
+        ...prev,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        email: user.email || "",
+        phone: user.phoneNumber || "",
+      }));
+    }
+  }, [user]);
+
+  // Fetch saved addresses
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch("/api/addresses");
+        if (response.ok) {
+          const addresses = await response.json();
+          setSavedAddresses(addresses);
+          // Auto-select default address
+          const defaultAddr = addresses.find((a: SavedAddress) => a.is_default);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id);
+          } else if (addresses.length > 0) {
+            setSelectedAddressId(addresses[0].id);
+          } else {
+            setShowNewAddressForm(true);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch addresses:", error);
+        setShowNewAddressForm(true);
+      } finally {
+        setIsLoadingAddresses(false);
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  // Get shipping address based on selection
+  const getShippingAddress = () => {
+    if (selectedAddressId && !showNewAddressForm) {
+      const addr = savedAddresses.find(a => a.id === selectedAddressId);
+      if (addr) {
+        const nameParts = addr.full_name.split(" ");
+        return {
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          email: formData.email,
+          phone: addr.phone,
+          address: [addr.address_line1, addr.address_line2, addr.landmark].filter(Boolean).join(", "),
+          city: addr.city,
+          state: addr.state,
+          zipCode: addr.pincode,
+          country: addr.country,
+        };
+      }
+    }
+    return {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zipCode: formData.zipCode,
+      country: formData.country,
+    };
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle checkout logic here
-    alert("Order placed successfully! (This is a demo)");
+    setIsProcessing(true);
+
+    try {
+      // Validate address selection
+      if (!showNewAddressForm && !selectedAddressId) {
+        throw new Error("Please select a shipping address");
+      }
+
+      const shippingAddress = getShippingAddress();
+
+      // Create order
+      const orderItems = cartItems.map(item => ({
+        productId: item.productId,
+        title: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.price * item.quantity,
+      }));
+
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens?.authToken}`,
+        },
+        body: JSON.stringify({
+          items: orderItems,
+          shippingAddress,
+          subtotal,
+          shippingFee: shipping,
+          taxAmount: tax,
+          total,
+          paymentMethod: "online",
+        }),
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderResponse.ok) {
+        const errorMsg = orderData.error || orderData.message || "Failed to create order";
+        console.error("Order creation failed:", orderData);
+        throw new Error(errorMsg);
+      }
+
+      const orderId = orderData.data?.orderId || orderData.orderId;
+
+      if (!orderId) {
+        throw new Error("Order created but no order ID returned");
+      }
+
+      // Initiate PhonePe payment
+      const paymentResponse = await fetch(`/api/payments/${orderId}/initiate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens?.authToken}`,
+        },
+        body: JSON.stringify({
+          amount: total,
+          orderId: orderId,
+        }),
+      });
+
+      const paymentData = await paymentResponse.json();
+
+      if (!paymentResponse.ok) {
+        const errorMsg = paymentData.error || paymentData.message || "Failed to initiate payment";
+        console.error("Payment initiation failed:", paymentData);
+        throw new Error(errorMsg);
+      }
+
+      // If payment gateway returns a redirect URL, redirect to it
+      if (paymentData.data?.redirectUrl || paymentData.redirectUrl) {
+        window.location.href = paymentData.data?.redirectUrl || paymentData.redirectUrl;
+        return;
+      }
+
+      // If no redirect, assume payment was successful
+      clearCart();
+      (router.push as (url: string) => void)(`/order-confirmation?orderId=${orderId}`);
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to process order");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -26,19 +238,19 @@ export default function CheckoutForm() {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="firstName">First Name *</Label>
-            <Input id="firstName" type="text" placeholder="John" required />
+            <Input id="firstName" type="text" placeholder="John" value={formData.firstName} onChange={handleInputChange} required />
           </div>
           <div>
             <Label htmlFor="lastName">Last Name *</Label>
-            <Input id="lastName" type="text" placeholder="Doe" required />
+            <Input id="lastName" type="text" placeholder="Doe" value={formData.lastName} onChange={handleInputChange} required />
           </div>
           <div>
             <Label htmlFor="email">Email *</Label>
-            <Input id="email" type="email" placeholder="john@example.com" required />
+            <Input id="email" type="email" placeholder="john@example.com" value={formData.email} onChange={handleInputChange} required />
           </div>
           <div>
             <Label htmlFor="phone">Phone *</Label>
-            <Input id="phone" type="tel" placeholder="+91 98765 43210" required />
+            <Input id="phone" type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={handleInputChange} required />
           </div>
         </div>
       </div>
@@ -49,37 +261,118 @@ export default function CheckoutForm() {
           <MapPin className="h-5 w-5" />
           Shipping Address
         </h2>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="address">Street Address *</Label>
-            <Input
-              id="address"
-              type="text"
-              placeholder="123 Main Street, Apartment 4B"
-              required
-            />
+        
+        {isLoadingAddresses ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-[#001F5F]" />
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="city">City *</Label>
-              <Input id="city" type="text" placeholder="Mumbai" required />
-            </div>
-            <div>
-              <Label htmlFor="state">State *</Label>
-              <Input id="state" type="text" placeholder="Maharashtra" required />
-            </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Saved Addresses */}
+            {savedAddresses.length > 0 && !showNewAddressForm && (
+              <div className="space-y-3">
+                {savedAddresses.map((addr) => (
+                  <label
+                    key={addr.id}
+                    className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                      selectedAddressId === addr.id ? "border-[#001F5F] bg-blue-50" : "border-gray-200"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="address"
+                      value={addr.id}
+                      checked={selectedAddressId === addr.id}
+                      onChange={() => setSelectedAddressId(addr.id)}
+                      className="mt-1 w-4 h-4 accent-[#001F5F]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-gray-900">{addr.label}</span>
+                        {addr.is_default && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Default</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700">{addr.full_name}</p>
+                      <p className="text-sm text-gray-600">
+                        {[addr.address_line1, addr.address_line2, addr.landmark].filter(Boolean).join(", ")}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {addr.city}, {addr.state} - {addr.pincode}
+                      </p>
+                      <p className="text-sm text-gray-500">{addr.phone}</p>
+                    </div>
+                    {selectedAddressId === addr.id && (
+                      <Check className="h-5 w-5 text-[#001F5F]" />
+                    )}
+                  </label>
+                ))}
+                
+                {/* Add New Address Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowNewAddressForm(true)}
+                  className="flex items-center gap-2 w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-[#001F5F] hover:text-[#001F5F] transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Add New Address</span>
+                </button>
+              </div>
+            )}
+
+            {/* New Address Form */}
+            {(showNewAddressForm || savedAddresses.length === 0) && (
+              <div className="space-y-4">
+                {savedAddresses.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(false);
+                      if (savedAddresses.length > 0) {
+                        const defaultAddr = savedAddresses.find(a => a.is_default);
+                        setSelectedAddressId(defaultAddr?.id || savedAddresses[0].id);
+                      }
+                    }}
+                    className="text-sm text-[#001F5F] hover:underline"
+                  >
+                    ← Back to saved addresses
+                  </button>
+                )}
+                <div>
+                  <Label htmlFor="address">Street Address *</Label>
+                  <Input
+                    id="address"
+                    type="text"
+                    placeholder="123 Main Street, Apartment 4B"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    required={showNewAddressForm || savedAddresses.length === 0}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input id="city" type="text" placeholder="Mumbai" value={formData.city} onChange={handleInputChange} required={showNewAddressForm || savedAddresses.length === 0} />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State *</Label>
+                    <Input id="state" type="text" placeholder="Maharashtra" value={formData.state} onChange={handleInputChange} required={showNewAddressForm || savedAddresses.length === 0} />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="zipCode">PIN Code *</Label>
+                    <Input id="zipCode" type="text" placeholder="400001" value={formData.zipCode} onChange={handleInputChange} required={showNewAddressForm || savedAddresses.length === 0} />
+                  </div>
+                  <div>
+                    <Label htmlFor="country">Country *</Label>
+                    <Input id="country" type="text" placeholder="India" value={formData.country} onChange={handleInputChange} required={showNewAddressForm || savedAddresses.length === 0} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="zipCode">PIN Code *</Label>
-              <Input id="zipCode" type="text" placeholder="400001" required />
-            </div>
-            <div>
-              <Label htmlFor="country">Country *</Label>
-              <Input id="country" type="text" placeholder="India" defaultValue="India" required />
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Payment Method */}
@@ -89,104 +382,40 @@ export default function CheckoutForm() {
           Payment Method
         </h2>
 
-        {/* Payment Options */}
+        {/* Payment Option - Online Only */}
         <div className="space-y-3 mb-6">
-          <label className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="radio"
-              name="payment"
-              value="card"
-              checked={paymentMethod === "card"}
-              onChange={(e) => setPaymentMethod(e.target.value as "card")}
-              className="w-4 h-4"
-            />
-            <CreditCard className="h-5 w-5 text-gray-600" />
-            <span className="font-medium">Credit/Debit Card</span>
-          </label>
-
-          <label className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="radio"
-              name="payment"
-              value="upi"
-              checked={paymentMethod === "upi"}
-              onChange={(e) => setPaymentMethod(e.target.value as "upi")}
-              className="w-4 h-4"
-            />
-            <Building2 className="h-5 w-5 text-gray-600" />
-            <span className="font-medium">UPI/Net Banking</span>
-          </label>
-
-          <label className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-            <input
-              type="radio"
-              name="payment"
-              value="cod"
-              checked={paymentMethod === "cod"}
-              onChange={(e) => setPaymentMethod(e.target.value as "cod")}
-              className="w-4 h-4"
-            />
-            <Mail className="h-5 w-5 text-gray-600" />
-            <span className="font-medium">Cash on Delivery</span>
-          </label>
+          <div className="flex items-center gap-3 p-4 border-2 border-[#001F5F] bg-blue-50 rounded-lg">
+            <Wallet className="h-5 w-5 text-[#001F5F]" />
+            <div className="flex-1">
+              <span className="font-medium">Pay Online (PhonePe)</span>
+              <p className="text-xs text-gray-500">UPI, Cards, Net Banking, Wallets</p>
+            </div>
+            <Check className="h-5 w-5 text-[#001F5F]" />
+          </div>
         </div>
 
-        {/* Card Details (shown only when card is selected) */}
-        {paymentMethod === "card" && (
-          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <Label htmlFor="cardNumber">Card Number *</Label>
-              <Input
-                id="cardNumber"
-                type="text"
-                placeholder="1234 5678 9012 3456"
-                maxLength={19}
-                required
-              />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry">Expiry Date *</Label>
-                <Input id="expiry" type="text" placeholder="MM/YY" maxLength={5} required />
-              </div>
-              <div>
-                <Label htmlFor="cvv">CVV *</Label>
-                <Input id="cvv" type="text" placeholder="123" maxLength={3} required />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="cardName">Cardholder Name *</Label>
-              <Input id="cardName" type="text" placeholder="John Doe" required />
-            </div>
-          </div>
-        )}
-
-        {/* UPI Details */}
-        {paymentMethod === "upi" && (
-          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <Label htmlFor="upiId">UPI ID *</Label>
-              <Input id="upiId" type="text" placeholder="yourname@upi" required />
-            </div>
-          </div>
-        )}
-
-        {/* COD Message */}
-        {paymentMethod === "cod" && (
-          <div className="p-4 bg-blue-50 text-blue-700 rounded-lg">
-            <p className="text-sm">
-              Cash on Delivery available. Please keep exact change ready for smooth delivery.
-            </p>
-          </div>
-        )}
+        {/* Online Payment Info */}
+        <div className="p-4 bg-green-50 text-green-700 rounded-lg">
+          <p className="text-sm">
+            You will be redirected to PhonePe secure payment gateway to complete your payment.
+          </p>
+        </div>
       </div>
 
       {/* Place Order Button */}
       <Button
         type="submit"
-        className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-lg py-6"
+        disabled={isProcessing || isLoadingAddresses}
+        className="w-full bg-[#FBC84C] hover:bg-yellow-500 text-[#001F5F] font-semibold text-lg py-6 disabled:opacity-50"
       >
-        Place Order
+        {isProcessing ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Processing...
+          </span>
+        ) : (
+          "Proceed to Payment"
+        )}
       </Button>
     </form>
   );
