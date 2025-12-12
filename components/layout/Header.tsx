@@ -72,7 +72,7 @@ export default function Header() {
                     className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     <User size={22} className="mb-1" />
-                    <span className="text-xs font-medium">{user?.name || "Account"}</span>
+                    <span className="text-xs font-medium">{user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}</span>
                   </button>
                   <button
                     onClick={logout}
@@ -198,7 +198,8 @@ export default function Header() {
                       <User size={24} className="text-[#001F5F]" />
                     </div>
                     <div>
-                      <p className="font-semibold text-white">{user?.name}</p>
+                      <p className="font-semibold text-white">{user?.name?.split(" ")[0] || user?.email?.split("@")[0]}</p>
+                      {user?.email && <p className="text-xs text-white/60">{user.email}</p>}
                     </div>
                   </div>
                   <button

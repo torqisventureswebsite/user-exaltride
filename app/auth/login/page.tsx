@@ -55,6 +55,7 @@ export default function LoginPage() {
     try {
       const sessionId = await login(phoneNumber);
       setSession(sessionId);
+      setOtp(""); // Clear old OTP when resending
       setResendTimer(30); // Reset 30 second countdown
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to resend OTP");
@@ -72,7 +73,15 @@ export default function LoginPage() {
       await verifyOtp(phoneNumber, session, otp);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid OTP");
+      const errorMessage = err instanceof Error ? err.message : "Invalid OTP";
+      // Check if session expired - prompt user to request new OTP
+      if (errorMessage.toLowerCase().includes("expired") || errorMessage.toLowerCase().includes("session")) {
+        setError("Session expired. Please request a new OTP.");
+        // Reset resend timer so user can immediately request new OTP
+        setResendTimer(0);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

@@ -59,7 +59,8 @@ class AuthService {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Login failed");
+        console.error("Login API error response:", error);
+        throw new Error(error.message || error.error || `Login failed (${response.status})`);
       }
 
       return await response.json();
@@ -86,12 +87,26 @@ class AuthService {
       }
 
       const result = await response.json();
+      console.log("Verify OTP API response:", JSON.stringify(result, null, 2));
+
+      // Map token fields - API may return accessToken or authToken
+      const authToken = result?.accessToken || result?.authToken;
+      const idToken = result?.idToken;
+      const refreshToken = result?.refreshToken;
+
+      const isValidToken = (v: unknown) =>
+        typeof v === "string" && v.trim() !== "" && v !== "undefined" && v !== "null";
+
+      if (!isValidToken(authToken) || !isValidToken(idToken) || !isValidToken(refreshToken)) {
+        this.clearTokens();
+        throw new Error(result?.message || "Invalid OTP");
+      }
       
       // Store tokens and user data
       this.setTokens({
-        authToken: result.authToken,
-        idToken: result.idToken,
-        refreshToken: result.refreshToken,
+        authToken,
+        idToken,
+        refreshToken,
       });
 
       return result;
@@ -104,32 +119,26 @@ class AuthService {
   // SSO Login with Google
   initiateGoogleSSO(): void {
     const params = new URLSearchParams({
-      client_id: cognitoConfig.clientId,
+      client_id: cognitoConfig.clientId ?? "",
       response_type: "code",
       scope: "email openid profile",
       redirect_uri: cognitoConfig.redirectUri,
+      identity_provider: "Google",
     });
 
-    window.location.href = `${authEndpoints.cognitoLogin}?${params.toString()}`;
+    window.location.href = `${authEndpoints.authorize}?${params.toString()}`;
   }
 
   // Exchange authorization code for tokens (SSO callback)
   async exchangeCodeForTokens(code: string): Promise<AuthTokens> {
     try {
-      const params = new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: cognitoConfig.clientId,
-        client_secret: cognitoConfig.clientSecret,
-        code,
-        redirect_uri: cognitoConfig.redirectUri,
-      });
-
+      // Send code to server-side proxy which has access to client_secret
       const response = await fetch(authEndpoints.token, {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: params.toString(),
+        body: JSON.stringify({ code }),
       });
 
       if (!response.ok) {
@@ -161,6 +170,14 @@ class AuthService {
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
   }
 
+  // Clear tokens from local storage (does not touch user)
+  clearTokens(): void {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.ID_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  }
+
   // Get tokens from local storage
   getTokens(): AuthTokens | null {
     if (typeof window === "undefined") return null;
@@ -169,9 +186,18 @@ class AuthService {
     const idToken = localStorage.getItem(STORAGE_KEYS.ID_TOKEN);
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
-    if (!authToken || !idToken || !refreshToken) return null;
+    const isValidToken = (v: string | null) =>
+      !!v && v.trim() !== "" && v !== "undefined" && v !== "null";
 
-    return { authToken, idToken, refreshToken };
+    if (!isValidToken(authToken) || !isValidToken(idToken) || !isValidToken(refreshToken)) {
+      return null;
+    }
+
+    return {
+      authToken: authToken as string,
+      idToken: idToken as string,
+      refreshToken: refreshToken as string,
+    };
   }
 
   // Store user data
@@ -203,9 +229,7 @@ class AuthService {
   logout(): void {
     if (typeof window === "undefined") return;
 
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.ID_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    this.clearTokens();
     localStorage.removeItem(STORAGE_KEYS.USER);
 
     // Optionally redirect to Cognito logout

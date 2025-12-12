@@ -7,6 +7,7 @@ import { CarProvider } from "@/lib/car/context";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import { NavigationLoader } from "@/components/ui/NavigationLoader";
+import { OAuthCallbackHandler } from "@/components/auth/OAuthCallbackHandler";
 
 const interTight = Inter_Tight({
   variable: "--font-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
             <CartProvider>
               <Suspense fallback={null}>
                 <NavigationLoader />
+                <OAuthCallbackHandler />
               </Suspense>
               {children}
               <Toaster position="top-right" richColors />
