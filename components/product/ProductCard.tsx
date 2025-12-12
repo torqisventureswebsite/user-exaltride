@@ -11,6 +11,27 @@ import { useState, useEffect } from "react";
 import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
 
+export interface CompatibleCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  variant?: string;
+  notes?: string;
+}
+
+export interface ProductVendor {
+  id: string;
+  business_name: string;
+  rating?: number;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   id: string;
   title?: string;
@@ -24,15 +45,22 @@ export interface Product {
   images?: string[];
   rating?: number;
   review_count?: number;
+  view_count?: number;
   brand_name?: string;
   status?: string;
   category_id?: string;
+  category?: ProductCategory;
   sku?: string;
   warranty_months?: number;
-  weight_kg?: number;
-  dimensions_cm?: string;
+  weight_kg?: number | null;
+  dimensions_cm?: string | null;
   is_oem?: boolean;
   is_universal?: boolean;
+  video_url?: string | null;
+  return_policy?: string | null;
+  shipping_info?: string | null;
+  compatible_cars?: CompatibleCar[];
+  vendor?: ProductVendor;
   created_at?: string;
   updated_at?: string;
 }

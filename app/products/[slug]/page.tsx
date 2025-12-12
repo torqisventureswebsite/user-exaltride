@@ -25,6 +25,7 @@ import SellerInfoCard from "@/components/product/SellerInfoCard";
 import WhyBuyFromUs from "@/components/product/WhyBuyFromUs";
 import BundlePriceBox from "@/components/product/BundlePriceBox";
 import RecentlyViewedSection from "@/components/cart/RecentlyViewedSection";
+import ProductTabs from "@/components/product/ProductTabs";
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -76,16 +77,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
               title={product.title}
               discount={discountAmount}
             />
-            {/* Hide PurchaseActions on mobile - sticky bottom bar handles it */}
-            <div className="hidden md:block">
-              <PurchaseActions
-                id={product.id}
-                title={product.title}
-                price={product.price}
-                image={product.primary_image}
-                categoryId={product.category?.id}
-              />
-            </div>
+            {/* PurchaseActions - handles both desktop and mobile sticky bar internally */}
+            <PurchaseActions
+              id={product.id}
+              title={product.title}
+              price={product.price}
+              image={product.primary_image}
+              categoryId={product.category?.id}
+              slug={product.slug}
+            />
             {/* <InstallationGuide/> */}
           </div>
 
@@ -93,8 +93,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6">
             <ProductInfo product={product} />
             {/* <OffersSection /> */}
-            <DeliveryAndServices />
-            <KeyHighlights />
+            <DeliveryAndServices 
+              returnPolicy={(product as any).return_policy}
+              shippingInfo={(product as any).shipping_info}
+            />
+            <KeyHighlights description={product.description} />
 
             {/* <ProductFeatures warranty={product.warranty_months} /> */}
 
@@ -106,7 +109,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="md:col-span-2 lg:col-span-3 space-y-4 md:space-y-6">
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-            <VehicleCompatibility />
+            <VehicleCompatibility 
+              compatibleCars={(product as any).compatible_cars}
+              isUniversal={product.is_universal}
+            />
               <ProfessionalInstallationCard />
               {/* <SellerInfoCard /> */}
               {/* <WhyBuyFromUs /> */}
@@ -117,6 +123,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
 
+
+        {/* ✅ PRODUCT TABS - About, Specs, Reviews */}
+        <div className="mt-8">
+          <ProductTabs
+            description={product.description}
+            warrantyMonths={product.warranty_months}
+            productId={product.id}
+            rating={product.rating}
+            reviewCount={product.review_count}
+          />
+        </div>
 
         {/* ✅ FREQUENTLY BOUGHT */}
         {/* <div className="mt-12">

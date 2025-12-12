@@ -102,7 +102,7 @@ export default function CarSelector() {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center justify-between gap-2 text-gray-700 px-3 py-2 bg-transparent font-medium cursor-pointer hover:text-gray-900 transition"
+        className="flex items-center justify-between gap-2 text-gray-200 px-3 py-2 bg-transparent font-medium cursor-pointer hover:text-gray-100 transition"
       >
         <Car className="h-4 w-4" />
         <span className="whitespace-nowrap text-sm">{displayText}</span>
@@ -112,11 +112,6 @@ export default function CarSelector() {
       {/* Modal */}
       {isOpen && (
         <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setIsOpen(false)}
-          />
 
           {/* Modal Content */}
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-50 w-[90%] max-w-md p-6">

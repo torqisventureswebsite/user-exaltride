@@ -134,11 +134,11 @@ export default function LocationSelector() {
       {/* Location Button */}
       <button
         onClick={openModal}
-        className="flex items-center space-x-1 text-gray-700 cursor-pointer hover:text-gray-900 transition-colors"
+        className="flex items-center space-x-1 text-gray-200 cursor-pointer hover:text-gray-900 transition-colors"
       >
         <MapPin className="h-4 w-4" />
         <div className="flex flex-col leading-tight text-left">
-          <span className="text-xs text-gray-500">Deliver to</span>
+          <span className="text-xs text-gray-400">Deliver to</span>
           <span className="font-medium text-sm flex items-center gap-1">
             {displayLocation} <span className="text-[11px]">▼</span>
           </span>
@@ -158,7 +158,7 @@ export default function LocationSelector() {
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-50 w-[90%] max-w-md p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Choose your location</h2>
+              <h2 className="text-lg font-semibold text-gray-200">Choose your location</h2>
               <button
                 onClick={closeModal}
                 className="p-1 text-gray-400 hover:text-gray-600"

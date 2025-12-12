@@ -276,7 +276,7 @@ export default function Header() {
             </div>
 
             {/* Quick Actions */}
-            <div className="px-4 pb-4 grid grid-cols-1 gap-3">
+            <div className="px-4 py-4 grid grid-cols-1 gap-3">
               <div className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors">
                 <CarSelector />
               </div>
@@ -284,62 +284,6 @@ export default function Header() {
                 <LocationSelector />
               </div>
             </div>
-
-            {/* Menu Items */}
-            <nav className="px-4 space-y-1">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider px-3 mb-2">
-                Browse
-              </p>
-              
-              <Link href="/products" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-                    <ShoppingBag size={18} />
-                  </div>
-                  <span className="font-medium">All Products</span>
-                </div>
-              </Link>
-
-              <Link href="/cart" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center relative">
-                    <ShoppingBag size={18} />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#001F5F] text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-medium">My Cart</span>
-                </div>
-              </Link>
-
-              <Link href="/wishlist" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
-                    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium">Wishlist</span>
-                </div>
-              </Link>
-
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  scrollToDeals();
-                }}
-                className="w-full flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
-              >
-                <div className="w-9 h-9 bg-yellow-400/20 rounded-lg flex items-center justify-center">
-                  <Tag size={18} className="text-yellow-400" />
-                </div>
-                <span className="font-medium">Deals & Offers</span>
-                <span className="ml-auto bg-yellow-400 text-[#001F5F] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  HOT
-                </span>
-              </button>
 
               {/* Account & Logout for authenticated users */}
               {isAuthenticated && (
@@ -370,7 +314,6 @@ export default function Header() {
                   </button>
                 </>
               )}
-            </nav>
 
             {/* Footer */}
             <div className="mt-auto p-4 border-t border-white/10 mt-6">

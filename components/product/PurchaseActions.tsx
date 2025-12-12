@@ -171,8 +171,8 @@ export default function PurchaseActions({
 
   return (
     <>
-      {/* Desktop/Tablet View */}
-      <div className="space-y-3">
+      {/* Desktop/Tablet View - hidden on mobile */}
+      <div className="hidden md:block space-y-3">
         {/* Primary Buttons */}
         <div className="flex gap-2">
           {quantityInCart > 0 ? (
@@ -212,8 +212,8 @@ export default function PurchaseActions({
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+      {/* Mobile Sticky Bottom Bar - only visible on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         {quantityInCart > 0 ? (
           <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
             <button
@@ -251,7 +251,7 @@ export default function PurchaseActions({
       </div>
 
       {/* Spacer for mobile sticky bar */}
-      <div className="h-16 lg:hidden" />
+      <div className="h-16 md:hidden" />
     </>
   );
 }
