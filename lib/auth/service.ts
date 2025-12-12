@@ -118,8 +118,17 @@ class AuthService {
 
   // SSO Login with Google
   initiateGoogleSSO(): void {
+    // Ensure we're on client-side
+    if (typeof window === "undefined") {
+      console.error("initiateGoogleSSO must be called on client-side");
+      return;
+    }
+
+    // Always compute redirect URI fresh on client-side to avoid SSR mismatch
+    const redirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+    
     // Check if we need to force account selection (user logged out previously)
-    const forceSelect = typeof window !== "undefined" && localStorage.getItem("force_sso_account_select") === "true";
+    const forceSelect = localStorage.getItem("force_sso_account_select") === "true";
     
     if (forceSelect) {
       // Clear the flag
@@ -132,7 +141,7 @@ class AuthService {
       // Redirect to Cognito logout, which will redirect to home, then we check for the flag
       const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
       logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
-      logoutUrl.searchParams.set("logout_uri", `${cognitoConfig.redirectUri.replace("/auth/callback", "")}/auth/login?sso=true`);
+      logoutUrl.searchParams.set("logout_uri", `${window.location.origin}/auth/login?sso=true`);
       
       window.location.href = logoutUrl.toString();
       return;
@@ -142,7 +151,7 @@ class AuthService {
       client_id: cognitoConfig.clientId ?? "",
       response_type: "code",
       scope: "email openid profile",
-      redirect_uri: cognitoConfig.redirectUri,
+      redirect_uri: redirectUri,
       identity_provider: "Google",
     });
 
