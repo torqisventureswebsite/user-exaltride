@@ -20,6 +20,7 @@ export default function Header() {
   const { count: cartCount } = useCart();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   // Smooth scroll to deals section
   const scrollToDeals = () => {
@@ -64,28 +65,53 @@ export default function Header() {
             <LocationSelector />
 
             <div className="flex items-center gap-5">
-              {/* Login/Profile */}
+              {/* Login/Profile with Dropdown */}
               {isAuthenticated ? (
-                <div className="flex items-center gap-3">
+                <div 
+                  className="relative group"
+                  onMouseEnter={() => setIsUserDropdownOpen(true)}
+                  onMouseLeave={() => setIsUserDropdownOpen(false)}
+                >
                   <button
-                    onClick={() => router.push("/account")}
-                    className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer pb-2"
                   >
                     <User size={22} className="mb-1" />
                     <span className="text-xs font-medium">{user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}</span>
                   </button>
-                  <button
-                    onClick={logout}
-                    className="flex flex-col items-center justify-center text-gray-700 hover:text-red-600 transition-colors"
-                    title="Logout"
-                  >
-                    <LogOut size={22} className="mb-1" />
-                  </button>
+                  
+                  {/* Dropdown Menu - pt-2 creates invisible hover bridge */}
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 top-full pt-2 z-50">
+                      <div className="w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                        <button
+                          onClick={() => {
+                            router.push("/account");
+                            setIsUserDropdownOpen(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          <User size={16} />
+                          My Account
+                        </button>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setIsUserDropdownOpen(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <LogOut size={16} />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button
                   onClick={() => router.push("/auth/login")}
-                  className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors"
+                  className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   <User size={22} className="mb-1" />
                   <span className="text-xs">Login</span>
@@ -146,17 +172,49 @@ export default function Header() {
 
           {/* Right: User + Cart */}
           <div className="flex items-center gap-3">
-            {/* User/Login */}
+            {/* User/Login with Dropdown */}
             {isAuthenticated ? (
-              <button
-                onClick={() => router.push("/account")}
-                className="flex items-center gap-1.5 text-gray-700 cursor-pointer"
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsUserDropdownOpen(true)}
+                onMouseLeave={() => setIsUserDropdownOpen(false)}
               >
-                <User size={20} />
-                <span className="text-xs font-medium max-w-[60px] truncate">
-                  {user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}
-                </span>
-              </button>
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center gap-1.5 text-gray-700 cursor-pointer"
+                >
+                  <User size={20} />
+                  <span className="text-xs font-medium max-w-[60px] truncate">
+                    {user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Account"}
+                  </span>
+                </button>
+                
+                {/* Dropdown Menu */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <button
+                      onClick={() => {
+                        router.push("/account");
+                        setIsUserDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <User size={14} />
+                      My Account
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsUserDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <LogOut size={14} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => router.push("/auth/login")}
