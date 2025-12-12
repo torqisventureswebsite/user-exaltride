@@ -64,7 +64,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
     >
       <div className="flex gap-3 md:gap-5">
         {/* ✅ IMAGE */}
-        <Link href={`/products/${item.slug || item.productId}`} className="relative w-20 h-20 md:w-32 md:h-32 rounded-lg md:rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 block">
+        <Link href={`/products/${item.slug || item.productId}`} className="relative w-30 h-30 md:w-32 md:h-32 rounded-lg md:rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 block">
           <Image
             src={item.image || "/images/image1.jpg"}
             alt={item.name}
@@ -94,12 +94,6 @@ export default function CartItemCard({ item }: CartItemCardProps) {
                 </span>
               </div>
 
-              {/* ✅ DELIVERY BADGE */}
-              <div className="mt-1.5 md:mt-2 inline-flex items-center gap-1.5 md:gap-2 bg-blue-50 text-blue-700 text-xs md:text-sm px-2 md:px-3 py-0.5 md:py-1 rounded-md md:rounded-lg">
-                <Truck size={14} className="md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Delivery in 2–3 days</span>
-                <span className="sm:hidden">2-3 days</span>
-              </div>
             </div>
 
             {/* ✅ PRICE BLOCK */}

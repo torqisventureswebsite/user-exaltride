@@ -83,7 +83,7 @@ function EmptyCart() {
       </p>
       <Link href="/">
         <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold">
-          Start Shopping
+          Continue Shopping
         </Button>
       </Link>
     </div>
