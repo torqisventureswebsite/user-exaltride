@@ -1,51 +1,27 @@
 "use client";
 
-import { Heart, ShoppingCart, Trash2, Plus, Minus, Loader2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useWishlist } from "@/lib/wishlist/context";
-import { useCart } from "@/lib/cart/context";
-import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
+import { ProductCard, Product } from "@/components/product/ProductCard";
 
 export default function WishlistContent() {
-  const { items, isLoading: loading, removeItem } = useWishlist();
-  const { addItem, updateQuantity, getItemQuantity } = useCart();
+  const { items, isLoading: loading } = useWishlist();
 
-  const handleRemove = async (productId: string) => {
-    await removeItem(productId);
-    toast.success("Removed from wishlist");
-  };
-
-  const handleAddToCart = async (item: typeof items[0]) => {
-    try {
-      await addItem({
-        productId: item.productId,
-        name: item.title,
-        price: item.price,
-        image: item.image,
-        slug: item.slug,
-      });
-      toast.success("Added to cart!", {
-        description: `${item.title} has been added to your cart`,
-      });
-    } catch (error) {
-      toast.error("Failed to add to cart");
-    }
-  };
-
-  const handleIncrement = async (item: typeof items[0]) => {
-    const currentQty = getItemQuantity(item.productId);
-    await updateQuantity(item.productId, currentQty + 1);
-  };
-
-  const handleDecrement = async (item: typeof items[0]) => {
-    const currentQty = getItemQuantity(item.productId);
-    await updateQuantity(item.productId, currentQty - 1);
-  };
+  // Convert wishlist items to Product format for ProductCard
+  const mapWishlistItemToProduct = (item: typeof items[0]): Product => ({
+    id: item.productId,
+    title: item.title,
+    slug: item.slug,
+    price: item.price,
+    primary_image: item.image,
+    brand_name: item.brand_name,
+    stock: item.in_stock ? 1 : 0,
+  });
 
   if (loading) {
     return (
@@ -121,82 +97,10 @@ export default function WishlistContent() {
       {/* Wishlist Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map((item) => (
-          <div
+          <ProductCard
             key={item.productId}
-            className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
-          >
-            <Link href={`/products/${item.slug}`}>
-              <div className="relative aspect-square bg-gray-100">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-contain p-4"
-                />
-                {item.in_stock === false && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <span className="text-white font-semibold">Out of Stock</span>
-                  </div>
-                )}
-              </div>
-            </Link>
-
-            <div className="p-4">
-              <Link href={`/products/${item.slug}`}>
-                <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 hover:text-blue-600">
-                  {item.title}
-                </h3>
-              </Link>
-              
-              {item.brand_name && (
-                <p className="text-xs text-gray-500 mb-2">{item.brand_name}</p>
-              )}
-
-              <p className="text-lg font-bold text-gray-900 mb-3">
-                ₹{item.price.toLocaleString()}
-              </p>
-
-              <div className="flex gap-2">
-                {getItemQuantity(item.productId) > 0 ? (
-                  <div className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 rounded-md py-1">
-                    <button
-                      onClick={() => handleDecrement(item)}
-                      className="w-7 h-7 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-bold text-gray-900 min-w-[24px] text-center">
-                      {getItemQuantity(item.productId)}
-                    </span>
-                    <button
-                      onClick={() => handleIncrement(item)}
-                      className="w-7 h-7 flex items-center justify-center text-gray-900 hover:bg-yellow-500 rounded transition-colors"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-                    onClick={() => handleAddToCart(item)}
-                    disabled={item.in_stock === false}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-1" />
-                    Add to Cart
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleRemove(item.productId)}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+            product={mapWishlistItemToProduct(item)}
+          />
         ))}
       </div>
 

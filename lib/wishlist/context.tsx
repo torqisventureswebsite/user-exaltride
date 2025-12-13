@@ -26,6 +26,30 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 const GUEST_ID_KEY = "wishlist_guest_id";
+const WISHLIST_DETAILS_CACHE_KEY = "exaltride_wishlist_details_cache";
+
+// Helper to get cached wishlist product details from localStorage
+const getCachedWishlistDetails = (): Record<string, Omit<WishlistItem, "productId"> & { productId: string }> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const cached = localStorage.getItem(WISHLIST_DETAILS_CACHE_KEY);
+    return cached ? JSON.parse(cached) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Helper to save wishlist product details to localStorage cache
+const setCachedWishlistDetails = (productId: string, details: WishlistItem) => {
+  if (typeof window === "undefined") return;
+  try {
+    const cache = getCachedWishlistDetails();
+    cache[productId] = details;
+    localStorage.setItem(WISHLIST_DETAILS_CACHE_KEY, JSON.stringify(cache));
+  } catch (error) {
+    console.error("Error caching wishlist details:", error);
+  }
+};
 
 // Get or create guest session ID
 function getGuestId(): string {
@@ -82,15 +106,50 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const mapApiItemToWishlistItem = (item: Record<string, unknown>): WishlistItem => {
     // Handle nested productDetails if present
     const productDetails = item.productDetails as Record<string, unknown> | undefined;
+    const productId = (item.productId || item.product_id || productDetails?.id || item.id) as string;
+    
+    let title = (productDetails?.title || item.title || item.name || "") as string;
+    let price = (productDetails?.price || item.price || 0) as number;
+    let image = (productDetails?.primary_image || item.primary_image || item.image || "") as string;
+    let slug = (productDetails?.slug || item.slug) as string | undefined;
+    let brand_name = (productDetails?.brand_name || item.brand_name) as string | undefined;
+    let in_stock = (productDetails?.in_stock ?? item.in_stock ?? true) as boolean;
+    
+    // If we have productDetails from API, cache them for future use
+    if (productDetails && (productDetails.title || productDetails.name)) {
+      setCachedWishlistDetails(productId, {
+        productId,
+        title,
+        price,
+        image,
+        slug,
+        brand_name,
+        in_stock,
+      });
+    }
+    
+    // If details are missing, try to get from cache
+    if (!title || price === 0) {
+      const cachedDetails = getCachedWishlistDetails()[productId];
+      if (cachedDetails) {
+        console.log("Using cached wishlist details for:", productId);
+        title = cachedDetails.title || title;
+        price = cachedDetails.price || price;
+        image = cachedDetails.image || image;
+        slug = cachedDetails.slug || slug;
+        brand_name = cachedDetails.brand_name || brand_name;
+        in_stock = cachedDetails.in_stock ?? in_stock;
+      }
+    }
     
     return {
-      productId: (item.productId || item.product_id || productDetails?.id || item.id) as string,
-      title: (productDetails?.title || item.title || item.name || "") as string,
-      price: (productDetails?.price || item.price || 0) as number,
-      image: (productDetails?.primary_image || item.primary_image || item.image || "") as string,
-      slug: (productDetails?.slug || item.slug) as string | undefined,
-      brand_name: (productDetails?.brand_name || item.brand_name) as string | undefined,
-      in_stock: (productDetails?.in_stock ?? item.in_stock ?? true) as boolean,
+      productId,
+      title,
+      price,
+      image,
+      slug,
+      brand_name,
+      in_stock,
     };
   };
 
@@ -173,6 +232,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const toggleItem = useCallback(async (item: Omit<WishlistItem, "productId"> & { productId: string }) => {
     const isCurrentlyInWishlist = isInWishlist(item.productId);
 
+    // Cache product details when adding to wishlist
+    if (!isCurrentlyInWishlist) {
+      setCachedWishlistDetails(item.productId, item as WishlistItem);
+    }
+    
     // Optimistic update
     if (isCurrentlyInWishlist) {
       setItems((prev) => prev.filter((i) => i.productId !== item.productId));
