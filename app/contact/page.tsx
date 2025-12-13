@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, Clock, Headphones } from "lucide-react";
+import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
-import Image from "next/image";
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
