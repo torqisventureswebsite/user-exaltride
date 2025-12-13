@@ -124,28 +124,11 @@ class AuthService {
       return;
     }
 
-    // Always compute redirect URI fresh on client-side to avoid SSR mismatch
+    // Use the exact redirect URI that's registered in Cognito
+    // This MUST match exactly what's configured in the Cognito app client
     const redirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || `${window.location.origin}/auth/callback`;
     
-    // Check if we need to force account selection (user logged out previously)
-    const forceSelect = localStorage.getItem("force_sso_account_select") === "true";
-    
-    if (forceSelect) {
-      // Clear the flag
-      localStorage.removeItem("force_sso_account_select");
-      
-      // First logout from Cognito to clear the session, then redirect back to login
-      // Store intent to login after logout
-      localStorage.setItem("sso_login_after_logout", "true");
-      
-      // Redirect to Cognito logout, which will redirect to home, then we check for the flag
-      const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
-      logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
-      logoutUrl.searchParams.set("logout_uri", `${window.location.origin}/auth/login?sso=true`);
-      
-      window.location.href = logoutUrl.toString();
-      return;
-    }
+    console.log("Initiating Google SSO with redirect_uri:", redirectUri);
     
     const params = new URLSearchParams({
       client_id: cognitoConfig.clientId ?? "",
@@ -261,9 +244,6 @@ class AuthService {
     console.log("Logging out - clearing all auth data");
     this.clearTokens();
     localStorage.removeItem(STORAGE_KEYS.USER);
-    
-    // Mark that we need to force account selection on next SSO login
-    localStorage.setItem("force_sso_account_select", "true");
     
     // Double-check tokens are cleared
     console.log("After logout - tokens:", this.getTokens());
