@@ -27,6 +27,38 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 const GUEST_ID_KEY = "wishlist_guest_id";
 const WISHLIST_DETAILS_CACHE_KEY = "exaltride_wishlist_details_cache";
+const GUEST_WISHLIST_KEY = "exaltride_guest_wishlist";
+
+// Helper to get guest wishlist from localStorage
+const getGuestWishlistFromStorage = (): WishlistItem[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(GUEST_WISHLIST_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Helper to save guest wishlist to localStorage
+const saveGuestWishlistToStorage = (items: WishlistItem[]) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(GUEST_WISHLIST_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error("Error saving guest wishlist:", error);
+  }
+};
+
+// Helper to clear guest wishlist from localStorage
+const clearGuestWishlistFromStorage = () => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(GUEST_WISHLIST_KEY);
+  } catch (error) {
+    console.error("Error clearing guest wishlist:", error);
+  }
+};
 
 // Helper to get cached wishlist product details from localStorage
 const getCachedWishlistDetails = (): Record<string, Omit<WishlistItem, "productId"> & { productId: string }> => {
@@ -72,17 +104,40 @@ function clearGuestId(): void {
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, tokens, isLoading: authLoading } = useAuth();
-  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [items, setItems] = useState<WishlistItem[]>([]); // Server items for authenticated users
+  const [guestItems, setGuestItems] = useState<WishlistItem[]>([]); // Guest wishlist (persisted to localStorage)
   const [isLoading, setIsLoading] = useState(true);
   const [wasAuthenticated, setWasAuthenticated] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  const count = items.length;
+  // Use guest items when not authenticated, otherwise use server items
+  const activeItems = isAuthenticated ? items : guestItems;
+  const count = activeItems.length;
   
   // Track when component mounts (client-side only)
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  // Initialize guest wishlist from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasInitialized && hasMounted) {
+      const storedGuestWishlist = getGuestWishlistFromStorage();
+      if (storedGuestWishlist.length > 0) {
+        console.log("Loaded guest wishlist from localStorage:", storedGuestWishlist.length, "items");
+        setGuestItems(storedGuestWishlist);
+      }
+      setHasInitialized(true);
+    }
+  }, [hasInitialized, hasMounted]);
+
+  // Save guest wishlist to localStorage whenever it changes
+  useEffect(() => {
+    if (hasInitialized && !isAuthenticated) {
+      saveGuestWishlistToStorage(guestItems);
+    }
+  }, [guestItems, hasInitialized, isAuthenticated]);
 
   // Get headers for API calls
   const getHeaders = useCallback((): Record<string, string> => {
@@ -225,8 +280,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   // Check if item is in wishlist
   const isInWishlist = useCallback((productId: string): boolean => {
-    return items.some((item) => item.productId === productId);
-  }, [items]);
+    return activeItems.some((item) => item.productId === productId);
+  }, [activeItems]);
 
   // Toggle item in wishlist (add if not present, remove if present)
   const toggleItem = useCallback(async (item: Omit<WishlistItem, "productId"> & { productId: string }) => {
@@ -236,67 +291,105 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     if (!isCurrentlyInWishlist) {
       setCachedWishlistDetails(item.productId, item as WishlistItem);
     }
-    
-    // Optimistic update
-    if (isCurrentlyInWishlist) {
-      setItems((prev) => prev.filter((i) => i.productId !== item.productId));
-    } else {
-      setItems((prev) => [...prev, item as WishlistItem]);
-    }
 
-    try {
-      const response = await fetch("/api/wishlist/toggle", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ productId: item.productId }),
-      });
+    if (isAuthenticated) {
+      // Authenticated user - sync to server
+      // Optimistic update
+      if (isCurrentlyInWishlist) {
+        setItems((prev) => prev.filter((i) => i.productId !== item.productId));
+      } else {
+        setItems((prev) => [...prev, item as WishlistItem]);
+      }
 
-      if (!response.ok) {
+      try {
+        const response = await fetch("/api/wishlist/toggle", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ productId: item.productId }),
+        });
+
+        if (!response.ok) {
+          // Revert on error
+          if (isCurrentlyInWishlist) {
+            setItems((prev) => [...prev, item as WishlistItem]);
+          } else {
+            setItems((prev) => prev.filter((i) => i.productId !== item.productId));
+          }
+          console.error("Failed to toggle wishlist item");
+        }
+      } catch (error) {
         // Revert on error
         if (isCurrentlyInWishlist) {
           setItems((prev) => [...prev, item as WishlistItem]);
         } else {
           setItems((prev) => prev.filter((i) => i.productId !== item.productId));
         }
-        console.error("Failed to toggle wishlist item");
+        console.error("Error toggling wishlist item:", error);
       }
-    } catch (error) {
-      // Revert on error
+    } else {
+      // Guest user - store in localStorage only
       if (isCurrentlyInWishlist) {
-        setItems((prev) => [...prev, item as WishlistItem]);
+        setGuestItems((prev) => prev.filter((i) => i.productId !== item.productId));
       } else {
-        setItems((prev) => prev.filter((i) => i.productId !== item.productId));
+        setGuestItems((prev) => [...prev, item as WishlistItem]);
       }
-      console.error("Error toggling wishlist item:", error);
     }
-  }, [getHeaders, isInWishlist]);
+  }, [getHeaders, isInWishlist, isAuthenticated]);
 
   // Remove item from wishlist
   const removeItem = useCallback(async (productId: string) => {
-    const removedItem = items.find((i) => i.productId === productId);
-    
-    // Optimistic update
-    setItems((prev) => prev.filter((i) => i.productId !== productId));
+    if (isAuthenticated) {
+      const removedItem = items.find((i) => i.productId === productId);
+      
+      // Optimistic update
+      setItems((prev) => prev.filter((i) => i.productId !== productId));
 
-    try {
-      const response = await fetch("/api/wishlist/toggle", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ productId }),
-      });
+      try {
+        const response = await fetch("/api/wishlist/toggle", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ productId }),
+        });
 
-      if (!response.ok && removedItem) {
-        // Revert on error
-        setItems((prev) => [...prev, removedItem]);
-        console.error("Failed to remove wishlist item");
+        if (!response.ok && removedItem) {
+          // Revert on error
+          setItems((prev) => [...prev, removedItem]);
+          console.error("Failed to remove wishlist item");
+        }
+      } catch (error) {
+        if (removedItem) {
+          setItems((prev) => [...prev, removedItem]);
+        }
+        console.error("Error removing wishlist item:", error);
       }
-    } catch (error) {
-      if (removedItem) {
-        setItems((prev) => [...prev, removedItem]);
-      }
-      console.error("Error removing wishlist item:", error);
+    } else {
+      // Guest user - remove from localStorage
+      setGuestItems((prev) => prev.filter((i) => i.productId !== productId));
     }
-  }, [getHeaders, items]);
+  }, [getHeaders, items, isAuthenticated]);
+
+  // Sync guest wishlist items to server when user logs in
+  const syncGuestWishlistToServer = useCallback(async (guestWishlistItems: WishlistItem[]) => {
+    if (!tokens?.idToken) return;
+    
+    console.log("Syncing guest wishlist to server:", guestWishlistItems.length, "items");
+    
+    for (const item of guestWishlistItems) {
+      try {
+        await fetch("/api/wishlist/toggle", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tokens.idToken}`,
+          },
+          body: JSON.stringify({ productId: item.productId }),
+        });
+        console.log("Synced wishlist item to server:", item.productId);
+      } catch (error) {
+        console.error("Error syncing wishlist item to server:", error);
+      }
+    }
+  }, [tokens]);
 
   // Initialize wishlist on mount and handle auth changes
   useEffect(() => {
@@ -309,31 +402,49 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       console.log("Initializing wishlist, isAuthenticated:", isAuthenticated, "hasToken:", !!tokens?.idToken);
       setIsLoading(true);
       try {
-        // User just logged in - merge guest wishlist first
-        if (isAuthenticated && tokens?.idToken && !wasAuthenticated) {
+        if (isAuthenticated && tokens?.idToken) {
+          // User just logged in - sync guest wishlist to server first
+          if (!wasAuthenticated && guestItems.length > 0) {
+            console.log("User logged in with guest wishlist items, syncing...");
+            await syncGuestWishlistToServer(guestItems);
+            // Clear guest wishlist after sync (both state and localStorage)
+            setGuestItems([]);
+            clearGuestWishlistFromStorage();
+          }
+          
+          // Also try the old merge method for any server-side guest data
           await mergeGuestWishlist();
           setWasAuthenticated(true);
-        } else if (!isAuthenticated && wasAuthenticated) {
+          
+          // Fetch user's wishlist from API
+          const wishlistItems = await fetchWishlist();
+          console.log("Wishlist items fetched:", wishlistItems.length);
+          setItems(wishlistItems);
+        } else {
           // User logged out
-          setWasAuthenticated(false);
+          if (wasAuthenticated) {
+            setItems([]);
+            setWasAuthenticated(false);
+            // Clear guest wishlist on logout to start fresh
+            setGuestItems([]);
+            clearGuestWishlistFromStorage();
+          }
+          // Guest user - guestItems are loaded from localStorage
+          setIsLoading(false);
+          return;
         }
-
-        // Fetch wishlist (works for both guest and authenticated users)
-        const wishlistItems = await fetchWishlist();
-        console.log("Wishlist items fetched:", wishlistItems.length);
-        setItems(wishlistItems);
       } finally {
         setIsLoading(false);
       }
     };
 
     initWishlist();
-  }, [hasMounted, authLoading, isAuthenticated, tokens, wasAuthenticated, fetchWishlist, mergeGuestWishlist]);
+  }, [hasMounted, authLoading, isAuthenticated, tokens, wasAuthenticated, guestItems, fetchWishlist, mergeGuestWishlist, syncGuestWishlistToServer]);
 
   return (
     <WishlistContext.Provider
       value={{
-        items,
+        items: activeItems,
         count,
         isLoading,
         isInWishlist,

@@ -27,8 +27,40 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// localStorage key for caching product details
+// localStorage keys
 const PRODUCT_DETAILS_CACHE_KEY = "exaltride_product_details_cache";
+const GUEST_CART_KEY = "exaltride_guest_cart";
+
+// Helper to get guest cart from localStorage
+const getGuestCartFromStorage = (): CartItem[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(GUEST_CART_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Helper to save guest cart to localStorage
+const saveGuestCartToStorage = (items: CartItem[]) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error("Error saving guest cart:", error);
+  }
+};
+
+// Helper to clear guest cart from localStorage
+const clearGuestCartFromStorage = () => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(GUEST_CART_KEY);
+  } catch (error) {
+    console.error("Error clearing guest cart:", error);
+  }
+};
 
 // Helper to get cached product details from localStorage
 const getCachedProductDetails = (): Record<string, Omit<CartItem, "quantity">> => {
@@ -56,9 +88,29 @@ const setCachedProductDetails = (productId: string, details: Omit<CartItem, "qua
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, tokens } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
-  const [guestItems, setGuestItems] = useState<CartItem[]>([]); // Guest cart (in-memory only)
+  const [guestItems, setGuestItems] = useState<CartItem[]>([]); // Guest cart (persisted to localStorage)
   const [isLoading, setIsLoading] = useState(true);
   const [wasAuthenticated, setWasAuthenticated] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Initialize guest cart from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasInitialized) {
+      const storedGuestCart = getGuestCartFromStorage();
+      if (storedGuestCart.length > 0) {
+        console.log("Loaded guest cart from localStorage:", storedGuestCart.length, "items");
+        setGuestItems(storedGuestCart);
+      }
+      setHasInitialized(true);
+    }
+  }, [hasInitialized]);
+
+  // Save guest cart to localStorage whenever it changes
+  useEffect(() => {
+    if (hasInitialized && !isAuthenticated) {
+      saveGuestCartToStorage(guestItems);
+    }
+  }, [guestItems, hasInitialized, isAuthenticated]);
   const quantityDebounceRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Use guest items when not authenticated, otherwise use server items
@@ -316,8 +368,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (!wasAuthenticated && guestItems.length > 0) {
             console.log("User logged in with guest cart items, syncing...");
             await syncGuestCartToServer(guestItems, headers);
-            // Clear guest cart after sync
+            // Clear guest cart after sync (both state and localStorage)
             setGuestItems([]);
+            clearGuestCartFromStorage();
           }
           
           // Fetch user's cart from API (will include newly synced items)
@@ -338,8 +391,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (wasAuthenticated) {
             setItems([]);
             setWasAuthenticated(false);
+            // Clear guest cart on logout to start fresh
+            setGuestItems([]);
+            clearGuestCartFromStorage();
           }
-          // Guest user - keep using guestItems (in-memory only)
+          // Guest user - guestItems are loaded from localStorage
         }
       } finally {
         setIsLoading(false);

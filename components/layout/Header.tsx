@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
@@ -23,24 +23,6 @@ export default function Header() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
-        setIsUserDropdownOpen(false);
-      }
-    };
-
-    if (isUserDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isUserDropdownOpen]);
 
   // Smooth scroll to deals section
   const scrollToDeals = () => {
@@ -87,10 +69,7 @@ export default function Header() {
             <div className="flex items-center gap-5">
               {/* Login/Profile with Dropdown */}
               {isAuthenticated ? (
-                <div 
-                  ref={userDropdownRef}
-                  className="relative"
-                >
+                <div className="relative">
                   <button
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                     className="flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
@@ -210,10 +189,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {/* User/Login with Dropdown */}
             {isAuthenticated ? (
-              <div 
-                ref={userDropdownRef}
-                className="relative"
-              >
+              <div className="relative">
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                   className="flex items-center gap-1.5 text-gray-700 cursor-pointer"
