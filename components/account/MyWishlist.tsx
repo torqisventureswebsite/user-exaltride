@@ -1,44 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, Trash2, ShoppingCart, Loader2, Package } from "lucide-react";
-import { useAuth } from "@/lib/auth/context";
 import { useCart } from "@/lib/cart/context";
-import { getWishlistItems, toggleWishlistItem, WishlistProduct } from "@/lib/wishlist-api";
+import { useWishlist } from "@/lib/wishlist/context";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 
 export function MyWishlist() {
-  const { tokens } = useAuth();
   const { addItem } = useCart();
-  const [wishlistItems, setWishlistItems] = useState<WishlistProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items: wishlistItems, isLoading, removeItem } = useWishlist();
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
-
-  const fetchWishlist = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getWishlistItems(tokens?.idToken);
-      setWishlistItems(response.data || []);
-    } catch (error) {
-      console.error("Error fetching wishlist:", error);
-      toast.error("Failed to load wishlist");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWishlist();
-  }, [tokens]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
     try {
       setRemovingId(productId);
-      await toggleWishlistItem(productId, tokens?.idToken);
-      setWishlistItems((prev) => prev.filter((item) => item.productId !== productId));
+      await removeItem(productId);
       toast.success("Removed from wishlist");
     } catch (error) {
       console.error("Error removing from wishlist:", error);
@@ -48,14 +27,14 @@ export function MyWishlist() {
     }
   };
 
-  const handleAddToCart = async (item: WishlistProduct) => {
+  const handleAddToCart = async (item: typeof wishlistItems[0]) => {
     try {
       setAddingToCartId(item.productId);
       addItem({
         productId: item.productId,
-        name: item.title || item.name || "Product",
+        name: item.title || "Product",
         price: item.price || 0,
-        image: item.primary_image || item.image || "",
+        image: item.image || "",
         slug: item.slug,
       });
       toast.success("Added to cart");
@@ -112,16 +91,16 @@ export function MyWishlist() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {wishlistItems.map((item) => (
             <div
-              key={item.id || item.productId}
+              key={item.productId}
               className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
             >
               {/* Product Image */}
               <Link href={`/products/${item.slug || item.productId}`}>
                 <div className="relative aspect-square bg-gray-100">
-                  {item.primary_image || item.image ? (
+                  {item.image ? (
                     <Image
-                      src={item.primary_image || item.image || ""}
-                      alt={item.title || item.name || "Product"}
+                      src={item.image || ""}
+                      alt={item.title || "Product"}
                       fill
                       className="object-cover"
                     />
@@ -137,7 +116,7 @@ export function MyWishlist() {
               <div className="p-4">
                 <Link href={`/products/${item.slug || item.productId}`}>
                   <h4 className="font-medium text-gray-900 line-clamp-2 hover:text-[#001F5F] transition-colors">
-                    {item.title || item.name || "Product"}
+                    {item.title || "Product"}
                   </h4>
                 </Link>
                 

@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Heart, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, Plus, Minus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { getWishlistItems, removeFromWishlist, clearWishlist, WishlistItem } from "@/lib/wishlist-actions";
+import { useWishlist } from "@/lib/wishlist/context";
 import { useCart } from "@/lib/cart/context";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
@@ -13,47 +12,18 @@ import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
 
 export default function WishlistContent() {
-  const [items, setItems] = useState<WishlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items, isLoading: loading, removeItem } = useWishlist();
   const { addItem, updateQuantity, getItemQuantity } = useCart();
 
-  useEffect(() => {
-    loadWishlist();
-  }, []);
-
-  const loadWishlist = async () => {
-    setLoading(true);
-    const wishlistItems = await getWishlistItems();
-    setItems(wishlistItems);
-    setLoading(false);
+  const handleRemove = async (productId: string) => {
+    await removeItem(productId);
+    toast.success("Removed from wishlist");
   };
 
-  const handleRemove = async (id: string) => {
-    const res = await removeFromWishlist(id);
-    if (res.success) {
-      setItems(items.filter((item) => item.id !== id));
-      toast.success("Removed from wishlist");
-    } else {
-      toast.error("Failed to remove item");
-    }
-  };
-
-  const handleClearAll = async () => {
-    if (confirm("Are you sure you want to clear your entire wishlist?")) {
-      const res = await clearWishlist();
-      if (res.success) {
-        setItems([]);
-        toast.success("Wishlist cleared");
-      } else {
-        toast.error("Failed to clear wishlist");
-      }
-    }
-  };
-
-  const handleAddToCart = async (item: WishlistItem) => {
+  const handleAddToCart = async (item: typeof items[0]) => {
     try {
       await addItem({
-        productId: item.id,
+        productId: item.productId,
         name: item.title,
         price: item.price,
         image: item.image,
@@ -67,14 +37,14 @@ export default function WishlistContent() {
     }
   };
 
-  const handleIncrement = async (item: WishlistItem) => {
-    const currentQty = getItemQuantity(item.id);
-    await updateQuantity(item.id, currentQty + 1);
+  const handleIncrement = async (item: typeof items[0]) => {
+    const currentQty = getItemQuantity(item.productId);
+    await updateQuantity(item.productId, currentQty + 1);
   };
 
-  const handleDecrement = async (item: WishlistItem) => {
-    const currentQty = getItemQuantity(item.id);
-    await updateQuantity(item.id, currentQty - 1);
+  const handleDecrement = async (item: typeof items[0]) => {
+    const currentQty = getItemQuantity(item.productId);
+    await updateQuantity(item.productId, currentQty - 1);
   };
 
   if (loading) {
@@ -146,23 +116,13 @@ export default function WishlistContent() {
             {items.length} {items.length === 1 ? "item" : "items"}
           </p>
         </div>
-        {items.length > 0 && (
-          <Button
-            variant="outline"
-            onClick={handleClearAll}
-            className="text-red-600 border-red-600 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear All
-          </Button>
-        )}
       </div>
 
       {/* Wishlist Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map((item) => (
           <div
-            key={item.id}
+            key={item.productId}
             className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
           >
             <Link href={`/products/${item.slug}`}>
@@ -197,7 +157,7 @@ export default function WishlistContent() {
               </p>
 
               <div className="flex gap-2">
-                {getItemQuantity(item.id) > 0 ? (
+                {getItemQuantity(item.productId) > 0 ? (
                   <div className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 rounded-md py-1">
                     <button
                       onClick={() => handleDecrement(item)}
@@ -206,7 +166,7 @@ export default function WishlistContent() {
                       <Minus className="h-4 w-4" />
                     </button>
                     <span className="text-sm font-bold text-gray-900 min-w-[24px] text-center">
-                      {getItemQuantity(item.id)}
+                      {getItemQuantity(item.productId)}
                     </span>
                     <button
                       onClick={() => handleIncrement(item)}
@@ -229,7 +189,7 @@ export default function WishlistContent() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleRemove(item.id)}
+                  onClick={() => handleRemove(item.productId)}
                   className="text-red-600 border-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />

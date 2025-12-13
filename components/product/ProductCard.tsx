@@ -8,8 +8,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/context";
 import { useCar } from "@/lib/car/context";
-import { useState, useEffect, useMemo } from "react";
-import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
+import { useWishlist } from "@/lib/wishlist/context";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
 export interface CompatibleCar {
@@ -94,9 +94,12 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addItem, updateQuantity, getItemQuantity } = useCart();
   const { selectedCar } = useCar();
+  const { toggleItem, isInWishlist: checkIsInWishlist } = useWishlist();
   const quantityInCart = getItemQuantity(product.id);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  
+  // Check if product is in wishlist using context
+  const isInWishlist = checkIsInWishlist(product.id);
 
   // Check if product is compatible with user's selected car
   const isCompatibleWithUserCar = useMemo(() => {
@@ -116,15 +119,6 @@ export function ProductCard({
       car.year === selectedCar.year
     );
   }, [selectedCar, product.compatible_cars, product.is_universal, product.isCompatibleWithUserCar]);
-
-  // Check if product is in wishlist on mount
-  useEffect(() => {
-    async function checkWishlist() {
-      const items = await getWishlistItems();
-      setIsInWishlist(items.some((item) => item.id === product.id));
-    }
-    checkWishlist();
-  }, [product.id]);
 
   const discountAmount =
     product.compare_at_price && product.price
@@ -172,7 +166,7 @@ export function ProductCard({
     updateQuantity(product.id, quantityInCart - 1);
   };
 
-  const handleWishlistToggle = (e: React.MouseEvent) => {
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -183,54 +177,31 @@ export function ProductCard({
     
     if (wishlistLoading) return;
     
-    // Optimistic update - update UI immediately
-    const wasInWishlist = isInWishlist;
-    setIsInWishlist(!wasInWishlist);
     setWishlistLoading(true);
+    const wasInWishlist = isInWishlist;
 
-    // Show toast immediately
-    if (wasInWishlist) {
-      toast.success("Removed from wishlist");
-    } else {
-      toast.success("Added to wishlist!");
-    }
-
-    // Sync with server in background
-    const syncWithServer = async () => {
-      try {
-        if (wasInWishlist) {
-          const result = await removeFromWishlist(product.id);
-          if (!result.success) {
-            // Revert on failure
-            setIsInWishlist(true);
-            toast.error("Failed to remove from wishlist");
-          }
-        } else {
-          const result = await addToWishlist(
-            product.id,
-            product.title || "",
-            product.price || 0,
-            product.primary_image || "/images/image1.jpg",
-            product.slug || "",
-            product.brand_name,
-            true
-          );
-          if (!result.success && result.message !== "Item already in wishlist") {
-            // Revert on failure
-            setIsInWishlist(false);
-            toast.error("Failed to add to wishlist");
-          }
-        }
-      } catch (error) {
-        // Revert on error
-        setIsInWishlist(wasInWishlist);
-        toast.error("Failed to update wishlist");
-      } finally {
-        setWishlistLoading(false);
+    try {
+      await toggleItem({
+        productId: product.id,
+        title: product.title || "",
+        price: product.price || 0,
+        image: product.primary_image || "/images/image1.jpg",
+        slug: product.slug,
+        brand_name: product.brand_name,
+        in_stock: true,
+      });
+      
+      // Show toast based on previous state
+      if (wasInWishlist) {
+        toast.success("Removed from wishlist");
+      } else {
+        toast.success("Added to wishlist!");
       }
-    };
-
-    syncWithServer();
+    } catch (error) {
+      toast.error("Failed to update wishlist");
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   return (
@@ -347,10 +318,10 @@ export function ProductCard({
                 <span className="sm:hidden">Add</span>
               </Button>
             )}
-            <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
+            {/* <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
               <span className="hidden sm:inline">Buy Now</span>
               <span className="sm:hidden">Buy</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </Card>

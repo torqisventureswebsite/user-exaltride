@@ -4,22 +4,26 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { NewProductCard } from "@/components/product/NewProductCard";
 import type { Product } from "@/components/product/ProductCard";
-import { fetchAllProducts } from "@/lib/api/products";
+import { useWishlist } from "@/lib/wishlist/context";
 
 export default function WishlistSection() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { items } = useWishlist();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // TEMP: load products (replace later with wishlist API)
-  useEffect(() => {
-    async function loadProducts() {
-      const data = await fetchAllProducts();
-      setProducts(data.slice(0, 20));
-    }
-    loadProducts();
-  }, []);
+  // Map wishlist items to Product format for NewProductCard
+  const products: Product[] = items.map((item) => ({
+    id: item.productId,
+    title: item.title,
+    price: item.price,
+    primary_image: item.image,
+    slug: item.slug || item.productId,
+    brand_name: item.brand_name,
+    in_stock: item.in_stock ?? true,
+    compare_at_price: undefined,
+    discount_percentage: undefined,
+  }));
 
   const checkScroll = () => {
     const el = scrollRef.current;

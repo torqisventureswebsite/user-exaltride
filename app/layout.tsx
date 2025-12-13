@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth/context";
 import { CartProvider } from "@/lib/cart/context";
 import { CarProvider } from "@/lib/car/context";
 import { LocationProvider } from "@/lib/location/context";
+import { WishlistProvider } from "@/lib/wishlist/context";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import { OAuthCallbackHandler } from "@/components/auth/OAuthCallbackHandler";
@@ -37,11 +38,13 @@ export default function RootLayout({
           <LocationProvider>
             <CarProvider>
               <CartProvider>
-                <Suspense fallback={null}>
-                  <OAuthCallbackHandler />
-                </Suspense>
-                {children}
-                <Toaster position="top-right" richColors duration={1000} />
+                <WishlistProvider>
+                  <Suspense fallback={null}>
+                    <OAuthCallbackHandler />
+                  </Suspense>
+                  {children}
+                  <Toaster position="top-right" richColors duration={1000} />
+                </WishlistProvider>
               </CartProvider>
             </CarProvider>
           </LocationProvider>

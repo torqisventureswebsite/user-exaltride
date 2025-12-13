@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, Trash2, Truck } from "lucide-react";
 import { useCart } from "@/lib/cart/context";
+import { useWishlist } from "@/lib/wishlist/context";
 import { useTransition, useState } from "react";
-import { saveForLater } from "@/lib/saved-for-later";
 import { toast } from "sonner";
 
 interface CartItemCardProps {
@@ -24,6 +24,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
   const [isPending, startTransition] = useTransition();
   const [removing, setRemoving] = useState(false);
   const { updateQuantity, removeItem } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
 
   const handleQty = (newQty: number) => {
     if (newQty < 1) {
@@ -43,17 +44,21 @@ export default function CartItemCard({ item }: CartItemCardProps) {
     });
   };
 
-  const handleSaveForLater = () => {
-    saveForLater({
+  const handleSaveToWishlist = async () => {
+    await toggleItem({
       productId: item.productId,
-      name: item.name,
+      title: item.name,
       price: item.price,
       image: item.image,
-      categoryId: item.categoryId,
       slug: item.slug,
     });
-    removeItem(item.productId);
-    toast.success("Saved for later!");
+    
+    if (isInWishlist(item.productId)) {
+      toast.success("Removed from wishlist");
+    } else {
+      removeItem(item.productId);
+      toast.success("Saved to wishlist!");
+    }
   };
 
   return (
@@ -139,11 +144,11 @@ export default function CartItemCard({ item }: CartItemCardProps) {
             {/* ✅ ACTION BUTTONS */}
             <div className="flex items-center gap-2 md:gap-3">
               <button
-                onClick={handleSaveForLater}
+                onClick={handleSaveToWishlist}
                 className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-xs md:text-sm font-medium"
               >
                 <Heart size={14} className="md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Save for Later</span>
+                <span className="hidden sm:inline">Save to wishlist</span>
               </button>
 
               <button

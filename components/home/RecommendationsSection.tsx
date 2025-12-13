@@ -203,7 +203,7 @@ export function RecommendationsSection({ products: initialProducts }: Recommenda
               )}
               <Link href={`/products/${featuredProduct.slug}`} className="flex-1">
                 <Button className="w-full bg-[#001F5F] hover:bg-blue-700 text-white font-semibold h-10">
-                  Buy Now
+                  View
                 </Button>
               </Link>
             </div>

@@ -6,18 +6,20 @@ import Link from "next/link";
 import SearchBar from "./SearchBar";
 import LocationSelector from "./LocationSelector";
 import CartIcon from "./CartIcon";
-import { User, Tag, Menu, X, ShoppingBag, MapPin, Car, LogOut } from "lucide-react";
+import { User, Tag, Menu, X, ShoppingBag, MapPin, Car, LogOut, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CarSelector from "./CarSelector";
 import { CartBadge } from "@/components/cart/CartBadge";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { useCart } from "@/lib/cart/context";
+import { useWishlist } from "@/lib/wishlist/context";
 
 export default function Header() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
   const { count: cartCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -118,6 +120,22 @@ export default function Header() {
                   <span className="text-xs">Login</span>
                 </Link>
               )}
+
+              {/* Wishlist */}
+              <Link
+                href="/wishlist"
+                className="relative flex flex-col items-center justify-center text-gray-700 hover:text-gray-900 transition-colors p-2 -m-2"
+              >
+                <div className="relative mb-1">
+                  <Heart size={22} />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                      {wishlistCount > 99 ? '99+' : wishlistCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-medium">Wishlist</span>
+              </Link>
 
               {/* Cart */}
               <Link
@@ -226,6 +244,19 @@ export default function Header() {
                 <span className="text-xs font-medium">Login</span>
               </Link>
             )}
+
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </Link>
 
             {/* Cart */}
             <Link
