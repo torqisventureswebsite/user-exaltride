@@ -43,6 +43,16 @@ export function MyOrders() {
   }, [tokens?.idToken]);
 
   const filteredOrders = orders.filter((order) => {
+    // First, exclude cancelled orders and orders with failed/pending payment
+    const orderStatus = order.orderStatus?.toLowerCase();
+    const paymentStatus = (order as any).paymentStatus?.toLowerCase();
+    
+    // Exclude cancelled orders
+    if (orderStatus === "cancelled") return false;
+    
+    // Exclude orders with failed or pending payment
+    if (paymentStatus === "failed" || paymentStatus === "pending") return false;
+
     // Filter by tab
     if (activeTab === "not-shipped") {
       if (!["pending", "confirmed", "packed"].includes(order.orderStatus)) {
