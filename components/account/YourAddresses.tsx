@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Star, MapPin, X } from "lucide-react";
+import { Pencil, Trash2, Star, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Address {
@@ -33,11 +33,6 @@ export function YourAddresses() {
   const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-
-  const handleAddNew = () => {
-    setEditingAddress(null);
-    setIsModalOpen(true);
-  };
 
   const handleEdit = (address: Address) => {
     setEditingAddress(address);
@@ -75,42 +70,41 @@ export function YourAddresses() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Add New Address Card */}
-        <button
-          onClick={handleAddNew}
-          className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#001F5F] hover:bg-gray-50 transition-colors min-h-[200px]"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <Plus className="h-6 w-6 text-gray-400" />
-          </div>
-          <span className="text-gray-600 font-medium">Add New Address</span>
-        </button>
+      {addresses.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Addresses Saved</h3>
+          <p className="text-gray-600">
+            You can add a new address during checkout.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Default Address */}
+          {defaultAddress && (
+            <AddressCard
+              address={defaultAddress}
+              onEdit={() => handleEdit(defaultAddress)}
+              onDelete={() => handleDelete(defaultAddress.id)}
+              onSetDefault={() => {}}
+            />
+          )}
 
-        {/* Default Address */}
-        {defaultAddress && (
-          <AddressCard
-            address={defaultAddress}
-            onEdit={() => handleEdit(defaultAddress)}
-            onDelete={() => handleDelete(defaultAddress.id)}
-            onSetDefault={() => {}}
-          />
-        )}
+          {/* Other Addresses */}
+          {otherAddresses.map((address) => (
+            <AddressCard
+              key={address.id}
+              address={address}
+              onEdit={() => handleEdit(address)}
+              onDelete={() => handleDelete(address.id)}
+              onSetDefault={() => handleSetDefault(address.id)}
+            />
+          ))}
+        </div>
+      )}
 
-        {/* Other Addresses */}
-        {otherAddresses.map((address) => (
-          <AddressCard
-            key={address.id}
-            address={address}
-            onEdit={() => handleEdit(address)}
-            onDelete={() => handleDelete(address.id)}
-            onSetDefault={() => handleSetDefault(address.id)}
-          />
-        ))}
-      </div>
-
-      {/* Add/Edit Address Modal */}
-      {isModalOpen && (
+      {/* Edit Address Modal - only for editing existing addresses */}
+      {isModalOpen && editingAddress && (
         <AddressModal
           address={editingAddress}
           onClose={() => {

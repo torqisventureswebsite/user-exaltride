@@ -3,20 +3,46 @@
 import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
 import type { Product } from "@/components/product/ProductCard";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
 import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
+import { useCar } from "@/lib/car/context";
 
 interface FeaturedProductsProps {
   products: Product[];
 }
 
 export function FeaturedProducts({ products: initialProducts }: FeaturedProductsProps) {
-  const { products, isLoading, hasCarFilter } = useCarProducts({
+  const { selectedCar } = useCar();
+  const { products: rawProducts, isLoading, hasCarFilter } = useCarProducts({
     endpoint: "products/best-selling",
     limit: 40,
     initialProducts: initialProducts as CarProduct[],
   });
+
+  // Sort products: compatible ones first when a car is selected
+  const products = useMemo(() => {
+    if (!selectedCar) return rawProducts;
+    
+    const checkCompatibility = (product: CarProduct): boolean => {
+      if (product.is_universal) return true;
+      if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
+      
+      return product.compatible_cars.some(car =>
+        car.make.toLowerCase() === selectedCar.make.toLowerCase() &&
+        car.model.toLowerCase() === selectedCar.model.toLowerCase() &&
+        car.year === selectedCar.year
+      );
+    };
+
+    return [...rawProducts].sort((a, b) => {
+      const aCompatible = checkCompatibility(a);
+      const bCompatible = checkCompatibility(b);
+      if (aCompatible && !bCompatible) return -1;
+      if (!aCompatible && bCompatible) return 1;
+      return 0;
+    });
+  }, [rawProducts, selectedCar]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);

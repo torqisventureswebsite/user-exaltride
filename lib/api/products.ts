@@ -37,6 +37,16 @@ export const ApiResponseSchema = z.object({
 export type ApiProduct = z.infer<typeof ApiProductSchema>;
 export type ApiResponse = z.infer<typeof ApiResponseSchema>;
 
+// Compatible car type
+export interface CompatibleCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  variant?: string;
+  notes?: string;
+}
+
 // Product type that matches the app's existing structure
 export interface Product {
   id: string;
@@ -72,6 +82,7 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   images?: string[];
+  compatible_cars?: CompatibleCar[];
 }
 
 
@@ -188,24 +199,34 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     
     // The API might return { data: product } or just the product
     const apiProduct = data.data || data;
-    const validated = ApiProductSchema.parse(apiProduct);
 
+    // Build product object directly from API response to preserve all fields
     const product: Product = {
-      id: validated.id,
-      slug: validated.slug,
-      title: validated.title,
-      primary_image: validated.primary_image,
-      price: validated.price,
-      compare_at_price: validated.compare_at_price,
-      discount_percentage: validated.discount_percentage
-        ? parseFloat(validated.discount_percentage)
+      id: apiProduct.id,
+      slug: apiProduct.slug,
+      title: apiProduct.title,
+      primary_image: apiProduct.primary_image,
+      price: apiProduct.price,
+      compare_at_price: apiProduct.compare_at_price,
+      discount_percentage: apiProduct.discount_percentage
+        ? parseFloat(apiProduct.discount_percentage)
         : null,
-      rating: validated.rating ?? 0,
-      review_count: validated.review_count ?? 0,
-      in_stock: validated.in_stock ?? true,
-      brand_name: validated.brand_name,
-      stock: (validated.in_stock ?? true) ? 100 : 0,
-      status: (validated.in_stock ?? true) ? "active" : "out_of_stock",
+      rating: apiProduct.rating ?? 0,
+      review_count: apiProduct.review_count ?? 0,
+      in_stock: apiProduct.in_stock ?? (apiProduct.stock > 0),
+      brand_name: apiProduct.brand_name,
+      stock: apiProduct.stock ?? 0,
+      status: apiProduct.status ?? "active",
+      description: apiProduct.description,
+      sku: apiProduct.sku,
+      warranty_months: apiProduct.warranty_months,
+      weight_kg: apiProduct.weight_kg,
+      dimensions_cm: apiProduct.dimensions_cm,
+      is_oem: apiProduct.is_oem,
+      is_universal: apiProduct.is_universal,
+      images: apiProduct.images,
+      category: apiProduct.category,
+      compatible_cars: apiProduct.compatible_cars,
     };
 
     return product;

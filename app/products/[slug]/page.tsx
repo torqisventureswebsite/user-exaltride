@@ -76,6 +76,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               }
               title={product.title}
               discount={discountAmount}
+              compatibleCars={product.compatible_cars}
+              isUniversal={product.is_universal}
             />
             {/* PurchaseActions - handles both desktop and mobile sticky bar internally */}
             <PurchaseActions
@@ -110,7 +112,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
             <VehicleCompatibility 
-              compatibleCars={(product as any).compatible_cars}
+              compatibleCars={product.compatible_cars}
               isUniversal={product.is_universal}
             />
               <ProfessionalInstallationCard />

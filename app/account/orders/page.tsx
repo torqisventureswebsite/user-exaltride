@@ -63,7 +63,21 @@ export default function OrdersPage() {
         const data = await response.json();
 
         if (response.ok) {
-          setOrders(data.data || []);
+          // Filter to only show successful orders (exclude cancelled and pending payment)
+          const allOrders = data.data || [];
+          const successfulOrders = allOrders.filter((order: Order) => {
+            const orderStatus = order.orderStatus?.toLowerCase();
+            const paymentStatus = order.paymentStatus?.toLowerCase();
+            
+            // Exclude cancelled orders
+            if (orderStatus === "cancelled") return false;
+            
+            // Exclude orders with failed or pending payment
+            if (paymentStatus === "failed" || paymentStatus === "pending") return false;
+            
+            return true;
+          });
+          setOrders(successfulOrders);
         }
       } catch (error) {
         console.error("Failed to fetch orders:", error);

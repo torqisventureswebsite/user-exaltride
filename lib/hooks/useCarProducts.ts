@@ -5,6 +5,16 @@ import { useCar } from "@/lib/car/context";
 
 const API_BASE_URL = "https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1";
 
+// Compatible car type
+interface CompatibleCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  variant?: string;
+  notes?: string;
+}
+
 // Product type that works with both API and component Product types
 export interface CarProduct {
   id: string;
@@ -22,6 +32,9 @@ export interface CarProduct {
   status?: string;
   category_id?: string;
   description?: string;
+  compatible_cars?: CompatibleCar[];
+  is_universal?: boolean;
+  isCompatibleWithUserCar?: boolean;
 }
 
 interface UseCarProductsOptions {
@@ -63,7 +76,14 @@ export function useCarProducts({
     try {
       const params = new URLSearchParams();
       params.append("limit", limit.toString());
+      // Send all car attributes for exact AND matching
       params.append("car_id", selectedCar.id);
+      params.append("make", selectedCar.make);
+      params.append("model", selectedCar.model);
+      params.append("year", selectedCar.year.toString());
+      if (selectedCar.variant) {
+        params.append("variant", selectedCar.variant);
+      }
 
       const url = `${API_BASE_URL}/${endpoint}?${params.toString()}`;
       const response = await fetch(url);
@@ -73,6 +93,19 @@ export function useCarProducts({
       }
 
       const data = await response.json();
+      
+      // Helper function to check if a product is compatible with user's car
+      const checkCompatibility = (product: any): boolean => {
+        if (product.is_universal) return true;
+        if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
+        
+        return product.compatible_cars.some((car: CompatibleCar) =>
+          car.make.toLowerCase() === selectedCar.make.toLowerCase() &&
+          car.model.toLowerCase() === selectedCar.model.toLowerCase() &&
+          car.year === selectedCar.year
+        );
+      };
+
       const fetchedProducts: CarProduct[] = (data.data || []).map((p: any) => ({
         id: p.id,
         slug: p.slug,
@@ -88,11 +121,30 @@ export function useCarProducts({
         stock: p.in_stock ? 100 : 0,
         status: p.in_stock ? "active" : "out_of_stock",
         category_id: p.category?.id,
+        compatible_cars: p.compatible_cars,
+        is_universal: p.is_universal,
+        isCompatibleWithUserCar: checkCompatibility(p),
       }));
 
-      // If car filter returns empty, fall back to initial products
+      // Sort products: compatible ones first, then non-compatible
+      fetchedProducts.sort((a, b) => {
+        if (a.isCompatibleWithUserCar && !b.isCompatibleWithUserCar) return -1;
+        if (!a.isCompatibleWithUserCar && b.isCompatibleWithUserCar) return 1;
+        return 0;
+      });
+
+      // If car filter returns empty, fall back to initial products (also sorted)
       if (fetchedProducts.length === 0) {
-        setProducts(initialProducts);
+        // Sort initial products by compatibility too
+        const sortedInitial = [...initialProducts].map(p => ({
+          ...p,
+          isCompatibleWithUserCar: checkCompatibility(p),
+        })).sort((a, b) => {
+          if (a.isCompatibleWithUserCar && !b.isCompatibleWithUserCar) return -1;
+          if (!a.isCompatibleWithUserCar && b.isCompatibleWithUserCar) return 1;
+          return 0;
+        });
+        setProducts(sortedInitial);
       } else {
         setProducts(fetchedProducts);
       }

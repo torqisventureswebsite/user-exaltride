@@ -3,11 +3,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Star, TruckIcon, Plus, Minus, Heart } from "lucide-react";
+import { ShoppingCart, Star, TruckIcon, Plus, Minus, Heart, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/context";
-import { useState, useEffect } from "react";
+import { useCar } from "@/lib/car/context";
+import { useState, useEffect, useMemo } from "react";
 import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
 
@@ -63,6 +64,7 @@ export interface Product {
   vendor?: ProductVendor;
   created_at?: string;
   updated_at?: string;
+  isCompatibleWithUserCar?: boolean;
 }
 
 interface ProductCardProps {
@@ -91,9 +93,29 @@ export function ProductCard({
   showOffers = true,
 }: ProductCardProps) {
   const { addItem, updateQuantity, getItemQuantity } = useCart();
+  const { selectedCar } = useCar();
   const quantityInCart = getItemQuantity(product.id);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Check if product is compatible with user's selected car
+  const isCompatibleWithUserCar = useMemo(() => {
+    // If explicitly set from parent, use that
+    if (product.isCompatibleWithUserCar !== undefined) {
+      return product.isCompatibleWithUserCar;
+    }
+    
+    // Otherwise, check compatibility ourselves
+    if (!selectedCar) return false;
+    if (product.is_universal) return true;
+    if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
+    
+    return product.compatible_cars.some(car =>
+      car.make.toLowerCase() === selectedCar.make.toLowerCase() &&
+      car.model.toLowerCase() === selectedCar.model.toLowerCase() &&
+      car.year === selectedCar.year
+    );
+  }, [selectedCar, product.compatible_cars, product.is_universal, product.isCompatibleWithUserCar]);
 
   // Check if product is in wishlist on mount
   useEffect(() => {
@@ -222,6 +244,13 @@ export function ProductCard({
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
+
+          {/* Compatible with user's car indicator */}
+          {isCompatibleWithUserCar && (
+            <div className="absolute top-2 md:top-3 left-2 md:left-3 bg-green-500 text-white p-1 md:p-1.5 rounded-full shadow-md" title="Fits your car">
+              <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
+            </div>
+          )}
 
           {/* Discount Badge */}
           {discountAmount > 0 && (
