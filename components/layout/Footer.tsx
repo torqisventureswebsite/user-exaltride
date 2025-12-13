@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Twitter
 } from "lucide-react";
 
 import Image from "next/image";
@@ -133,28 +132,27 @@ export default function Footer() {
           {/* Social Media Icons */}
           <div className="flex items-center gap-2 md:gap-3">
             <a
-              href="#"
+              href="https://www.facebook.com/people/exaltride/61583843222896/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
               aria-label="Facebook"
             >
               <Facebook className="w-4 h-4 text-white" />
             </a>
             <a
-              href="#"
-              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
-              aria-label="Twitter"
-            >
-              <Twitter className="w-4 h-4 text-white" />
-            </a>
-            <a
-              href="#"
+              href="https://www.linkedin.com/showcase/exalt-ride/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
               aria-label="LinkedIn"
             >
               <Linkedin className="w-4 h-4 text-white" />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/exaltride/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-[#1a2a7a] hover:bg-[#2a3a8a] rounded-full transition-colors flex-shrink-0"
               aria-label="Instagram"
             >
