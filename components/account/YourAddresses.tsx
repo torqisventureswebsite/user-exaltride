@@ -26,17 +26,7 @@ const MOCK_ADDRESSES: Address[] = [
     state: "Maharashtra",
     postalCode: "400001",
     isDefault: true,
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    phone: "+91 98765 43210",
-    addressLine1: "456 Park Avenue",
-    city: "Bangalore",
-    state: "Karnataka",
-    postalCode: "560001",
-    isDefault: false,
-  },
+  }
 ];
 
 export function YourAddresses() {

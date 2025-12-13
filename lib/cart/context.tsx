@@ -59,15 +59,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, tokens]);
 
   // Map API response to CartItem format
-  const mapApiItemToCartItem = (item: Record<string, unknown>): CartItem => ({
-    productId: (item.productId || item.productId || item.slug) as string,
-    name: (item.name || item.product_name || "") as string,
-    price: (item.price || 0) as number,
-    quantity: (item.quantity || 1) as number,
-    image: (item.image || item.primary_image || "") as string,
-    categoryId: (item.category_id || item.categoryId) as string | undefined,
-    slug: item.slug as string | undefined,
-  });
+  const mapApiItemToCartItem = (item: Record<string, unknown>): CartItem => {
+    console.log("Mapping API item:", JSON.stringify(item, null, 2));
+    return {
+      productId: (item.product_id || item.productId || item.slug) as string,
+      name: (item?.product_name || item?.name || item?.title) as string,
+      price: (item?.price || item?.unit_price) as number,
+      quantity: (item?.quantity) as number,
+      image: (item?.primary_image || item?.image) as string,
+      categoryId: (item?.category_id || item?.categoryId) as string | undefined,
+      slug: (item?.slug || item?.product_id || item?.productId) as string | undefined,
+    };
+  };
 
   // Fetch cart from API - only for authenticated users
   const fetchCart = useCallback(async (): Promise<CartItem[]> => {
@@ -79,7 +82,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       if (response.ok) {
         const data = await response.json();
-        const cartItems = (data.data || data.items || data.cart || []).map(mapApiItemToCartItem);
+        console.log("Raw API response:", JSON.stringify(data, null, 2));
+        const rawItems = data.data?.items || data.data || data.items || data.cart || [];
+        console.log("Raw items array:", JSON.stringify(rawItems, null, 2));
+        const cartItems = rawItems.map(mapApiItemToCartItem);
+        console.log("Mapped cart items:", JSON.stringify(cartItems, null, 2));
         return cartItems;
       }
     } catch (error) {
@@ -91,7 +98,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Refresh cart from API
   const refreshCart = useCallback(async () => {
     console.log("Refreshing cart...");
-    if (!isAuthenticated) {
+    if (tokens?.idToken) {
       setIsLoading(false);
       return;
     }
@@ -219,7 +226,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     };
-
+    refreshCart();
     initCart();
   }, [isAuthenticated, tokens, wasAuthenticated, guestItems, fetchCart, mergeCartData, syncGuestCartToServer]);
 

@@ -32,7 +32,8 @@ export default function CheckoutContent() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 999 ? 0 : 50;
   const tax = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST
-  const total = subtotal + shipping + tax;
+  // const total = subtotal + shipping + tax;
+  const total = subtotal;
 
   if (isLoading) {
     return (
@@ -102,7 +103,7 @@ export default function CheckoutContent() {
                 <span>Subtotal</span>
                 <span className="font-medium">₹{subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-gray-700">
+              {/* <div className="flex justify-between text-gray-700">
                 <span>Shipping</span>
                 <span className="font-medium">
                   {shipping === 0 ? (
@@ -111,11 +112,11 @@ export default function CheckoutContent() {
                     `₹${shipping}`
                   )}
                 </span>
-              </div>
-              <div className="flex justify-between text-gray-700">
+              </div> */}
+              {/* <div className="flex justify-between text-gray-700">
                 <span>Tax (GST 18%)</span>
                 <span className="font-medium">₹{tax.toLocaleString()}</span>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
