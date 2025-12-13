@@ -61,77 +61,96 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Map API response to CartItem format
   const mapApiItemToCartItem = (item: Record<string, unknown>): CartItem => {
     console.log("Mapping API item:", JSON.stringify(item, null, 2));
+    
+    // Extract productDetails if it exists (nested structure from backend)
+    const productDetails = item.productDetails as Record<string, unknown> | undefined;
+    
+    // Get values from productDetails first, then fall back to top-level properties
+    const name = (productDetails?.title || productDetails?.name || item?.product_name || item?.name || item?.title || "") as string;
+    const price = (productDetails?.price || item?.price || item?.unit_price || 0) as number;
+    const image = (productDetails?.primary_image || productDetails?.image || item?.primary_image || item?.image || "") as string;
+    const slug = (productDetails?.slug || item?.slug || item?.product_id || item?.productId) as string | undefined;
+    const categoryId = (productDetails?.category_id || item?.category_id || item?.categoryId) as string | undefined;
+    const productId = (item.productId || item.product_id || productDetails?.id || productDetails?.slug || item.slug) as string;
+    
     return {
-      productId: (item.product_id || item.productId || item.slug) as string,
-      name: (item?.product_name || item?.name || item?.title || "") as string,
-      price: (item?.price || item?.unit_price || 0) as number,
-      quantity: (item?.quantity || 0) as number,
-      image: (item?.primary_image || item?.image || "") as string,
-      categoryId: (item?.category_id || item?.categoryId) as string | undefined,
-      slug: (item?.slug || item?.product_id || item?.productId) as string | undefined,
+      productId,
+      name,
+      price,
+      quantity: (item?.quantity || 1) as number,
+      image,
+      categoryId,
+      slug,
     };
   };
 
   // Fetch cart from API - only for authenticated users
-  const fetchCart = useCallback(async (): Promise<CartItem[]> => {
+  // Returns null if there's an error (to distinguish from empty cart)
+  const fetchCart = useCallback(async (): Promise<CartItem[] | null> => {
     const headers = getHeaders();
     if (!headers) return [];
     
     try {
       const response = await fetch("/api/cart", { headers });
+      const data = await response.json();
+      console.log("Raw API response:", JSON.stringify(data, null, 2));
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Raw API response:", JSON.stringify(data, null, 2));
-        const rawItems = data.data?.items || data.data || data.items || data.cart || [];
-        console.log("Raw items array:", JSON.stringify(rawItems, null, 2));
-        const cartItems = rawItems.map(mapApiItemToCartItem);
-        console.log("Mapped cart items:", JSON.stringify(cartItems, null, 2));
-        return cartItems;
+      // Check for error response from backend
+      if (data.error || !response.ok) {
+        console.error("Backend cart error:", data.error || data.message);
+        return null; // Return null to indicate error, not empty cart
       }
+      
+      let rawItems = data.data?.items || data.data || data.items || data.cart || [];
+      console.log("Raw items array:", JSON.stringify(rawItems, null, 2));
+      
+      // Handle case where data.data is a single object instead of an array
+      if (rawItems && !Array.isArray(rawItems) && typeof rawItems === 'object') {
+        // Check if it's a cart item object (has productId) vs just metadata
+        if (rawItems.productId || rawItems.product_id) {
+          rawItems = [rawItems];
+        } else {
+          // It's not a cart item, return empty
+          rawItems = [];
+        }
+      }
+      
+      // Filter out any items that are just error objects
+      const validItems = Array.isArray(rawItems) ? rawItems.filter((item: Record<string, unknown>) => item && !item.error) : [];
+      const cartItems = validItems.map(mapApiItemToCartItem);
+      console.log("Mapped cart items:", JSON.stringify(cartItems, null, 2));
+      return cartItems;
     } catch (error) {
       console.error("Error fetching cart:", error);
+      return null;
     }
-    return [];
   }, [getHeaders]);
-
-  // Refresh cart from API
-  const refreshCart = useCallback(async () => {
-    console.log("Refreshing cart...");
-    if (tokens?.idToken) {
-      setIsLoading(false);
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      console.log("Fetching cart...");
-      const cartItems = await fetchCart();
-      console.log("Cart items:", cartItems);
-      setItems(cartItems);
-      
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchCart, isAuthenticated]);
 
   // Fetch product details from API for items missing details
   const fetchProductDetails = useCallback(async (productId: string): Promise<Omit<CartItem, "quantity"> | null> => {
+    console.log("Fetching product details for:", productId);
     try {
-      const response = await fetch(`https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1/products/${productId}`);
-      if (response.ok) {
-        const data = await response.json();
-        const product = data.data || data;
-        if (product) {
-          return {
-            productId: product.slug || product.id || productId,
-            name: product.title || product.name || "",
-            price: product.price || 0,
-            image: product.primary_image || product.image || "",
-            categoryId: product.category?.id || product.category_id,
-            slug: product.slug,
-          };
-        }
+      // Try fetching by ID first
+      let response = await fetch(`https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1/products/${productId}`);
+      let data = await response.json();
+      console.log("Product API response:", JSON.stringify(data, null, 2));
+      
+      // If not found by ID, the API might need slug - but we only have ID here
+      if (!response.ok || data.error) {
+        console.log("Product not found by ID, response:", data);
+        return null;
+      }
+      
+      const product = data.data || data;
+      if (product && (product.title || product.name)) {
+        return {
+          productId: product.id || productId,
+          name: product.title || product.name || "",
+          price: product.price || 0,
+          image: product.primary_image || product.image || "",
+          categoryId: product.category?.id || product.category_id,
+          slug: product.slug,
+        };
       }
     } catch (error) {
       console.error("Error fetching product details:", error);
@@ -141,6 +160,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Merge API cart with fetched product details for items missing info
   const mergeCartData = useCallback(async (apiCart: CartItem[]): Promise<CartItem[]> => {
+    console.log("mergeCartData called with:", JSON.stringify(apiCart, null, 2));
     const mergedItems: CartItem[] = [];
     
     for (const apiItem of apiCart) {
@@ -163,6 +183,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     
     return mergedItems;
   }, [fetchProductDetails]);
+
+  // Refresh cart from API
+  const refreshCart = useCallback(async () => {
+    console.log("Refreshing cart...");
+    if (!tokens?.idToken) {
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      console.log("Fetching cart...");
+      const cartItems = await fetchCart();
+      console.log("Cart items:", cartItems);
+      
+      // If backend returned an error (null), preserve current cart state
+      if (cartItems === null) {
+        console.log("Backend error, preserving current cart state");
+        return;
+      }
+      
+      const mergedCart = await mergeCartData(cartItems);
+      setItems(mergedCart);
+      
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchCart, mergeCartData, tokens]);
 
   // Sync guest cart items to server when user logs in
   const syncGuestCartToServer = useCallback(async (guestCartItems: CartItem[], headers: HeadersInit) => {
@@ -207,7 +255,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Fetch user's cart from API (will include newly synced items)
           const apiCart = await fetchCart();
           
-          if (apiCart.length > 0) {
+          // If backend returned an error (null), don't clear cart
+          if (apiCart === null) {
+            console.log("Backend error during init, preserving state");
+          } else if (apiCart.length > 0) {
             const mergedCart = await mergeCartData(apiCart);
             setItems(mergedCart);
           } else {

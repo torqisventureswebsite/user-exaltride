@@ -18,7 +18,7 @@ interface RecommendationsSectionProps {
 
 export function RecommendationsSection({ products: initialProducts }: RecommendationsSectionProps) {
   const { products, isLoading, hasCarFilter } = useCarProducts({
-    endpoint: "products/best-rated",
+    endpoint: "products/best-selling",
     limit: 12,
     initialProducts: initialProducts as CarProduct[],
   });

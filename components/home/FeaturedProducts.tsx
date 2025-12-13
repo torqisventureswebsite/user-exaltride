@@ -15,7 +15,7 @@ interface FeaturedProductsProps {
 export function FeaturedProducts({ products: initialProducts }: FeaturedProductsProps) {
   const { selectedCar } = useCar();
   const { products: rawProducts, isLoading, hasCarFilter } = useCarProducts({
-    endpoint: "products/best-selling",
+    endpoint: "products/featured",
     limit: 40,
     initialProducts: initialProducts as CarProduct[],
   });
@@ -120,7 +120,7 @@ export function FeaturedProducts({ products: initialProducts }: FeaturedProducts
           </div>
 
           <Link
-            href={"/collections/best-selling" as any}
+            href={"/collections/featured" as any}
             className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base"
           >
             View all

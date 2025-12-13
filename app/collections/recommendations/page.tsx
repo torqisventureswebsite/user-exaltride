@@ -1,4 +1,4 @@
-import { fetchBestRatedProducts } from "@/lib/api/products";
+import { fetchBestSellingProducts } from "@/lib/api/products";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
@@ -7,11 +7,11 @@ import CollectionPageClient from "@/components/products/CollectionPageClient";
 
 export const metadata = {
   title: "Expert Recommendations | ExaltRide",
-  description: "Curated by industry professionals - best rated car accessories",
+  description: "Curated by industry professionals - best selling car accessories",
 };
 
 export default async function RecommendationsPage() {
-  const products = await fetchBestRatedProducts(200);
+  const products = await fetchBestSellingProducts(200);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

@@ -61,28 +61,58 @@ export function useCarProducts({
   const [error, setError] = useState<string | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
-    // Only fetch if a car is selected
-    if (!selectedCar?.id) {
-      // Reset to initial products when no car is selected
-      setProducts(initialProducts);
-      setHasFetched(false);
-      return;
-    }
+  // Helper function to check if a product is compatible with user's car
+  const checkCompatibility = useCallback((product: any, car: typeof selectedCar): boolean => {
+    if (!car) return false;
+    if (product.is_universal) return true;
+    if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
+    
+    return product.compatible_cars.some((c: CompatibleCar) =>
+      c.make.toLowerCase() === car.make.toLowerCase() &&
+      c.model.toLowerCase() === car.model.toLowerCase() &&
+      c.year === car.year
+    );
+  }, []);
 
+  // Map API response to CarProduct format
+  const mapProduct = useCallback((p: any, car: typeof selectedCar): CarProduct => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    primary_image: p.primary_image,
+    price: p.price,
+    compare_at_price: p.compare_at_price,
+    discount_percentage: p.discount_percentage ? parseFloat(p.discount_percentage) : null,
+    rating: p.rating ?? 0,
+    review_count: p.review_count ?? 0,
+    in_stock: p.in_stock ?? true,
+    brand_name: p.brand_name,
+    stock: p.in_stock ? 100 : 0,
+    status: p.in_stock ? "active" : "out_of_stock",
+    category_id: p.category?.id,
+    compatible_cars: p.compatible_cars,
+    is_universal: p.is_universal,
+    isCompatibleWithUserCar: car ? checkCompatibility(p, car) : false,
+  }), [checkCompatibility]);
+
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
+      // Build URL - always fetch products, optionally with car filter params
       const params = new URLSearchParams();
       params.append("limit", limit.toString());
-      // Send all car attributes for exact AND matching
-      params.append("car_id", selectedCar.id);
-      params.append("make", selectedCar.make);
-      params.append("model", selectedCar.model);
-      params.append("year", selectedCar.year.toString());
-      if (selectedCar.variant) {
-        params.append("variant", selectedCar.variant);
+      
+      // Only add car params if a car is selected (for backend filtering/sorting)
+      if (selectedCar?.id) {
+        params.append("car_id", selectedCar.id);
+        params.append("make", selectedCar.make);
+        params.append("model", selectedCar.model);
+        params.append("year", selectedCar.year.toString());
+        if (selectedCar.variant) {
+          params.append("variant", selectedCar.variant);
+        }
       }
 
       const url = `${API_BASE_URL}/${endpoint}?${params.toString()}`;
@@ -93,57 +123,31 @@ export function useCarProducts({
       }
 
       const data = await response.json();
-      
-      // Helper function to check if a product is compatible with user's car
-      const checkCompatibility = (product: any): boolean => {
-        if (product.is_universal) return true;
-        if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
-        
-        return product.compatible_cars.some((car: CompatibleCar) =>
-          car.make.toLowerCase() === selectedCar.make.toLowerCase() &&
-          car.model.toLowerCase() === selectedCar.model.toLowerCase() &&
-          car.year === selectedCar.year
-        );
-      };
+      const fetchedProducts: CarProduct[] = (data.data || []).map((p: any) => mapProduct(p, selectedCar));
 
-      const fetchedProducts: CarProduct[] = (data.data || []).map((p: any) => ({
-        id: p.id,
-        slug: p.slug,
-        title: p.title,
-        primary_image: p.primary_image,
-        price: p.price,
-        compare_at_price: p.compare_at_price,
-        discount_percentage: p.discount_percentage ? parseFloat(p.discount_percentage) : null,
-        rating: p.rating ?? 0,
-        review_count: p.review_count ?? 0,
-        in_stock: p.in_stock ?? true,
-        brand_name: p.brand_name,
-        stock: p.in_stock ? 100 : 0,
-        status: p.in_stock ? "active" : "out_of_stock",
-        category_id: p.category?.id,
-        compatible_cars: p.compatible_cars,
-        is_universal: p.is_universal,
-        isCompatibleWithUserCar: checkCompatibility(p),
-      }));
-
-      // Sort products: compatible ones first, then non-compatible
-      fetchedProducts.sort((a, b) => {
-        if (a.isCompatibleWithUserCar && !b.isCompatibleWithUserCar) return -1;
-        if (!a.isCompatibleWithUserCar && b.isCompatibleWithUserCar) return 1;
-        return 0;
-      });
-
-      // If car filter returns empty, fall back to initial products (also sorted)
-      if (fetchedProducts.length === 0) {
-        // Sort initial products by compatibility too
-        const sortedInitial = [...initialProducts].map(p => ({
-          ...p,
-          isCompatibleWithUserCar: checkCompatibility(p),
-        })).sort((a, b) => {
+      // If car is selected, sort products: compatible ones first, then non-compatible
+      if (selectedCar) {
+        fetchedProducts.sort((a, b) => {
           if (a.isCompatibleWithUserCar && !b.isCompatibleWithUserCar) return -1;
           if (!a.isCompatibleWithUserCar && b.isCompatibleWithUserCar) return 1;
           return 0;
         });
+      }
+
+      // If API returns empty and we have initial products, use those instead
+      if (fetchedProducts.length === 0 && initialProducts.length > 0) {
+        const sortedInitial = [...initialProducts].map(p => ({
+          ...p,
+          isCompatibleWithUserCar: selectedCar ? checkCompatibility(p, selectedCar) : false,
+        }));
+        
+        if (selectedCar) {
+          sortedInitial.sort((a, b) => {
+            if (a.isCompatibleWithUserCar && !b.isCompatibleWithUserCar) return -1;
+            if (!a.isCompatibleWithUserCar && b.isCompatibleWithUserCar) return 1;
+            return 0;
+          });
+        }
         setProducts(sortedInitial);
       } else {
         setProducts(fetchedProducts);
@@ -157,7 +161,7 @@ export function useCarProducts({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCar?.id, endpoint, limit, initialProducts]);
+  }, [selectedCar, endpoint, limit, initialProducts, mapProduct, checkCompatibility]);
 
   // Fetch products only when car selection changes
   useEffect(() => {
