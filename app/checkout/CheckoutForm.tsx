@@ -13,8 +13,6 @@ import { toast } from "sonner";
 interface CheckoutFormProps {
   cartItems: CartItem[];
   subtotal: number;
-  shipping: number;
-  tax: number;
   total: number;
 }
 
@@ -33,7 +31,7 @@ interface SavedAddress {
   is_default: boolean;
 }
 
-export default function CheckoutForm({ cartItems, subtotal, shipping, tax, total }: CheckoutFormProps) {
+export default function CheckoutForm({ cartItems, subtotal, total }: CheckoutFormProps) {
   const router = useRouter();
   const { tokens, user } = useAuth();
   const { clearCart } = useCart();

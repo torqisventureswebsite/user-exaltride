@@ -30,9 +30,6 @@ export default function CheckoutContent() {
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 999 ? 0 : 50;
-  const tax = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST
-  // const total = subtotal + shipping + tax;
   const total = subtotal;
 
   if (isLoading) {
@@ -71,8 +68,6 @@ export default function CheckoutContent() {
           <CheckoutForm 
             cartItems={items}
             subtotal={subtotal}
-            shipping={shipping}
-            tax={tax}
             total={total}
           />
         </div>

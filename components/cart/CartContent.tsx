@@ -18,9 +18,9 @@ export default function CartContent() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shipping = subtotal > 999 ? 0 : 50;
-  const tax = 0; // Taxes already included in prices
-  const total = subtotal + shipping;
+  const shipping = 0;
+  const tax = 0;
+  const total = subtotal;
 
   if (items.length === 0) {
     return (
