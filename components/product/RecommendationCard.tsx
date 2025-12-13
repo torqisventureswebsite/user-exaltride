@@ -103,6 +103,11 @@ export function RecommendationCard({ product }: RecommendationCardProps) {
                 ₹{product.compare_at_price.toLocaleString()}
               </span>
             )}
+              {product.discount_percentage && product.discount_percentage > 0 && (
+    <span className="bg-[#FBC84C] text-[#001F5F] text-[11px] font-bold px-2 my-5 py-[2px] rounded">
+      {product.discount_percentage.toFixed(0)}% OFF
+    </span>
+  )}
           </div>
 
           {/* Buttons */}

@@ -30,6 +30,7 @@ export default function CategoryPageClient({
   subCategories: { id: string; name: string; slug: string }[];
 }) {
 
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const searchParams = useSearchParams();
   const brandFromUrl = searchParams.get("brand"); // e.g. "mann-filter"
   // ---------- FILTER STATE ----------
@@ -198,17 +199,13 @@ export default function CategoryPageClient({
             totalResults={totalResults}
           />
           <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-            <button
-              className="px-2 py-1.5 border rounded-lg text-xs"
-              onClick={() =>
-                setSortBy((s) =>
-                  s === "relevance" ? "price-asc" : s === "price-asc" ? "price-desc" : "relevance"
-                )
-              }
-            >
-              Sort
-            </button>
-            <button className="px-2 py-1.5 border rounded-lg text-xs">Grid</button>
+          <button
+            className="px-2 py-1.5 border rounded-lg text-xs"
+            onClick={() => setIsSortOpen(true)}
+          >
+            Sort
+          </button>
+            {/* <button className="px-2 py-1.5 border rounded-lg text-xs">Grid</button> */}
           </div>
         </div>
       </div>
@@ -296,7 +293,35 @@ export default function CategoryPageClient({
           setIsFilterOpen(false);
         }}
       />
+      {/* Mobile sort drawer */}
+{isSortOpen && (
+  <div className="fixed inset-0 z-50 bg-black/40 lg:hidden">
+    <div className="absolute bottom-0 w-full bg-white rounded-t-xl p-4">
+      {[
+        ["relevance", "Relevance"],
+        ["price-asc", "Price: Low to High"],
+        ["price-desc", "Price: High to Low"],
+        ["rating", "Top Rated"],
+        ["newest", "Newest"],
+      ].map(([key, label]) => (
+        <button
+          key={key}
+          className="w-full text-left py-3 border-b"
+          onClick={() => {
+            setSortBy(key as any);
+            setIsSortOpen(false);
+          }}
+        >
+          {label}
+        </button>
+      ))}
     </div>
-  );
+  </div>
+)}
+
+    </div>
+    
+);
+  
 
 }

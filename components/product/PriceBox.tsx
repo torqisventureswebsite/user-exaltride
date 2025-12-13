@@ -1,15 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Lock, Minus, Plus } from "lucide-react";
+import { useCart } from "@/lib/cart/context";
 
 interface PriceBoxProps {
+  productId: string;
+  title?: string;
   price?: number;
+  image?: string;
+  categoryId?: string;
+  slug?: string;
   compareAt?: number | null;
 }
 
-export default function PriceBox({ price = 0, compareAt = null }: PriceBoxProps) {
-  const [qty, setQty] = useState(1);
+export default function PriceBox({
+  productId,
+  title,
+  price = 0,
+  image,
+  categoryId,
+  slug,
+  compareAt = null,
+}: PriceBoxProps) {
+  const { addItem, updateQuantity, getItemQuantity } = useCart();
+
+  const qty = getItemQuantity(productId);
 
   const discount =
     compareAt && price
@@ -18,12 +33,33 @@ export default function PriceBox({ price = 0, compareAt = null }: PriceBoxProps)
 
   const savings = compareAt ? compareAt - price : 0;
 
+  const handleIncrement = () => {
+    if (qty === 0) {
+      addItem({
+        productId,
+        name: title || "",
+        price,
+        image: image || "",
+        categoryId,
+        slug,
+      });
+    } else {
+      updateQuantity(productId, qty + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (qty > 0) {
+      updateQuantity(productId, qty - 1);
+    }
+  };
+
   return (
     <div className="bg-[#F8FAFC] border rounded-xl p-4 space-y-3 shadow-sm">
 
       {/* PRICE ROW */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-2xl font-bold font-medium text-[#001F5F]">
+        <span className="text-2xl font-bold text-[#001F5F]">
           ₹{price.toLocaleString()}
         </span>
 
@@ -46,35 +82,38 @@ export default function PriceBox({ price = 0, compareAt = null }: PriceBoxProps)
       {/* SAVINGS */}
       {savings > 0 && (
         <div className="flex items-center gap-1 text-xs text-blue-600">
-          <Lock className="h-3 w-3 text-blue-600" />
+          <Lock className="h-3 w-3" />
           <span>You save ₹{savings.toLocaleString()} on this purchase</span>
         </div>
       )}
 
       <hr />
 
-      {/* QUANTITY */}
-      <div className="flex items-center justify-between">
+      {/* QUANTITY CONTROL */}
+      {/* <div className="flex items-center justify-between">
         <span className="text-sm text-gray-700">Quantity:</span>
 
-        <div className="flex items-center border rounded-md overflow-hidden">
+        <div className="flex items-center bg-[#FBC84C] rounded-md overflow-hidden">
           <button
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="px-3 py-1 text-lg hover:bg-gray-100"
+            onClick={handleDecrement}
+            disabled={qty === 0}
+            className="w-10 h-9 flex items-center justify-center text-[#001F5F] hover:bg-yellow-500 disabled:opacity-40"
           >
-            –
+            <Minus className="h-4 w-4" />
           </button>
 
-          <span className="px-4 py-1 text-sm">{qty}</span>
+          <span className="w-10 text-center font-bold text-[#001F5F]">
+            {qty}
+          </span>
 
           <button
-            onClick={() => setQty((q) => q + 1)}
-            className="px-3 py-1 text-lg hover:bg-gray-100"
+            onClick={handleIncrement}
+            className="w-10 h-9 flex items-center justify-center text-[#001F5F] hover:bg-yellow-500"
           >
-            +
+            <Plus className="h-4 w-4" />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* STOCK WARNING */}
       <p className="text-xs text-[#D97706] font-medium">

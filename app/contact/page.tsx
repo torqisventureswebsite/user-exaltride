@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
-import Image from "next/image";
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -18,14 +19,14 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
 
     toast.success("Message sent successfully!", {
       description: "We'll get back to you within 24-48 hours",
@@ -38,6 +39,7 @@ export default function ContactPage() {
       subject: "",
       message: "",
     });
+
     setLoading(false);
   };
 

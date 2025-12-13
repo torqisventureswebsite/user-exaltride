@@ -37,10 +37,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         </div>
       )}
 
-      {/* ✅ Price Box */}
       <PriceBox
+        productId={product.id}
+        title={product.title}
         price={product.price}
         compareAt={product.compare_at_price}
+        image={product.primary_image}
+        categoryId={product.category?.id}
+        slug={product.slug}
       />
 
       {/* Description */}
