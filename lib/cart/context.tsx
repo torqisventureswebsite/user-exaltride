@@ -27,6 +27,32 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// localStorage key for caching product details
+const PRODUCT_DETAILS_CACHE_KEY = "exaltride_product_details_cache";
+
+// Helper to get cached product details from localStorage
+const getCachedProductDetails = (): Record<string, Omit<CartItem, "quantity">> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const cached = localStorage.getItem(PRODUCT_DETAILS_CACHE_KEY);
+    return cached ? JSON.parse(cached) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Helper to save product details to localStorage cache
+const setCachedProductDetails = (productId: string, details: Omit<CartItem, "quantity">) => {
+  if (typeof window === "undefined") return;
+  try {
+    const cache = getCachedProductDetails();
+    cache[productId] = details;
+    localStorage.setItem(PRODUCT_DETAILS_CACHE_KEY, JSON.stringify(cache));
+  } catch (error) {
+    console.error("Error caching product details:", error);
+  }
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, tokens } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -64,14 +90,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     
     // Extract productDetails if it exists (nested structure from backend)
     const productDetails = item.productDetails as Record<string, unknown> | undefined;
+    const productId = (item.productId || item.product_id || productDetails?.id || productDetails?.slug || item.slug) as string;
     
     // Get values from productDetails first, then fall back to top-level properties
-    const name = (productDetails?.title || productDetails?.name || item?.product_name || item?.name || item?.title || "") as string;
-    const price = (productDetails?.price || item?.price || item?.unit_price || 0) as number;
-    const image = (productDetails?.primary_image || productDetails?.image || item?.primary_image || item?.image || "") as string;
-    const slug = (productDetails?.slug || item?.slug || item?.product_id || item?.productId) as string | undefined;
-    const categoryId = (productDetails?.category_id || item?.category_id || item?.categoryId) as string | undefined;
-    const productId = (item.productId || item.product_id || productDetails?.id || productDetails?.slug || item.slug) as string;
+    let name = (productDetails?.title || productDetails?.name || item?.product_name || item?.name || item?.title || "") as string;
+    let price = (productDetails?.price || item?.price || item?.unit_price || 0) as number;
+    let image = (productDetails?.primary_image || productDetails?.image || item?.primary_image || item?.image || "") as string;
+    let slug = (productDetails?.slug || item?.slug || item?.product_id || item?.productId) as string | undefined;
+    let categoryId = (productDetails?.category_id || item?.category_id || item?.categoryId) as string | undefined;
+    
+    // If we have productDetails from API, cache them for future use
+    if (productDetails && (productDetails.title || productDetails.name)) {
+      setCachedProductDetails(productId, {
+        productId,
+        name,
+        price,
+        image,
+        categoryId,
+        slug,
+      });
+    }
+    
+    // If details are missing, try to get from cache
+    if (!name || price === 0) {
+      const cachedDetails = getCachedProductDetails()[productId];
+      if (cachedDetails) {
+        console.log("Using cached product details for:", productId);
+        name = cachedDetails.name || name;
+        price = cachedDetails.price || price;
+        image = cachedDetails.image || image;
+        slug = cachedDetails.slug || slug;
+        categoryId = cachedDetails.categoryId || categoryId;
+      }
+    }
     
     return {
       productId,
@@ -158,19 +209,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-  // Merge API cart with fetched product details for items missing info
+  // Merge API cart with cached product details for items missing info
   const mergeCartData = useCallback(async (apiCart: CartItem[]): Promise<CartItem[]> => {
     console.log("mergeCartData called with:", JSON.stringify(apiCart, null, 2));
     const mergedItems: CartItem[] = [];
+    const cache = getCachedProductDetails();
     
     for (const apiItem of apiCart) {
+      // If item already has valid details, use it
       if (apiItem.name && apiItem.price > 0) {
         mergedItems.push(apiItem);
         continue;
       }
       
+      // Try to get details from localStorage cache first
+      const cachedDetails = cache[apiItem.productId];
+      if (cachedDetails && cachedDetails.name && cachedDetails.price > 0) {
+        console.log("Using cached details for:", apiItem.productId);
+        mergedItems.push({
+          ...cachedDetails,
+          quantity: apiItem.quantity,
+        });
+        continue;
+      }
+      
+      // Fall back to API fetch if not in cache
       const fetchedDetails = await fetchProductDetails(apiItem.productId);
       if (fetchedDetails && fetchedDetails.name && fetchedDetails.price > 0) {
+        // Cache the fetched details for future use
+        setCachedProductDetails(apiItem.productId, fetchedDetails);
         mergedItems.push({
           ...fetchedDetails,
           quantity: apiItem.quantity,
@@ -178,6 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         continue;
       }
       
+      // Last resort: push item as-is
       mergedItems.push(apiItem);
     }
     
@@ -287,6 +355,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const headers = getHeaders();
     
     if (headers) {
+      // Cache product details when adding to cart
+      setCachedProductDetails(item.productId, {
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        categoryId: item.categoryId,
+        slug: item.slug,
+      });
+      
       // Authenticated user - sync to server
       setItems((prev) => {
         const existingIndex = prev.findIndex((i) => i.productId === item.productId);
@@ -311,6 +389,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }),
       }).catch((error) => console.error("Error adding to cart:", error));
     } else {
+      // Cache product details for guest users too
+      setCachedProductDetails(item.productId, {
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        categoryId: item.categoryId,
+        slug: item.slug,
+      });
+      
       // Guest user - add to in-memory guest cart only
       setGuestItems((prev) => {
         const existingIndex = prev.findIndex((i) => i.productId === item.productId);
