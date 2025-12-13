@@ -59,9 +59,12 @@ export function BrandsSection({ brands: propBrands }: BrandsSectionProps) {
     loadBrands();
   }, [propBrands]);
 
-  /* ---------------- DUPLICATE FOR AUTO SCROLL ---------------- */
+  /* ---------------- DUPLICATE FOR AUTO SCROLL (only if 6+ brands) ---------------- */
   const scrollBrands = useMemo(() => {
-    return brands.length ? [...brands, ...brands] : brands;
+    if (brands.length >= 6) {
+      return [...brands, ...brands];
+    }
+    return brands;
   }, [brands]);
 
   /* ---------------- CHECK SCROLL (ARROWS) ---------------- */
@@ -101,7 +104,8 @@ export function BrandsSection({ brands: propBrands }: BrandsSectionProps) {
   /* ---------------- AUTO SCROLL ---------------- */
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el || brands.length === 0) return;
+    // Only auto-scroll if we have 6+ brands (duplicated for infinite scroll)
+    if (!el || brands.length < 6) return;
 
     const speed = 0.6; // smooth + visible
 

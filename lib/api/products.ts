@@ -5,21 +5,21 @@ export const ApiProductSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  primary_image: z.string(),
+  primary_image: z.string().nullable().optional(),
   price: z.number(),
   compare_at_price: z.number().nullable().optional(),
   discount_percentage: z.string().nullable().optional(),
   rating: z.number().optional().default(0),
   review_count: z.number().optional().default(0),
   in_stock: z.boolean().optional().default(true),
-  brand_name: z.string(),
+  brand_name: z.string().optional().default(""),
 
-  //category fix
+  // category is optional since some endpoints don't return it
   category: z.object({
     id: z.string(),
     name: z.string(),
     slug: z.string(),
-  }),
+  }).optional(),
 });
 
 
@@ -120,7 +120,7 @@ export async function fetchProducts(params?: {
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -132,7 +132,7 @@ export async function fetchProducts(params?: {
       brand_name: apiProduct.brand_name,
       stock: apiProduct.in_stock ? 100 : 0, // Default stock value
       status: apiProduct.in_stock ? "active" : "out_of_stock",
-      category_id: apiProduct.category.id,
+      category_id: apiProduct.category?.id,
     }));
 
     return {
@@ -269,7 +269,7 @@ export async function fetchFeaturedProducts(limit: number = 12): Promise<Product
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -310,7 +310,7 @@ export async function fetchBestRatedProducts(limit: number = 12): Promise<Produc
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -351,7 +351,7 @@ export async function fetchNewArrivals(limit: number = 12): Promise<Product[]> {
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -392,7 +392,7 @@ export async function fetchBestSellingProducts(limit: number = 12): Promise<Prod
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -433,7 +433,7 @@ export async function fetchTopDeals(limit: number = 12): Promise<Product[]> {
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
@@ -474,7 +474,7 @@ export async function fetchRelatedProducts(slug: string, limit: number = 4): Pro
       id: apiProduct.id,
       slug: apiProduct.slug,
       title: apiProduct.title,
-      primary_image: apiProduct.primary_image,
+      primary_image: apiProduct.primary_image || "/images/image1.jpg",
       price: apiProduct.price,
       compare_at_price: apiProduct.compare_at_price,
       discount_percentage: apiProduct.discount_percentage
