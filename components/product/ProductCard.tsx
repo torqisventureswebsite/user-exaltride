@@ -256,7 +256,7 @@ export function ProductCard({
         {/* Card Content */}
         <div className="p-2 md:p-4">
           {/* Product Title */}
-          <h3 className="mb-1 line-clamp-2 h-8 text-xs md:text-sm font-medium text-gray-900">
+          <h3 className="mb-4 h-8 text-xs md:text-sm font-medium text-gray-900">
             {product.title || "Product"}
           </h3>
 

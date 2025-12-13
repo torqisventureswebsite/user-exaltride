@@ -23,6 +23,7 @@ import type { Product } from "@/lib/api/products";
 import { fetchBrands } from "@/lib/api/brands";
 import { fetchCategories, type Category } from "@/lib/api/categories";
 import Link from "next/link";
+import { useCar } from "@/lib/car/context";
 
 interface CollectionPageClientProps {
   products: Product[];
@@ -46,6 +47,21 @@ export default function CollectionPageClient({
   icon,
   iconBgColor = "bg-[#001F5F]",
 }: CollectionPageClientProps) {
+  const { selectedCar } = useCar();
+
+  // Helper to check if product is compatible with selected car
+  const isProductCompatible = (product: Product): boolean => {
+    if (!selectedCar) return false;
+    if (product.is_universal) return true;
+    if (!product.compatible_cars || !Array.isArray(product.compatible_cars)) return false;
+    
+    return product.compatible_cars.some(car =>
+      car.make.toLowerCase() === selectedCar.make.toLowerCase() &&
+      car.model.toLowerCase() === selectedCar.model.toLowerCase() &&
+      car.year === selectedCar.year
+    );
+  };
+
   // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -137,26 +153,43 @@ export default function CollectionPageClient({
       return price >= localPriceRange[0] && price <= localPriceRange[1];
     });
 
-    // Sort products
+    // Sort products - compatible products first when car is selected
+    if (selectedCar) {
+      filtered.sort((a, b) => {
+        const aCompatible = isProductCompatible(a);
+        const bCompatible = isProductCompatible(b);
+        if (aCompatible && !bCompatible) return -1;
+        if (!aCompatible && bCompatible) return 1;
+        return 0;
+      });
+    }
+
+    // Then apply user's sort preference
+    const stableSort = (arr: Product[], compareFn: (a: Product, b: Product) => number) => {
+      return arr.map((item, index) => ({ item, index }))
+        .sort((a, b) => compareFn(a.item, b.item) || a.index - b.index)
+        .map(({ item }) => item);
+    };
+
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        filtered = stableSort(filtered, (a, b) => (a.price || 0) - (b.price || 0));
         break;
       case "price-high":
-        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        filtered = stableSort(filtered, (a, b) => (b.price || 0) - (a.price || 0));
         break;
       case "rating":
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        filtered = stableSort(filtered, (a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "discount":
-        filtered.sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0));
+        filtered = stableSort(filtered, (a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0));
         break;
       default:
         break;
     }
 
     return filtered;
-  }, [uniqueProducts, selectedCategories, selectedBrands, localPriceRange, sortBy]);
+  }, [uniqueProducts, selectedCategories, selectedBrands, localPriceRange, sortBy, selectedCar]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
