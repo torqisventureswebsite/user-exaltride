@@ -3,11 +3,34 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Star, TruckIcon, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Star, TruckIcon, Plus, Minus, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/context";
-import { useTransition } from "react";
+import { useState, useEffect } from "react";
+import { addToWishlist, removeFromWishlist, getWishlistItems } from "@/lib/wishlist-actions";
+import { toast } from "sonner";
+
+export interface CompatibleCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  variant?: string;
+  notes?: string;
+}
+
+export interface ProductVendor {
+  id: string;
+  business_name: string;
+  rating?: number;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export interface Product {
   id: string;
@@ -22,15 +45,22 @@ export interface Product {
   images?: string[];
   rating?: number;
   review_count?: number;
+  view_count?: number;
   brand_name?: string;
   status?: string;
   category_id?: string;
+  category?: ProductCategory;
   sku?: string;
   warranty_months?: number;
-  weight_kg?: number;
-  dimensions_cm?: string;
+  weight_kg?: number | null;
+  dimensions_cm?: string | null;
   is_oem?: boolean;
   is_universal?: boolean;
+  video_url?: string | null;
+  return_policy?: string | null;
+  shipping_info?: string | null;
+  compatible_cars?: CompatibleCar[];
+  vendor?: ProductVendor;
   created_at?: string;
   updated_at?: string;
 }
@@ -60,9 +90,19 @@ export function ProductCard({
   badges = {},
   showOffers = true,
 }: ProductCardProps) {
-  const [isPending, startTransition] = useTransition();
   const { addItem, updateQuantity, getItemQuantity } = useCart();
   const quantityInCart = getItemQuantity(product.id);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Check if product is in wishlist on mount
+  useEffect(() => {
+    async function checkWishlist() {
+      const items = await getWishlistItems();
+      setIsInWishlist(items.some((item) => item.id === product.id));
+    }
+    checkWishlist();
+  }, [product.id]);
 
   const discountAmount =
     product.compare_at_price && product.price
@@ -82,67 +122,106 @@ export function ProductCard({
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await addItem({
-          productId: product.id,
-          name: product.title || "",
-          price: product.price || 0,
-          image: product.primary_image || "/images/image1.jpg",
-          categoryId: product.category_id,
-          slug: product.slug,
-        });
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-      }
-    });
+    try {
+      addItem({
+        productId: product.id,
+        name: product.title || "",
+        price: product.price || 0,
+        image: product.primary_image || "/images/image1.jpg",
+        categoryId: product.category_id,
+        slug: product.slug,
+      });
+      toast.success("Added to cart!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add to cart");
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(product.id, quantityInCart + 1);
-    });
+    updateQuantity(product.id, quantityInCart + 1);
   };
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(product.id, quantityInCart - 1);
-    });
+    updateQuantity(product.id, quantityInCart - 1);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent default touch behavior that causes scroll
+    if (e.nativeEvent) {
+      e.nativeEvent.stopImmediatePropagation();
+    }
+    
+    if (wishlistLoading) return;
+    
+    // Optimistic update - update UI immediately
+    const wasInWishlist = isInWishlist;
+    setIsInWishlist(!wasInWishlist);
+    setWishlistLoading(true);
+
+    // Show toast immediately
+    if (wasInWishlist) {
+      toast.success("Removed from wishlist");
+    } else {
+      toast.success("Added to wishlist!");
+    }
+
+    // Sync with server in background
+    const syncWithServer = async () => {
+      try {
+        if (wasInWishlist) {
+          const result = await removeFromWishlist(product.id);
+          if (!result.success) {
+            // Revert on failure
+            setIsInWishlist(true);
+            toast.error("Failed to remove from wishlist");
+          }
+        } else {
+          const result = await addToWishlist(
+            product.id,
+            product.title || "",
+            product.price || 0,
+            product.primary_image || "/images/image1.jpg",
+            product.slug || "",
+            product.brand_name,
+            true
+          );
+          if (!result.success && result.message !== "Item already in wishlist") {
+            // Revert on failure
+            setIsInWishlist(false);
+            toast.error("Failed to add to wishlist");
+          }
+        }
+      } catch (error) {
+        // Revert on error
+        setIsInWishlist(wasInWishlist);
+        toast.error("Failed to update wishlist");
+      } finally {
+        setWishlistLoading(false);
+      }
+    };
+
+    syncWithServer();
   };
 
   return (
     <Link href={`/products/${product.slug || ""}`}>
-      <Card className="group overflow-hidden transition-all hover:shadow-xl">
+      <Card className="group overflow-hidden transition-all hover:shadow-xl !p-0 !gap-0">
         <div className="relative aspect-square overflow-hidden">
           {/* Product Image */}
           <Image
-            src="/images/image1.jpg"
+            src={product.primary_image || "/images/image1.jpg"}
             alt={product.title || "Product"}
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
-
-          {/* Badges */}
-          <div className="absolute left-2 md:left-3 top-2 md:top-3 flex flex-col gap-1 md:gap-2">
-            {badges.primary && (
-              <Badge
-                className={`${badgeStyles[badges.primary] || "bg-blue-600 text-white"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
-              >
-                {badges.primary}
-              </Badge>
-            )}
-            {badges.secondary && (
-              <Badge
-                className={`${badgeStyles[badges.secondary] || "bg-yellow-500 text-gray-900"} px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold`}
-              >
-                {badges.secondary}
-              </Badge>
-            )}
-          </div>
 
           {/* Discount Badge */}
           {discountAmount > 0 && (
@@ -150,12 +229,34 @@ export function ProductCard({
               {discountAmount}% off
             </Badge>
           )}
+
+          {/* Wishlist Heart Button */}
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            disabled={wishlistLoading}
+            className={`absolute bottom-2 md:bottom-3 right-2 md:right-3 p-1.5 md:p-2 rounded-full shadow-md transition-all duration-200 ${
+              isInWishlist 
+                ? "bg-red-500 text-white" 
+                : "bg-white text-gray-600 hover:text-red-500"
+            } ${wishlistLoading ? "opacity-50" : "hover:scale-110"}`}
+            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart 
+              className={`h-4 w-4 md:h-5 md:w-5 ${isInWishlist ? "fill-current" : ""}`} 
+            />
+          </button>
         </div>
 
         {/* Card Content */}
         <div className="p-2 md:p-4">
           {/* Product Title */}
-          <h3 className="mb-1 md:mb-2 line-clamp-2 h-8 md:h-12 text-xs md:text-sm font-medium text-gray-900">
+          <h3 className="mb-1 line-clamp-2 h-8 text-xs md:text-sm font-medium text-gray-900">
             {product.title || "Product"}
           </h3>
 
@@ -186,31 +287,12 @@ export function ProductCard({
             )}
           </div>
 
-          {/* Free Delivery Badge */}
-          <div className="mb-2 md:mb-3 flex items-center gap-1 md:gap-1.5 text-[10px] md:text-xs text-blue-600">
-            <TruckIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
-            <span className="font-medium">FREE Delivery</span>
-          </div>
-
-          {/* Offer Tags */}
-          {showOffers && (
-            <div className="mb-2 md:mb-3 flex flex-wrap gap-1 md:gap-2">
-              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
-                Today Offer
-              </Badge>
-              <Badge variant="outline" className="text-[9px] md:text-xs font-normal px-1 md:px-2 py-0 md:py-0.5">
-                Bank Offers
-              </Badge>
-            </div>
-          )}
-
           {/* Action Buttons */}
-          <div className="flex gap-1 md:gap-2">
+          <div className="flex flex-col md:flex-row gap-1 md:gap-2">
             {quantityInCart > 0 ? (
               <div className="flex-1 flex items-center justify-center gap-2 bg-[#FFC107] rounded-md h-7 md:h-9">
                 <button
                   onClick={handleDecrement}
-                  disabled={isPending}
                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-l-md transition-colors"
                 >
                   <Minus className="h-3 w-3 md:h-4 md:w-4" />
@@ -220,7 +302,6 @@ export function ProductCard({
                 </span>
                 <button
                   onClick={handleIncrement}
-                  disabled={isPending}
                   className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-gray-900 hover:bg-yellow-600 rounded-r-md transition-colors"
                 >
                   <Plus className="h-3 w-3 md:h-4 md:w-4" />
@@ -231,21 +312,15 @@ export function ProductCard({
                 size="sm"
                 className="flex-1 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9 font-semibold transition-colors bg-[#FFC107] hover:bg-[#FFB300] text-gray-900"
                 onClick={handleAddToCart}
-                disabled={isPending}
               >
                 <ShoppingCart className="mr-0.5 md:mr-1 h-3 w-3 md:h-4 md:w-4" />
-                {isPending ? (
-                  <span className="hidden sm:inline">Adding...</span>
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">Add to cart</span>
-                    <span className="sm:hidden">Add</span>
-                  </>
-                )}
+                <span className="hidden sm:inline">Add to cart</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             )}
             <Button size="sm" className="flex-1 bg-[#001F5F] hover:bg-blue-700 text-[10px] md:text-sm px-1 md:px-3 py-1 md:py-2 h-7 md:h-9">
-              Buy Now
+              <span className="hidden sm:inline">Buy Now</span>
+              <span className="sm:hidden">Buy</span>
             </Button>
           </div>
         </div>

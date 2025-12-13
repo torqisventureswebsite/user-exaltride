@@ -91,9 +91,19 @@ export default function CategoryPageClient({
     [allCategories]
   );
 
+  // Deduplicate products by ID
+  const uniqueProducts = useMemo(() => {
+    const seen = new Set<string>();
+    return initialProducts.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  }, [initialProducts]);
+
   // ---------- FILTER LOGIC ----------
   const filtered = useMemo(() => {
-    let list = initialProducts.slice();
+    let list = uniqueProducts.slice();
 
     if (selectedSubcat) {
       list = list.filter((p) => p.category_id === selectedSubcat);
@@ -132,7 +142,7 @@ export default function CategoryPageClient({
     }
 
     return list;
-  }, [initialProducts, selectedSubcat, selectedBrands, localRange, sortBy]);
+  }, [uniqueProducts, selectedSubcat, selectedBrands, localRange, sortBy]);
 
   // pagination calc
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
@@ -181,20 +191,15 @@ export default function CategoryPageClient({
         <CategoryOfferCarousel />
       </div>
       {/* Top mobile filter row (mobile-only) */}
-      <div className="md:hidden max-w-[480px] mx-auto px-4">
-        <div className="flex items-center gap-3 py-3">
+      <div className="lg:hidden px-0">
+        <div className="flex items-center gap-2 py-3 overflow-x-auto">
           <MobileFiltersButton
             onOpen={() => setIsFilterOpen(true)}
             totalResults={totalResults}
           />
-
-          <div className="flex-1 text-center text-sm text-gray-600">
-            {totalResults.toLocaleString()} results
-          </div>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto flex-shrink-0">
             <button
-              className="px-2 py-2 border rounded-lg text-sm"
+              className="px-2 py-1.5 border rounded-lg text-xs"
               onClick={() =>
                 setSortBy((s) =>
                   s === "relevance" ? "price-asc" : s === "price-asc" ? "price-desc" : "relevance"
@@ -203,24 +208,23 @@ export default function CategoryPageClient({
             >
               Sort
             </button>
-            <button className="px-2 py-2 border rounded-lg text-sm">Grid</button>
+            <button className="px-2 py-1.5 border rounded-lg text-xs">Grid</button>
           </div>
         </div>
       </div>
 
       {/* Main container */}
-      <div className="container mx-auto grid grid-cols-12 gap-6 px-4 md:px-6">
-        {/* Sidebar (desktop only) */}
-        <aside className="col-span-12 lg:col-span-3">
-          {/* show on md/lg as sidebar, hide on mobile */}
-          {/* ✅ DEAL OF THE DAY FIRST */}
-          <DealOfDay />
-          <div className="hidden md:block">
+      <div className="container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 px-4 md:px-6">
+        {/* Sidebar (desktop only) - sticky with separate scroll */}
+        <aside className="hidden lg:block lg:col-span-3">
+          <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <SidebarFilters
               categories={categoriesForFilter.length > 0 ? categoriesForFilter : [{ ...category, product_count: 0 }, ...subCategories.map(c => ({ ...c, product_count: 0 }))]}
               brands={allBrands}
               selectedBrands={selectedBrands}
               toggleBrand={toggleBrand}
+              selectedCategory={selectedSubcat}
+              setSelectedCategory={setSelectedSubcat}
               priceRange={priceRange}
               localRange={localRange}
               setLocalRange={setLocalRange}
@@ -230,26 +234,14 @@ export default function CategoryPageClient({
         </aside>
 
         {/* Product Grid */}
-        <div className="col-span-12 lg:col-span-9 space-y-4">
-          {/* Top bar (desktop) */}
-          <div className="hidden md:flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-md bg-white px-4 py-2 shadow-sm text-sm">
-                {filtered.length.toLocaleString()} results
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="text-sm">View</div>
-              <div className="bg-white rounded-md p-2 shadow-sm">
-                <span className="text-sm">Grid</span>
-              </div>
-            </div>
+        <div className="col-span-1 lg:col-span-9 space-y-4">
+          {/* CategoryTopControls - hidden on mobile since we have mobile filter row */}
+          <div className="hidden lg:block">
+            <CategoryTopControls sortBy={sortBy} setSortBy={setSortBy} />
           </div>
-          <CategoryTopControls sortBy={sortBy} setSortBy={setSortBy} />
 
           {/* Product cards grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-3 lg:gap-5">
             {visible.map((p) => (
               <ProductCard key={p.id} product={p} showOffers />
             ))}
@@ -293,6 +285,8 @@ export default function CategoryPageClient({
         brands={allBrands}
         selectedBrands={selectedBrands}
         toggleBrand={toggleBrand}
+        selectedCategory={selectedSubcat}
+        setSelectedCategory={setSelectedSubcat}
         localRange={localRange}
         setLocalRange={setLocalRange}
         priceRange={priceRange}

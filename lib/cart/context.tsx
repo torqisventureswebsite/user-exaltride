@@ -1,14 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/lib/auth/context";
-import { 
-  addToCart as serverAddToCart, 
-  removeFromCart as serverRemoveFromCart, 
-  updateCartQuantity as serverUpdateQuantity,
-  clearCart as serverClearCart,
-  getCartItems as serverGetCartItems 
-} from "@/lib/cart-actions";
 
 export interface CartItem {
   productId: string;
@@ -24,187 +17,199 @@ interface CartContextType {
   items: CartItem[];
   count: number;
   isLoading: boolean;
-  addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => Promise<void>;
-  removeItem: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   getItemQuantity: (productId: string) => number;
   refreshCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_COOKIE_NAME = "cart";
-
-// Helper to get cart from cookies (client-side)
-function getCartFromCookies(): CartItem[] {
-  if (typeof window === "undefined") return [];
-  
-  try {
-    const cookies = document.cookie.split(";");
-    const cartCookie = cookies.find((c) => c.trim().startsWith(`${CART_COOKIE_NAME}=`));
-    if (!cartCookie) return [];
-    
-    const value = cartCookie.split("=")[1];
-    return JSON.parse(decodeURIComponent(value));
-  } catch {
-    return [];
-  }
-}
-
-// Helper to save cart to cookies (client-side)
-function saveCartToCookies(cart: CartItem[]) {
-  if (typeof window === "undefined") return;
-  
-  const maxAge = 60 * 60 * 24 * 7; // 7 days
-  document.cookie = `${CART_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(cart))};path=/;max-age=${maxAge};samesite=lax`;
-}
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, tokens } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [guestItems, setGuestItems] = useState<CartItem[]>([]); // Guest cart (in-memory only)
   const [isLoading, setIsLoading] = useState(true);
+  const [wasAuthenticated, setWasAuthenticated] = useState(false);
+  const quantityDebounceRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Use guest items when not authenticated, otherwise use server items
+  const activeItems = isAuthenticated ? items : guestItems;
 
   // Calculate total count
-  const count = items.reduce((total, item) => total + item.quantity, 0);
+  const count = activeItems.reduce((total, item) => total + item.quantity, 0);
 
   // Get quantity for a specific product
   const getItemQuantity = useCallback((productId: string): number => {
-    const item = items.find((i) => i.productId === productId);
+    const item = activeItems.find((i) => i.productId === productId);
     return item?.quantity || 0;
-  }, [items]);
+  }, [activeItems]);
 
-  // Fetch cart from API (for authenticated users)
-  const fetchCartFromAPI = useCallback(async (): Promise<CartItem[]> => {
-    if (!isAuthenticated || !tokens?.authToken) return [];
-
-    try {
-      const response = await fetch("/api/cart", {
-        headers: {
-          Authorization: `Bearer ${tokens.authToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Map API response to our CartItem format
-        return (data.items || []).map((item: any) => ({
-          productId: item.product_id || item.productId,
-          name: item.name || item.product_name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image || item.primary_image,
-          categoryId: item.category_id || item.categoryId,
-          slug: item.slug,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching cart from API:", error);
+  // Get headers for API calls - only for authenticated users
+  const getHeaders = useCallback((): HeadersInit | null => {
+    if (isAuthenticated && tokens?.idToken) {
+      return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokens.idToken}`,
+      };
     }
-    return [];
+    return null;
   }, [isAuthenticated, tokens]);
 
-  // Sync cart to API (for authenticated users)
-  const syncCartToAPI = useCallback(async (cart: CartItem[]) => {
-    if (!isAuthenticated || !tokens?.authToken) return;
+  // Map API response to CartItem format
+  const mapApiItemToCartItem = (item: Record<string, unknown>): CartItem => ({
+    productId: (item.product_id || item.productId || item.slug) as string,
+    name: (item.name || item.product_name || "") as string,
+    price: (item.price || 0) as number,
+    quantity: (item.quantity || 1) as number,
+    image: (item.image || item.primary_image || "") as string,
+    categoryId: (item.category_id || item.categoryId) as string | undefined,
+    slug: item.slug as string | undefined,
+  });
 
+  // Fetch cart from API - only for authenticated users
+  const fetchCart = useCallback(async (): Promise<CartItem[]> => {
+    const headers = getHeaders();
+    if (!headers) return [];
+    
     try {
-      // Clear existing cart first
-      await fetch("/api/cart", {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${tokens.authToken}`,
-        },
-      });
+      const response = await fetch("/api/cart", { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const cartItems = (data.data || data.items || data.cart || []).map(mapApiItemToCartItem);
+        return cartItems;
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+    }
+    return [];
+  }, [getHeaders]);
 
-      // Add each item to API cart
-      for (const item of cart) {
+  // Refresh cart from API
+  const refreshCart = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const cartItems = await fetchCart();
+      setItems(cartItems);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchCart, isAuthenticated]);
+
+  // Fetch product details from API for items missing details
+  const fetchProductDetails = useCallback(async (productId: string): Promise<Omit<CartItem, "quantity"> | null> => {
+    try {
+      const response = await fetch(`https://vais35g209.execute-api.ap-south-1.amazonaws.com/prod/v1/products/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const product = data.data || data;
+        if (product) {
+          return {
+            productId: product.slug || product.id || productId,
+            name: product.title || product.name || "",
+            price: product.price || 0,
+            image: product.primary_image || product.image || "",
+            categoryId: product.category?.id || product.category_id,
+            slug: product.slug,
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
+    return null;
+  }, []);
+
+  // Merge API cart with fetched product details for items missing info
+  const mergeCartData = useCallback(async (apiCart: CartItem[]): Promise<CartItem[]> => {
+    const mergedItems: CartItem[] = [];
+    
+    for (const apiItem of apiCart) {
+      if (apiItem.name && apiItem.price > 0) {
+        mergedItems.push(apiItem);
+        continue;
+      }
+      
+      const fetchedDetails = await fetchProductDetails(apiItem.productId);
+      if (fetchedDetails && fetchedDetails.name && fetchedDetails.price > 0) {
+        mergedItems.push({
+          ...fetchedDetails,
+          quantity: apiItem.quantity,
+        });
+        continue;
+      }
+      
+      mergedItems.push(apiItem);
+    }
+    
+    return mergedItems;
+  }, [fetchProductDetails]);
+
+  // Sync guest cart items to server when user logs in
+  const syncGuestCartToServer = useCallback(async (guestCartItems: CartItem[], headers: HeadersInit) => {
+    console.log("Syncing guest cart to server:", guestCartItems.length, "items");
+    
+    for (const item of guestCartItems) {
+      try {
         await fetch("/api/cart/items", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
+          headers,
           body: JSON.stringify({
             product_id: item.productId,
             quantity: item.quantity,
           }),
         });
-      }
-    } catch (error) {
-      console.error("Error syncing cart to API:", error);
-    }
-  }, [isAuthenticated, tokens]);
-
-  // Merge guest cart with user cart on login
-  const mergeCartsOnLogin = useCallback(async () => {
-    const guestCart = getCartFromCookies();
-    const userCart = await fetchCartFromAPI();
-
-    // Merge: combine quantities for same products, add new products
-    const mergedCart = [...userCart];
-    
-    for (const guestItem of guestCart) {
-      const existingIndex = mergedCart.findIndex(
-        (item) => item.productId === guestItem.productId
-      );
-      
-      if (existingIndex > -1) {
-        // Add quantities
-        mergedCart[existingIndex].quantity += guestItem.quantity;
-      } else {
-        // Add new item
-        mergedCart.push(guestItem);
+        console.log("Synced item to server:", item.productId);
+      } catch (error) {
+        console.error("Error syncing item to server:", error);
       }
     }
+  }, []);
 
-    // Save merged cart
-    setItems(mergedCart);
-    saveCartToCookies(mergedCart);
-    
-    // Sync to API
-    if (mergedCart.length > 0) {
-      await syncCartToAPI(mergedCart);
-    }
-
-    return mergedCart;
-  }, [fetchCartFromAPI, syncCartToAPI]);
-
-  // Refresh cart
-  const refreshCart = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      if (isAuthenticated) {
-        const apiCart = await fetchCartFromAPI();
-        if (apiCart.length > 0) {
-          setItems(apiCart);
-        } else {
-          // If API cart is empty, use server cart
-          const serverCart = await serverGetCartItems();
-          setItems(serverCart);
-        }
-      } else {
-        // Use server action for guest
-        const serverCart = await serverGetCartItems();
-        setItems(serverCart);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, fetchCartFromAPI]);
-
-  // Initialize cart on mount and auth change
+  // Initialize cart on mount and handle auth changes
   useEffect(() => {
     const initCart = async () => {
       setIsLoading(true);
       try {
-        if (isAuthenticated) {
-          // Merge carts on login
-          await mergeCartsOnLogin();
+        if (isAuthenticated && tokens?.idToken) {
+          const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokens.idToken}`,
+          };
+          
+          // User just logged in - sync guest cart to server first
+          if (!wasAuthenticated && guestItems.length > 0) {
+            console.log("User logged in with guest cart items, syncing...");
+            await syncGuestCartToServer(guestItems, headers);
+            // Clear guest cart after sync
+            setGuestItems([]);
+          }
+          
+          // Fetch user's cart from API (will include newly synced items)
+          const apiCart = await fetchCart();
+          
+          if (apiCart.length > 0) {
+            const mergedCart = await mergeCartData(apiCart);
+            setItems(mergedCart);
+          } else {
+            setItems([]);
+          }
+          setWasAuthenticated(true);
         } else {
-          // Load from server action for guest (more reliable than client-side cookie reading)
-          const serverCart = await serverGetCartItems();
-          setItems(serverCart);
+          // User logged out
+          if (wasAuthenticated) {
+            setItems([]);
+            setWasAuthenticated(false);
+          }
+          // Guest user - keep using guestItems (in-memory only)
         }
       } finally {
         setIsLoading(false);
@@ -212,145 +217,130 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     initCart();
-  }, [isAuthenticated, mergeCartsOnLogin]);
+  }, [isAuthenticated, tokens, wasAuthenticated, guestItems, fetchCart, mergeCartData, syncGuestCartToServer]);
 
   // Add item to cart
-  const addItem = useCallback(async (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+  const addItem = useCallback((item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
     const quantity = item.quantity || 1;
+    const headers = getHeaders();
     
-    // Use server action to add item (this updates the cookie on server)
-    await serverAddToCart(
-      item.productId,
-      item.name,
-      item.price,
-      item.image,
-      quantity,
-      item.categoryId,
-      item.slug
-    );
+    if (headers) {
+      // Authenticated user - sync to server
+      setItems((prev) => {
+        const existingIndex = prev.findIndex((i) => i.productId === item.productId);
+        if (existingIndex > -1) {
+          const newCart = [...prev];
+          newCart[existingIndex] = {
+            ...newCart[existingIndex],
+            quantity: newCart[existingIndex].quantity + quantity,
+          };
+          return newCart;
+        } else {
+          return [...prev, { ...item, quantity }];
+        }
+      });
 
-    // Update local state
-    setItems((prev) => {
-      const existingIndex = prev.findIndex((i) => i.productId === item.productId);
-      let newCart: CartItem[];
-      
-      if (existingIndex > -1) {
-        newCart = [...prev];
-        newCart[existingIndex].quantity += quantity;
-      } else {
-        newCart = [...prev, { ...item, quantity }];
-      }
-      
-      return newCart;
-    });
-
-    // Sync to API if authenticated
-    if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch("/api/cart/items", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-          body: JSON.stringify({
-            product_id: item.productId,
-            quantity,
-          }),
-        });
-      } catch (error) {
-        console.error("Error adding item to API cart:", error);
-      }
+      fetch("/api/cart/items", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          product_id: item.productId,
+          quantity,
+        }),
+      }).catch((error) => console.error("Error adding to cart:", error));
+    } else {
+      // Guest user - add to in-memory guest cart only
+      setGuestItems((prev) => {
+        const existingIndex = prev.findIndex((i) => i.productId === item.productId);
+        if (existingIndex > -1) {
+          const newCart = [...prev];
+          newCart[existingIndex] = {
+            ...newCart[existingIndex],
+            quantity: newCart[existingIndex].quantity + quantity,
+          };
+          return newCart;
+        } else {
+          return [...prev, { ...item, quantity }];
+        }
+      });
     }
-  }, [isAuthenticated, tokens]);
+  }, [getHeaders]);
 
   // Remove item from cart
-  const removeItem = useCallback(async (productId: string) => {
-    // Use server action to remove item
-    await serverRemoveFromCart(productId);
-
-    // Update local state
-    setItems((prev) => {
-      const newCart = prev.filter((item) => item.productId !== productId);
-      return newCart;
-    });
-
-    // Sync to API if authenticated
-    if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch(`/api/cart/items/${productId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-        });
-      } catch (error) {
-        console.error("Error removing item from API cart:", error);
-      }
+  const removeItem = useCallback((productId: string) => {
+    const headers = getHeaders();
+    
+    if (headers) {
+      setItems((prev) => prev.filter((item) => item.productId !== productId));
+      fetch(`/api/cart/items/${productId}`, {
+        method: "DELETE",
+        headers,
+      }).catch((error) => console.error("Error removing from cart:", error));
+    } else {
+      // Guest user - remove from in-memory cart
+      setGuestItems((prev) => prev.filter((item) => item.productId !== productId));
     }
-  }, [isAuthenticated, tokens]);
+  }, [getHeaders]);
 
   // Update item quantity
-  const updateQuantity = useCallback(async (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity < 1) {
-      return removeItem(productId);
+      removeItem(productId);
+      return;
     }
 
-    // Use server action to update quantity
-    await serverUpdateQuantity(productId, quantity);
-
-    // Update local state
-    setItems((prev) => {
-      const newCart = prev.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+    const headers = getHeaders();
+    
+    if (headers) {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.productId === productId ? { ...item, quantity } : item
+        )
       );
-      return newCart;
-    });
 
-    // Sync to API if authenticated
-    if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch(`/api/cart/items/${productId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-          body: JSON.stringify({ quantity }),
-        });
-      } catch (error) {
-        console.error("Error updating item in API cart:", error);
+      if (quantityDebounceRef.current[productId]) {
+        clearTimeout(quantityDebounceRef.current[productId]);
       }
+
+      quantityDebounceRef.current[productId] = setTimeout(() => {
+        fetch(`/api/cart/items/${productId}`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ quantity }),
+        }).catch((error) => console.error("Error updating quantity:", error));
+
+        delete quantityDebounceRef.current[productId];
+      }, 300);
+    } else {
+      // Guest user - update in-memory cart
+      setGuestItems((prev) =>
+        prev.map((item) =>
+          item.productId === productId ? { ...item, quantity } : item
+        )
+      );
     }
-  }, [isAuthenticated, tokens, removeItem]);
+  }, [getHeaders, removeItem]);
 
   // Clear cart
-  const clearCart = useCallback(async () => {
-    // Use server action to clear cart
-    await serverClearCart();
-
-    // Update local state
-    setItems([]);
-
-    // Sync to API if authenticated
-    if (isAuthenticated && tokens?.authToken) {
-      try {
-        await fetch("/api/cart", {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${tokens.authToken}`,
-          },
-        });
-      } catch (error) {
-        console.error("Error clearing API cart:", error);
-      }
+  const clearCart = useCallback(() => {
+    const headers = getHeaders();
+    
+    if (headers) {
+      setItems([]);
+      fetch("/api/cart", {
+        method: "DELETE",
+        headers,
+      }).catch((error) => console.error("Error clearing cart:", error));
+    } else {
+      // Guest user - clear in-memory cart
+      setGuestItems([]);
     }
-  }, [isAuthenticated, tokens]);
+  }, [getHeaders]);
 
   return (
     <CartContext.Provider
       value={{
-        items,
+        items: activeItems,
         count,
         isLoading,
         addItem,

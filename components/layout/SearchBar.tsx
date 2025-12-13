@@ -88,8 +88,8 @@ export default function SearchBar() {
   return (
     <div ref={searchRef} className="relative w-full max-w-xl">
       <form onSubmit={handleSearch} className="flex items-center border border-[#004AAD] rounded-full overflow-hidden shadow-sm bg-white">
-        <div className="flex items-center pl-3">
-          <Search className="h-5 w-5 text-gray-500" />
+        <div className="flex items-center pl-2 md:pl-3">
+          <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
         </div>
         <Input
           type="text"
@@ -97,23 +97,24 @@ export default function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && setShowSuggestions(true)}
-          placeholder="Search by product name, part number, brand..."
-          className="border-none focus:ring-0 flex-1 px-2 text-gray-700 placeholder:text-gray-400"
+          placeholder="Search products..."
+          className="border-none focus:ring-0 flex-1 px-2 text-sm md:text-base text-gray-700 placeholder:text-gray-400 h-9 md:h-10"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="px-2 text-gray-400 hover:text-gray-600"
+            className="px-1.5 md:px-2 text-gray-400 hover:text-gray-600"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </button>
         )}
         <Button
           type="submit"
-          className="bg-yellow-400 hover:bg-yellow-500 text-black rounded-none rounded-r-full px-6 font-medium transition-colors"
+          className="bg-yellow-400 hover:bg-yellow-500 text-black rounded-none rounded-r-full px-3 md:px-6 font-medium transition-colors text-sm md:text-base h-9 md:h-10"
         >
-          Search
+          <span className="hidden sm:inline">Search</span>
+          <Search className="h-4 w-4 sm:hidden" />
         </Button>
       </form>
 

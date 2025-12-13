@@ -1,8 +1,11 @@
 "use client";
 
 import { ShieldCheck, CheckCircle, Zap, MapPin } from "lucide-react";
+import { useLocation } from "@/lib/location/context";
 
 export default function ProfessionalInstallationCard() {
+  const { location, openModal } = useLocation();
+
   return (
     <div className="bg-[#FFFDF7] border border-yellow-200 rounded-2xl p-4 space-y-4 shadow-sm">
       
@@ -57,13 +60,28 @@ export default function ProfessionalInstallationCard() {
       <div className="flex items-center justify-between text-xs text-gray-600 pt-1">
         <div className="flex items-center gap-1">
           <MapPin className="h-3 w-3" />
-          <span>53 certified installers available in your pincode</span>
+          <span>
+            {location?.pincode 
+              ? `Checking availability in ${location.pincode}`
+              : "Enter pincode to check availability"
+            }
+          </span>
         </div>
 
-        <button className="text-blue-600 font-medium hover:underline">
-          Change
+        <button 
+          onClick={openModal}
+          className="text-blue-600 font-medium hover:underline"
+        >
+          {location?.pincode ? "Change" : "Enter Pincode"}
         </button>
       </div>
+
+      {/* Service Not Available Message */}
+      {location?.pincode && (
+        <p className="text-xs text-red-600 mt-1">
+          Sorry, installation service is not available at your location ({location.pincode}). We are expanding soon!
+        </p>
+      )}
     </div>
   );
 }

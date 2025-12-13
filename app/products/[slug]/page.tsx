@@ -25,6 +25,7 @@ import SellerInfoCard from "@/components/product/SellerInfoCard";
 import WhyBuyFromUs from "@/components/product/WhyBuyFromUs";
 import BundlePriceBox from "@/components/product/BundlePriceBox";
 import RecentlyViewedSection from "@/components/cart/RecentlyViewedSection";
+import ProductTabs from "@/components/product/ProductTabs";
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -38,18 +39,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const discountAmount =
     product.compare_at_price && product.price
       ? Math.round(
-          ((product.compare_at_price - product.price) /
-            product.compare_at_price) *
-            100
-        )
+        ((product.compare_at_price - product.price) /
+          product.compare_at_price) *
+        100
+      )
       : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="hidden md:block">
-        <TopBar />
-      </div>
+      <TopBar />
 
       <main className="container mx-auto px-4 py-4 md:py-8">
 
@@ -63,64 +62,78 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {/* ✅ TRUE 3 COLUMN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 lg:gap-8">
 
           {/* ✅ LEFT COLUMN → IMAGES */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="lg:sticky lg:top-32 lg:self-start md:col-span-1 lg:col-span-5 flex flex-col gap-4 md:gap-6">
             <ProductImages
               images={
                 product.images?.length
                   ? product.images
                   : product.primary_image
-                  ? [product.primary_image]
-                  : ["/images/fallback.jpg"]
+                    ? [product.primary_image]
+                    : ["/images/fallback.jpg"]
               }
               title={product.title}
               discount={discountAmount}
             />
-                <PurchaseActions
+            {/* PurchaseActions - handles both desktop and mobile sticky bar internally */}
+            <PurchaseActions
               id={product.id}
               title={product.title}
               price={product.price}
               image={product.primary_image}
-              categoryId={product.category?.id} // ✅ FIXED for new API
+              categoryId={product.category?.id}
+              slug={product.slug}
             />
-            <InstallationGuide/>
+            {/* <InstallationGuide/> */}
           </div>
 
           {/* ✅ CENTER COLUMN → PRODUCT INFO */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6">
             <ProductInfo product={product} />
-            <OffersSection />
-            <DeliveryAndServices/>
-            <KeyHighlights />
-            <VehicleCompatibility />
-        
+            {/* <OffersSection /> */}
+            <DeliveryAndServices 
+              returnPolicy={(product as any).return_policy}
+              shippingInfo={(product as any).shipping_info}
+            />
+            <KeyHighlights description={product.description} />
 
-            <ProductFeatures warranty={product.warranty_months} />
+            {/* <ProductFeatures warranty={product.warranty_months} /> */}
 
-            
+
+
           </div>
 
           {/* ✅ RIGHT COLUMN → INSTALLATION / SELLER / TRUST */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="md:col-span-2 lg:col-span-3 space-y-4 md:space-y-6">
 
- <div className="lg:col-span-3 space-y-6">
-  <ProfessionalInstallationCard />
-  <SellerInfoCard />
-<WhyBuyFromUs />
-<BundlePriceBox 
-  totalPrice={product.price || 0}
-  originalPrice={product.compare_at_price || product.price || 0}
-  savings={(product.compare_at_price || 0) - (product.price || 0)}
-/>
- 
-</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+            <VehicleCompatibility 
+              compatibleCars={(product as any).compatible_cars}
+              isUniversal={product.is_universal}
+            />
+              <ProfessionalInstallationCard />
+              {/* <SellerInfoCard /> */}
+              {/* <WhyBuyFromUs /> */}
+
+            </div>
 
           </div>
         </div>
 
- 
+
+
+        {/* ✅ PRODUCT TABS - About, Specs, Reviews */}
+        <div className="mt-8">
+          <ProductTabs
+            description={product.description}
+            warrantyMonths={product.warranty_months}
+            productId={product.id}
+            rating={product.rating}
+            reviewCount={product.review_count}
+          />
+        </div>
 
         {/* ✅ FREQUENTLY BOUGHT */}
         {/* <div className="mt-12">
@@ -137,13 +150,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div> */}
 
       </main>
-      <RecentlyViewedSection/>  
-      <RecentlyViewedSection title="Customers Who Bought Also Purchased" />
-      <RecentlyViewedSection title="Customers Who Bought Also Viewed" />
+      <RecentlyViewedSection />
+      {/* <RecentlyViewedSection title="Customers Who Bought Also Purchased" /> */}
+      {/* <RecentlyViewedSection title="Customers Who Bought Also Viewed" /> */}
 
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

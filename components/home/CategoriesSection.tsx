@@ -7,6 +7,7 @@ import { fetchCategories } from "@/lib/api/categories";
 import { fetchProducts } from "@/lib/api/products";
 import type { Category } from "@/lib/api/categories";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { HomepageCategory } from "@/lib/api/products";
 
 interface CategoryWithProducts {
   category: Category & { item_count: number };
@@ -14,7 +15,11 @@ interface CategoryWithProducts {
   bgColor: string;
 }
 
-export function CategoriesSection() {
+interface CategoriesSectionProps {
+  categories?: HomepageCategory[];
+}
+
+export function CategoriesSection({ categories: propCategories }: CategoriesSectionProps) {
   const [categoryData, setCategoryData] = useState<CategoryWithProducts[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,12 +58,37 @@ export function CategoriesSection() {
     return () => el.removeEventListener("scroll", checkScroll);
   }, []);
 
-  // ✅ DATA FETCH (TOP 8 POPULATED)
+  // ✅ DATA FETCH - Use props if provided, otherwise fetch
   useEffect(() => {
     async function loadCategoriesWithProducts() {
       try {
         setLoading(true);
 
+        // If categories are provided via props, use them directly
+        if (propCategories && propCategories.length > 0) {
+          const data: CategoryWithProducts[] = propCategories.slice(0, 8).map((cat) => {
+            // Generate placeholder images
+            const productImages = Array(5).fill("/images/image1.jpg");
+
+            return {
+              category: {
+                id: cat.id,
+                name: cat.name,
+                description: null,
+                slug: cat.slug,
+                item_count: cat.product_count,
+              },
+              productImages,
+              bgColor: "bg-[#FBC84C]",
+            };
+          });
+
+          setCategoryData(data);
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: fetch categories from API
         const categories = await fetchCategories();
         const topCategories = categories.filter((c) => c.level === 0);
 
@@ -90,19 +120,8 @@ export function CategoriesSection() {
           .sort((a, b) => b.productCount - a.productCount)
           .slice(0, 8);
 
-        const bgColors = [
-          "bg-gradient-to-br from-yellow-200 to-yellow-300",
-          "bg-gradient-to-br from-orange-200 to-orange-300",
-          "bg-gradient-to-br from-amber-200 to-amber-300",
-          "bg-gradient-to-br from-lime-200 to-lime-300",
-          "bg-gradient-to-br from-blue-200 to-blue-300",
-          "bg-gradient-to-br from-purple-200 to-purple-300",
-          "bg-gradient-to-br from-pink-200 to-pink-300",
-          "bg-gradient-to-br from-teal-200 to-teal-300",
-        ];
-
         const data: CategoryWithProducts[] = topEightCategories.map(
-          (item, index) => {
+          (item) => {
             const productImages = item.products
               .map((p) => p.primary_image || "/images/image1.jpg")
               .filter(Boolean)
@@ -135,7 +154,7 @@ export function CategoriesSection() {
     }
 
     loadCategoriesWithProducts();
-  }, []);
+  }, [propCategories]);
 
   return (
     <section className="bg-gray-50 py-8 md:py-16">
@@ -152,10 +171,10 @@ export function CategoriesSection() {
           </div>
 
           <Link
-            href="/products"
+            href={"/categories" as any}
             className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base"
           >
-            Browse all
+            View all
             <svg
               className="w-4 h-4"
               fill="none"
@@ -187,29 +206,30 @@ export function CategoriesSection() {
         ) : (
           // ✅ REAL SCROLLER WITH ARROWS
           <div className="relative">
-<button
-  onClick={() => scroll("left")}
-  className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
->
-  <ChevronLeft className="h-5 w-5" />
-</button>
+            {/* Left Arrow - Hidden on mobile */}
+            <button
+              onClick={() => scroll("left")}
+              className="hidden md:flex absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-<button
-  onClick={() => scroll("right")}
-  className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
->
-  <ChevronRight className="h-5 w-5" />
-</button>
-
+            {/* Right Arrow - Hidden on mobile */}
+            <button
+              onClick={() => scroll("right")}
+              className="hidden md:flex absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
             <div
               ref={scrollRef}
-              className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-6"
+              className="flex gap-3 md:gap-6 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-6"
             >
               {categoryData.map((data) => (
                 <div
                   key={data.category.id}
-                  className="min-w-[320px] max-w-[320px] shrink-0"
+                  className="min-w-[260px] max-w-[260px] md:min-w-[320px] md:max-w-[320px] shrink-0"
                 >
                   <CategoryCard
                     category={data.category}

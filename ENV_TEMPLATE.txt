@@ -1,17 +1,13 @@
 # Copy this to .env or .env.local file
 # DO NOT commit .env files to git
 
-# Cognito Configuration
-NEXT_PUBLIC_COGNITO_CLIENT_ID=5u411frjvscpbcksgv4ce5kf5b
-COGNITO_CLIENT_SECRET=uqltvu1cr8sgt60pg9c8fmhaacvqmt77op46ut3em7p8igqmde
-
-# SSO Configuration
-NEXT_PUBLIC_COGNITO_SSO_CLIENT_ID=24vle4l58riamcdce2lh1imn35
-COGNITO_SSO_CLIENT_SECRET=11jhe4jcpokjjca9mskuv79mvnpk0neo8phnq3etgpb2oc8b8hup
-
-# API Configuration (WhatsApp OTP)
+# WhatsApp OTP API Base URL
 NEXT_PUBLIC_API_BASE_URL=https://k8he8cx9he.execute-api.ap-south-1.amazonaws.com/dev
 
-# Redirect URLs (update for production)
-NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000/auth/callback
-NEXT_PUBLIC_LOGOUT_URI=http://localhost:3000
+# Google SSO (Cognito) Configuration
+NEXT_PUBLIC_COGNITO_DOMAIN=exaltride-auth.auth.ap-south-1.amazoncognito.com
+NEXT_PUBLIC_COGNITO_CLIENT_ID=your_cognito_client_id
+COGNITO_CLIENT_SECRET=your_cognito_client_secret
+
+# App URL (update for production)
+NEXT_PUBLIC_APP_URL=http://localhost:3000

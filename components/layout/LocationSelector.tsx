@@ -1,42 +1,20 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { MapPin, Navigation, X, Loader2 } from "lucide-react";
-
-interface LocationData {
-  city: string;
-  pincode: string;
-  state?: string;
-  country?: string;
-}
-
-const STORAGE_KEY = "user_location";
+import { useLocation } from "@/lib/location/context";
 
 export default function LocationSelector() {
-  const [location, setLocation] = useState<LocationData | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { location, setLocation, isModalOpen, openModal, closeModal } = useLocation();
   const [pincode, setPincode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Load saved location on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setLocation(JSON.parse(saved));
-      } catch {
-        // Invalid saved data, will prompt user
-      }
-    }
-  }, []);
-
-  // Save location to localStorage
-  const saveLocation = useCallback((data: LocationData) => {
+  // Save location using context
+  const saveLocation = useCallback((data: { city: string; pincode: string; state?: string; country?: string }) => {
     setLocation(data);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setIsOpen(false);
+    closeModal();
     setError("");
-  }, []);
+  }, [setLocation, closeModal]);
 
   // Fetch location from coordinates using reverse geocoding
   const fetchLocationFromCoords = useCallback(async (lat: number, lon: number) => {
@@ -59,7 +37,7 @@ export default function LocationSelector() {
       const data = await response.json();
       const address = data.address;
       
-      const locationData: LocationData = {
+      const locationData = {
         city: address.city || address.town || address.village || address.suburb || "Unknown",
         pincode: address.postcode || "",
         state: address.state || "",
@@ -129,7 +107,7 @@ export default function LocationSelector() {
 
       if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
         const postOffice = data[0].PostOffice[0];
-        const locationData: LocationData = {
+        const locationData = {
           city: postOffice.District || postOffice.Name,
           pincode: pincode,
           state: postOffice.State,
@@ -155,12 +133,12 @@ export default function LocationSelector() {
     <>
       {/* Location Button */}
       <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center space-x-1 text-gray-700 cursor-pointer hover:text-gray-900 transition-colors"
+        onClick={openModal}
+        className="flex items-center space-x-1 text-gray-800 cursor-pointer hover:text-gray-900 transition-colors"
       >
         <MapPin className="h-4 w-4" />
         <div className="flex flex-col leading-tight text-left">
-          <span className="text-xs text-gray-500">Deliver to</span>
+          <span className="text-xs text-gray-800">Deliver to</span>
           <span className="font-medium text-sm flex items-center gap-1">
             {displayLocation} <span className="text-[11px]">▼</span>
           </span>
@@ -168,21 +146,21 @@ export default function LocationSelector() {
       </button>
 
       {/* Location Modal */}
-      {isOpen && (
+      {isModalOpen && (
         <>
           {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setIsOpen(false)}
+            onClick={closeModal}
           />
 
           {/* Modal */}
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-50 w-[90%] max-w-md p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Choose your location</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Choose your location</h2>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={closeModal}
                 className="p-1 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-5 w-5" />

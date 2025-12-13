@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, ShoppingCart, Plus, Minus } from "lucide-react";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart/context";
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist-actions";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ export default function PurchaseActions({
   in_stock,
 }: PurchaseActionsProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const { addItem, updateQuantity, getItemQuantity, count: cartCount } = useCart();
@@ -51,41 +50,31 @@ export default function PurchaseActions({
 
     if (!id || !title || !price) return;
 
-    startTransition(async () => {
-      try {
-        await addItem({
-          productId: id,
-          name: title,
-          price: price,
-          image: image || "",
-          categoryId,
-          slug,
-        });
-        toast.success("Added to cart!", {
-          description: `${title} has been added to your cart`,
-        });
-      } catch (error) {
-        toast.error("Failed to add to cart", {
-          description: "Please try again",
-        });
-      }
-    });
+    try {
+      addItem({
+        productId: id,
+        name: title,
+        price: price,
+        image: image || "",
+        categoryId,
+        slug,
+      });
+      toast.success("Added to cart!");
+    } catch (error) {
+      toast.error("Failed to add to cart");
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(id, quantityInCart + 1);
-    });
+    updateQuantity(id, quantityInCart + 1);
   };
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(async () => {
-      await updateQuantity(id, quantityInCart - 1);
-    });
+    updateQuantity(id, quantityInCart - 1);
   };
 
   const handleBuyNow = async (e: React.MouseEvent) => {
@@ -182,15 +171,14 @@ export default function PurchaseActions({
 
   return (
     <>
-      {/* Desktop/Tablet View */}
-      <div className="space-y-3">
+      {/* Desktop/Tablet View - hidden on mobile */}
+      <div className="hidden md:block space-y-3">
         {/* Primary Buttons */}
         <div className="flex gap-2">
           {quantityInCart > 0 ? (
             <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
               <button
                 onClick={handleDecrement}
-                disabled={isPending}
                 className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
               >
                 <Minus className="h-5 w-5" />
@@ -200,7 +188,6 @@ export default function PurchaseActions({
               </span>
               <button
                 onClick={handleIncrement}
-                disabled={isPending}
                 className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
               >
                 <Plus className="h-5 w-5" />
@@ -210,7 +197,6 @@ export default function PurchaseActions({
             <Button
               className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
               onClick={handleAddToCart}
-              disabled={isPending}
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Add to cart
@@ -220,20 +206,18 @@ export default function PurchaseActions({
           <Button 
             className="flex-1 bg-[#001F5F]"
             onClick={handleBuyNow}
-            disabled={isPending}
           >
             Buy Now
           </Button>
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+      {/* Mobile Sticky Bottom Bar - only visible on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         {quantityInCart > 0 ? (
           <div className="flex-1 flex items-center justify-center gap-3 bg-[#FBC84C] rounded-md h-10">
             <button
               onClick={handleDecrement}
-              disabled={isPending}
               className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-l-md transition-colors"
             >
               <Minus className="h-5 w-5" />
@@ -243,7 +227,6 @@ export default function PurchaseActions({
             </span>
             <button
               onClick={handleIncrement}
-              disabled={isPending}
               className="w-10 h-10 flex items-center justify-center text-[#001F5F] hover:bg-yellow-600 rounded-r-md transition-colors"
             >
               <Plus className="h-5 w-5" />
@@ -253,7 +236,6 @@ export default function PurchaseActions({
           <Button
             className="flex-1 font-semibold bg-[#FBC84C] text-[#001F5F] hover:bg-[#FBC84C]"
             onClick={handleAddToCart}
-            disabled={isPending}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to cart
@@ -263,14 +245,13 @@ export default function PurchaseActions({
         <Button 
           className="flex-1 bg-[#001F5F]"
           onClick={handleBuyNow}
-          disabled={isPending}
         >
           Buy Now
         </Button>
       </div>
 
       {/* Spacer for mobile sticky bar */}
-      <div className="h-16 lg:hidden" />
+      <div className="h-16 md:hidden" />
     </>
   );
 }

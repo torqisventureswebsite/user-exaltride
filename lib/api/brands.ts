@@ -72,24 +72,24 @@ export async function fetchBrandProducts(
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.offset) queryParams.append("offset", params.offset.toString());
 
-    const url = `${API_BASE_URL}/brands/${brandSlug}/products${
-      queryParams.toString() ? `?${queryParams.toString()}` : ""
-    }`;
+    // Use /brands/{slug}/products endpoint
+    const url = `${API_BASE_URL}/brands/${brandSlug}/products${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
 
     const response = await fetch(url, {
       next: { revalidate: 60 },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch brand products: ${response.statusText}`);
+      console.error(`Brand products API error: ${response.status} for brand ${brandSlug}`);
+      throw new Error(`Failed to fetch brand products: ${response.status} ${response.statusText || 'Unknown error'}`);
     }
 
 const data = await response.json();
 
-// ✅ TEMP: bypass Zod for brand products
+// Handle response data
 const validated = data as any;
 
-const products: Product[] = validated.data.map((apiProduct: any) => ({
+const products: Product[] = (validated.data || []).map((apiProduct: any) => ({
   id: apiProduct.id,
   slug: apiProduct.slug,
   title: apiProduct.title,
@@ -99,18 +99,18 @@ const products: Product[] = validated.data.map((apiProduct: any) => ({
   discount_percentage: apiProduct.discount_percentage
     ? parseFloat(apiProduct.discount_percentage)
     : null,
-  rating: apiProduct.rating,
-  review_count: apiProduct.review_count,
-  in_stock: apiProduct.in_stock,
+  rating: apiProduct.rating || 0,
+  review_count: apiProduct.review_count || 0,
+  in_stock: apiProduct.in_stock ?? true,
   brand_name: apiProduct.brand_name,
   stock: apiProduct.in_stock ? 100 : 0,
   status: apiProduct.in_stock ? "active" : "out_of_stock",
+  category_id: apiProduct.category?.id || apiProduct.category_id,
 }));
-
 
     return {
       products,
-      meta: validated.meta,
+      meta: validated.meta || { limit: params?.limit || 100, offset: params?.offset || 0, has_more: false, total: products.length },
     };
   } catch (error) {
     console.error(`Error fetching products for brand ${brandSlug}:`, error);

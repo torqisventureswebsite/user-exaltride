@@ -21,8 +21,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {product.title}
       </h1>
 
-      {/* Rating */}
-      {product.rating !== undefined && (
+      {/* Rating - only show if rating > 0 and has reviews */}
+      {product.rating !== undefined && product.rating > 0 && (product.review_count || 0) > 0 && (
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 rounded bg-[#001F5F] px-3 py-1">
             <span className="text-sm font-semibold text-white">

@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Facebook,
+  Linkedin,
+  Instagram,
+  Mail,
+  Phone,
+  MapPin,
+  Twitter
+} from "lucide-react";
+
 import Image from "next/image";
 
 export default function Footer() {
@@ -57,38 +66,24 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5">
               <li>
-                <a href="#faq" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/shipping" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Shipping Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link href={"/policies/returns" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Return Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/cancellation-policy" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Cancellation Policy
-                </a>
-              </li>
-            
-              <li>
-                <Link
-                  href="/privacy-policy"
-                  className="text-gray-300 hover:text-white transition-colors text-sm"
-                >
+                <Link href={"/policies/privacy" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <a href="#terms" className="text-gray-300 hover:text-white transition-colors text-sm">
-                  Terms & Conditions
-                </a>
+                <Link href={"/policies/terms" as any} className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Terms of Use
+                </Link>
               </li>
             </ul>
           </div>
@@ -128,49 +123,11 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-
-        {/* Newsletter Section */}
-        <div className="border border-white/20 bg-white/5 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          {/* Newsletter Text */}
-          <div className="flex items-center gap-4">
-            <div className="bg-[#1a2a7a] p-3 rounded-full">
-              <Mail className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h4 className="text-white font-semibold text-base">Stay Updated!</h4>
-              <p className="text-gray-400 text-sm">
-                Join our mailing list for exclusive deals...
-              </p>
-            </div>
-          </div>
-
-          {/* Newsletter Input */}
-          <form className="flex w-full md:w-auto md:min-w-[400px]">
-            <div className="flex-1 flex items-center bg-[#0a1654] rounded-l-full px-4 py-2 border border-[#1a2a7a]">
-              <Mail className="h-4 w-4 text-gray-500 mr-2" />
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-gray-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors -ml-2"
-              aria-label="Subscribe"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-          </form>
-        </div>
-
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 mt-8 border-t border-white/10">
           {/* Copyright */}
           <p className="text-gray-400 text-sm">
-            © 2025 Auto Essentials. All Rights Reserved.
+            © 2025 Exaltride. All Rights Reserved.
           </p>
 
           {/* Social Media Icons */}

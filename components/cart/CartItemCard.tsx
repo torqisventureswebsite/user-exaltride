@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Heart, Trash2, Truck } from "lucide-react";
 import { useCart } from "@/lib/cart/context";
 import { useTransition, useState } from "react";
+import { saveForLater } from "@/lib/saved-for-later";
+import { toast } from "sonner";
 
 interface CartItemCardProps {
   item: {
@@ -41,15 +43,28 @@ export default function CartItemCard({ item }: CartItemCardProps) {
     });
   };
 
+  const handleSaveForLater = () => {
+    saveForLater({
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      categoryId: item.categoryId,
+      slug: item.slug,
+    });
+    removeItem(item.productId);
+    toast.success("Saved for later!");
+  };
+
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm p-5 border border-gray-200 transition ${
+      className={`bg-white rounded-xl md:rounded-2xl shadow-sm p-3 md:p-5 border border-gray-200 transition ${
         removing ? "opacity-50" : ""
       }`}
     >
-      <div className="flex gap-5">
+      <div className="flex gap-3 md:gap-5">
         {/* ✅ IMAGE */}
-        <Link href={`/products/${item.slug || item.productId}`} className="relative w-32 h-32 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 block">
+        <Link href={`/products/${item.slug || item.productId}`} className="relative w-30 h-30 md:w-32 md:h-32 rounded-lg md:rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 block">
           <Image
             src={item.image || "/images/image1.jpg"}
             alt={item.name}
@@ -59,19 +74,19 @@ export default function CartItemCard({ item }: CartItemCardProps) {
         </Link>
 
         {/* ✅ RIGHT CONTENT */}
-        <div className="flex-1 flex flex-col justify-between">
+        <div className="flex-1 flex flex-col justify-between min-w-0">
           {/* ✅ TOP SECTION */}
-          <div className="flex justify-between items-start gap-4">
-            <div>
-              <Link href={`/products/${item.slug || item.productId}`} className="font-semibold text-gray-900 text-[16px] leading-tight hover:text-blue-600 transition-colors">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 md:gap-4">
+            <div className="min-w-0">
+              <Link href={`/products/${item.slug || item.productId}`} className="font-semibold text-gray-900 text-sm md:text-[16px] leading-tight hover:text-blue-600 transition-colors line-clamp-2">
                 {item.name}
               </Link>
 
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs md:text-sm text-gray-500 mt-1 hidden md:block">
                 For: <span className="font-medium">Fits Hyundai Creta 2019–2023, all variants</span>
               </p>
 
-              <div className="flex items-center gap-2 text-sm mt-1">
+              <div className="hidden md:flex items-center gap-2 text-sm mt-1">
                 <span className="text-gray-500">Sold by:</span>
                 <span className="text-blue-600 font-medium">AutoShield Official</span>
                 <span className="ml-2 bg-blue-900 text-white text-xs px-2 py-[2px] rounded-md font-semibold">
@@ -79,53 +94,42 @@ export default function CartItemCard({ item }: CartItemCardProps) {
                 </span>
               </div>
 
-              {/* ✅ DELIVERY BADGE */}
-              <div className="mt-2 inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-lg">
-                <Truck size={16} />
-                Delivery in 2–3 days
-              </div>
             </div>
 
             {/* ✅ PRICE BLOCK */}
-            <div className="text-right flex flex-col items-end">
-              <p className="text-2xl font-bold text-[#001F5F]">₹{item.price}</p>
-
-              {/* <p className="text-sm text-gray-400 line-through">₹4,999</p> */}
-
-              {/* <span className="mt-1 bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-md">
-                50% OFF
-              </span> */}
+            <div className="text-left md:text-right flex md:flex-col items-center md:items-end gap-2 md:gap-0">
+              <p className="text-lg md:text-2xl font-bold text-[#001F5F]">₹{item.price.toLocaleString()}</p>
             </div>
           </div>
 
           {/* ✅ DIVIDER */}
-          <div className="my-4 border-t border-gray-200" />
+          <div className="my-2 md:my-4 border-t border-gray-200" />
 
           {/* ✅ BOTTOM ROW */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             {/* ✅ QUANTITY */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
-                Quantity:
+            <div className="flex items-center gap-2 md:gap-3">
+              <span className="text-xs md:text-sm font-medium text-gray-700">
+                Qty:
               </span>
 
               <div className="flex items-center border rounded-lg overflow-hidden">
                 <button
                   disabled={isPending}
                   onClick={() => handleQty(item.quantity - 1)}
-                  className="w-10 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 disabled:opacity-40"
+                  className="w-8 h-8 md:w-10 md:h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 disabled:opacity-40 text-sm md:text-base"
                 >
                   −
                 </button>
 
-                <span className="w-12 text-center font-semibold">
+                <span className="w-8 md:w-12 text-center font-semibold text-sm md:text-base">
                   {item.quantity}
                 </span>
 
                 <button
                   disabled={isPending}
                   onClick={() => handleQty(item.quantity + 1)}
-                  className="w-10 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 disabled:opacity-40"
+                  className="w-8 h-8 md:w-10 md:h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 disabled:opacity-40 text-sm md:text-base"
                 >
                   +
                 </button>
@@ -133,19 +137,22 @@ export default function CartItemCard({ item }: CartItemCardProps) {
             </div>
 
             {/* ✅ ACTION BUTTONS */}
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">
-                <Heart size={16} />
-                Save for Later
+            <div className="flex items-center gap-2 md:gap-3">
+              <button
+                onClick={handleSaveForLater}
+                className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border rounded-lg text-gray-700 hover:bg-gray-50 text-xs md:text-sm font-medium"
+              >
+                <Heart size={14} className="md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Save for Later</span>
               </button>
 
               <button
                 onClick={handleRemove}
                 disabled={isPending}
-                className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-sm font-medium"
+                className="flex items-center gap-1.5 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-xs md:text-sm font-medium"
               >
-                <Trash2 size={16} />
-                Remove
+                <Trash2 size={14} className="md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Remove</span>
               </button>
             </div>
           </div>

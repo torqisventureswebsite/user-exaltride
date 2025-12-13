@@ -62,12 +62,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session: string,
     otp: string
   ): Promise<void> => {
+    console.log("verifyOtp called with:", { phoneNumber, session: session?.slice(0, 20) + "...", otp });
     try {
       const response = await authService.verifyOtp({
         phoneNumber,
         session,
         otp,
       });
+
+      console.log("verifyOtp response received, setting user state");
+
+      // Get tokens from response - API may return accessToken or authToken
+      const authToken = response.accessToken || response.authToken;
+      const idToken = response.idToken;
+      const refreshToken = response.refreshToken;
 
       const user: User = response.user || authService.getUserFromToken() || {
         phoneNumber,
@@ -80,14 +88,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setState({
         user,
         tokens: {
-          authToken: response.authToken,
-          idToken: response.idToken,
-          refreshToken: response.refreshToken,
+          authToken,
+          idToken,
+          refreshToken,
         },
         isAuthenticated: true,
         isLoading: false,
       });
+
+      console.log("Auth state updated, isAuthenticated: true");
     } catch (error) {
+      console.error("verifyOtp error:", error);
       throw error;
     }
   };
@@ -98,6 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     authService.logout();
+    // Clear cart cookie on logout
+    if (typeof window !== "undefined") {
+      document.cookie = "cart=; path=/; max-age=0; samesite=lax";
+    }
     setState({
       user: null,
       tokens: null,

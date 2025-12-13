@@ -1,28 +1,3 @@
-// AWS Cognito Configuration
-export const cognitoConfig = {
-  // Regular login/signup
-  clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "5u411frjvscpbcksgv4ce5kf5b",
-  clientSecret: process.env.COGNITO_CLIENT_SECRET || "uqltvu1cr8sgt60pg9c8fmhaacvqmt77op46ut3em7p8igqmde",
-  
-  // SSO login
-  ssoClientId: process.env.NEXT_PUBLIC_COGNITO_SSO_CLIENT_ID || "24vle4l58riamcdce2lh1imn35",
-  ssoClientSecret: process.env.COGNITO_SSO_CLIENT_SECRET || "11jhe4jcpokjjca9mskuv79mvnpk0neo8phnq3etgpb2oc8b8hup",
-  
-  // Cognito URLs
-  domain: "exaltride-auth.auth.ap-south-1.amazoncognito.com",
-  region: "ap-south-1",
-  
-  // API endpoints
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://k8he8cx9he.execute-api.ap-south-1.amazonaws.com/dev",
-  
-  // Redirect URLs (update these with your actual domain)
-  redirectUri: process.env.NEXT_PUBLIC_REDIRECT_URI || "http://localhost:3000/auth/callback",
-  logoutUri: process.env.NEXT_PUBLIC_LOGOUT_URI || "http://localhost:3000",
-};
-
-// Use proxy endpoints to bypass CORS issues with AWS API Gateway
-// The proxy forwards requests from /api/proxy/auth/* to the real AWS endpoint
-
 // Auto-detect the base URL - works on both client and server
 function getBaseUrl() {
   // Client-side: always use window.location.origin to ensure same-origin requests
@@ -37,23 +12,51 @@ function getBaseUrl() {
   return "http://localhost:3000";
 }
 
-const useLocalAuth = process.env.NEXT_PUBLIC_USE_LOCAL_AUTH === "true";
+// WhatsApp OTP API Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://k8he8cx9he.execute-api.ap-south-1.amazonaws.com/dev";
 
+// AWS Cognito Configuration for Google SSO
+const COGNITO_DOMAIN = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "exaltride-auth.auth.ap-south-1.amazoncognito.com";
+
+export const cognitoConfig = {
+  // Google SSO client credentials
+  clientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+  clientSecret: process.env.COGNITO_CLIENT_SECRET,
+  
+  // Cognito domain
+  domain: COGNITO_DOMAIN,
+  
+  // Redirect URI for Google SSO (use env var for production, fallback to local)
+  get redirectUri() {
+    return process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || `${getBaseUrl()}/auth/callback`;
+  },
+  get logoutUri() {
+    return getBaseUrl();
+  },
+};
+
+// Auth API endpoints
 export const authEndpoints = {
-  // Use proxy endpoints to avoid CORS issues (proxy forwards to AWS)
+  // WhatsApp OTP endpoints (via proxy to bypass CORS)
   get signup() {
-    const base = getBaseUrl();
-    return useLocalAuth ? `${base}/api/auth/signup` : `${base}/api/proxy/auth/signup`;
+    return `${getBaseUrl()}/api/proxy/auth/signup`;
   },
   get login() {
-    const base = getBaseUrl();
-    return useLocalAuth ? `${base}/api/auth/login` : `${base}/api/proxy/auth/login`;
+    return `${getBaseUrl()}/api/proxy/auth/login`;
   },
   get verifyOtp() {
-    const base = getBaseUrl();
-    return useLocalAuth ? `${base}/api/auth/verify-otp` : `${base}/api/proxy/auth/verify-otp`;
+    return `${getBaseUrl()}/api/proxy/auth/verify-otp`;
   },
-  ssoAuthorize: `https://${cognitoConfig.domain}/oauth2/authorize`,
-  token: `https://${cognitoConfig.domain}/oauth2/token`,
-  logout: `https://${cognitoConfig.domain}/logout`,
+  
+  // Cognito hosted UI endpoints for Google SSO
+  get authorize() {
+    return `https://${COGNITO_DOMAIN}/oauth2/authorize`;
+  },
+  get token() {
+    // Use proxy to bypass CORS
+    return `${getBaseUrl()}/api/proxy/auth/token`;
+  },
+  get logout() {
+    return `https://${COGNITO_DOMAIN}/logout`;
+  },
 };

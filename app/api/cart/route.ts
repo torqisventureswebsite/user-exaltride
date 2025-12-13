@@ -13,8 +13,9 @@ export async function GET(request: NextRequest) {
     const headers: HeadersInit = {};
     if (authHeader) {
       headers["Authorization"] = authHeader;
-    } else if (sessionId) {
-      headers["X-session-id"] = sessionId;
+    }
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
     }
 
     const response = await fetch(`${API_BASE_URL}/v1/cart`, {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const error = await response.text();
       return NextResponse.json(
-        { success: false, error: `Failed to fetch cart: ${error}` },
+        { success: false, error: `Failed to fetch cart: ${error}`, data: [] },
         { status: response.status }
       );
     }
@@ -52,8 +53,9 @@ export async function DELETE(request: NextRequest) {
     const headers: HeadersInit = {};
     if (authHeader) {
       headers["Authorization"] = authHeader;
-    } else if (sessionId) {
-      headers["X-session-id"] = sessionId;
+    }
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
     }
 
     const response = await fetch(`${API_BASE_URL}/v1/cart`, {

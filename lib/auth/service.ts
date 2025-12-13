@@ -59,7 +59,8 @@ class AuthService {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Login failed");
+        console.error("Login API error response:", error);
+        throw new Error(error.message || error.error || `Login failed (${response.status})`);
       }
 
       return await response.json();
@@ -86,12 +87,26 @@ class AuthService {
       }
 
       const result = await response.json();
+      console.log("Verify OTP API response:", JSON.stringify(result, null, 2));
+
+      // Map token fields - API may return accessToken or authToken
+      const authToken = result?.accessToken || result?.authToken;
+      const idToken = result?.idToken;
+      const refreshToken = result?.refreshToken;
+
+      const isValidToken = (v: unknown) =>
+        typeof v === "string" && v.trim() !== "" && v !== "undefined" && v !== "null";
+
+      if (!isValidToken(authToken) || !isValidToken(idToken) || !isValidToken(refreshToken)) {
+        this.clearTokens();
+        throw new Error(result?.message || "Invalid OTP");
+      }
       
       // Store tokens and user data
       this.setTokens({
-        authToken: result.authToken,
-        idToken: result.idToken,
-        refreshToken: result.refreshToken,
+        authToken,
+        idToken,
+        refreshToken,
       });
 
       return result;
@@ -103,36 +118,56 @@ class AuthService {
 
   // SSO Login with Google
   initiateGoogleSSO(): void {
+    // Ensure we're on client-side
+    if (typeof window === "undefined") {
+      console.error("initiateGoogleSSO must be called on client-side");
+      return;
+    }
+
+    // Always compute redirect URI fresh on client-side to avoid SSR mismatch
+    const redirectUri = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || `${window.location.origin}/auth/callback`;
+    
+    // Check if we need to force account selection (user logged out previously)
+    const forceSelect = localStorage.getItem("force_sso_account_select") === "true";
+    
+    if (forceSelect) {
+      // Clear the flag
+      localStorage.removeItem("force_sso_account_select");
+      
+      // First logout from Cognito to clear the session, then redirect back to login
+      // Store intent to login after logout
+      localStorage.setItem("sso_login_after_logout", "true");
+      
+      // Redirect to Cognito logout, which will redirect to home, then we check for the flag
+      const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
+      logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
+      logoutUrl.searchParams.set("logout_uri", `${window.location.origin}/auth/login?sso=true`);
+      
+      window.location.href = logoutUrl.toString();
+      return;
+    }
+    
     const params = new URLSearchParams({
-      client_id: cognitoConfig.ssoClientId,
+      client_id: cognitoConfig.clientId ?? "",
       response_type: "code",
       scope: "email openid profile",
-      redirect_uri: cognitoConfig.redirectUri,
+      redirect_uri: redirectUri,
       identity_provider: "Google",
     });
 
-    window.location.href = `${authEndpoints.ssoAuthorize}?${params.toString()}`;
+    window.location.href = `${authEndpoints.authorize}?${params.toString()}`;
   }
 
   // Exchange authorization code for tokens (SSO callback)
   async exchangeCodeForTokens(code: string): Promise<AuthTokens> {
     try {
-      const params = new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: cognitoConfig.ssoClientId,
-        code,
-        redirect_uri: cognitoConfig.redirectUri,
-      });
-
+      // Send code to server-side proxy which has access to client_secret
       const response = await fetch(authEndpoints.token, {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(
-            `${cognitoConfig.ssoClientId}:${cognitoConfig.ssoClientSecret}`
-          )}`,
+          "Content-Type": "application/json",
         },
-        body: params.toString(),
+        body: JSON.stringify({ code }),
       });
 
       if (!response.ok) {
@@ -164,6 +199,14 @@ class AuthService {
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
   }
 
+  // Clear tokens from local storage (does not touch user)
+  clearTokens(): void {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.ID_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  }
+
   // Get tokens from local storage
   getTokens(): AuthTokens | null {
     if (typeof window === "undefined") return null;
@@ -172,9 +215,18 @@ class AuthService {
     const idToken = localStorage.getItem(STORAGE_KEYS.ID_TOKEN);
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
-    if (!authToken || !idToken || !refreshToken) return null;
+    const isValidToken = (v: string | null) =>
+      !!v && v.trim() !== "" && v !== "undefined" && v !== "null";
 
-    return { authToken, idToken, refreshToken };
+    if (!isValidToken(authToken) || !isValidToken(idToken) || !isValidToken(refreshToken)) {
+      return null;
+    }
+
+    return {
+      authToken: authToken as string,
+      idToken: idToken as string,
+      refreshToken: refreshToken as string,
+    };
   }
 
   // Store user data
@@ -206,13 +258,31 @@ class AuthService {
   logout(): void {
     if (typeof window === "undefined") return;
 
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.ID_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    console.log("Logging out - clearing all auth data");
+    this.clearTokens();
     localStorage.removeItem(STORAGE_KEYS.USER);
+    
+    // Mark that we need to force account selection on next SSO login
+    localStorage.setItem("force_sso_account_select", "true");
+    
+    // Double-check tokens are cleared
+    console.log("After logout - tokens:", this.getTokens());
+  }
 
-    // Optionally redirect to Cognito logout
-    // window.location.href = `${authEndpoints.logout}?client_id=${cognitoConfig.ssoClientId}&logout_uri=${cognitoConfig.logoutUri}`;
+  // Full logout including Cognito session (for switching accounts)
+  logoutWithCognito(): void {
+    if (typeof window === "undefined") return;
+
+    console.log("Logging out with Cognito session clear");
+    this.clearTokens();
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    
+    // Redirect to Cognito logout to clear the Cognito session
+    const logoutUrl = new URL(`https://${cognitoConfig.domain}/logout`);
+    logoutUrl.searchParams.set("client_id", cognitoConfig.clientId ?? "");
+    logoutUrl.searchParams.set("logout_uri", cognitoConfig.logoutUri);
+    
+    window.location.href = logoutUrl.toString();
   }
 
   // Decode JWT token to get user info

@@ -21,8 +21,9 @@ export async function PUT(
 
     if (authHeader) {
       headers["Authorization"] = authHeader;
-    } else if (sessionId) {
-      headers["X-session-id"] = sessionId;
+    }
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
     }
 
     const response = await fetch(`${API_BASE_URL}/v1/cart/items/${productId}`, {
@@ -65,8 +66,9 @@ export async function DELETE(
     const headers: HeadersInit = {};
     if (authHeader) {
       headers["Authorization"] = authHeader;
-    } else if (sessionId) {
-      headers["X-session-id"] = sessionId;
+    }
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
     }
 
     const response = await fetch(`${API_BASE_URL}/v1/cart/items/${productId}`, {

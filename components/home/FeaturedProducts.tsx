@@ -4,13 +4,20 @@ import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
 import type { Product } from "@/components/product/ProductCard";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
+import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
 
 interface FeaturedProductsProps {
   products: Product[];
 }
 
-export function FeaturedProducts({ products }: FeaturedProductsProps) {
+export function FeaturedProducts({ products: initialProducts }: FeaturedProductsProps) {
+  const { products, isLoading, hasCarFilter } = useCarProducts({
+    endpoint: "products/best-selling",
+    limit: 40,
+    initialProducts: initialProducts as CarProduct[],
+  });
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -66,17 +73,28 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
-              Featured Products
-            </h2>
-            <p className="text-xs md:text-sm text-gray-600">
-              Handpicked selection
-            </p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-[#101828]">
+                Featured Products
+              </h2>
+              <p className="text-xs md:text-sm text-gray-600">
+                {hasCarFilter ? "Products for your car" : "Handpicked selection"}
+              </p>
+            </div>
+            {isLoading && (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            )}
+            {hasCarFilter && !isLoading && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                <Car className="h-3 w-3" />
+                Filtered
+              </span>
+            )}
           </div>
 
           <Link
-            href="/products"
+            href={"/collections/best-selling" as any}
             className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base"
           >
             View all
@@ -98,21 +116,21 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
 
         {/* ✅ REAL HORIZONTAL SCROLLER */}
         <div className="relative">
-          {/* LEFT ARROW */}
+          {/* LEFT ARROW - Hidden on mobile */}
           {canScrollLeft && (
             <button
               onClick={() => scroll("left")}
-              className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+              className="hidden md:flex absolute -left-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
           )}
 
-          {/* RIGHT ARROW */}
+          {/* RIGHT ARROW - Hidden on mobile */}
           {canScrollRight && (
             <button
               onClick={() => scroll("right")}
-              className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+              className="hidden md:flex absolute -right-4 top-1/2 z-10 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -121,12 +139,12 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
           {/* SCROLL CONTAINER */}
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-10"
+            className="flex gap-3 md:gap-4 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-10"
           >
             {featuredProducts.map(({ product, badges }) => (
               <div
                 key={product.id}
-                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0"
+                className="min-w-[150px] max-w-[150px] md:min-w-[280px] md:max-w-[280px] shrink-0"
               >
                 <ProductCard product={product} badges={badges} showOffers />
               </div>

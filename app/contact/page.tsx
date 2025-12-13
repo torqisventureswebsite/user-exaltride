@@ -5,11 +5,12 @@ import { Mail, Phone, Clock, Headphones } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Mail, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
+import Image from "next/image";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -28,7 +29,10 @@ export default function ContactPage() {
 
     await new Promise((r) => setTimeout(r, 1000));
 
-    toast.success("Message sent successfully!");
+    toast.success("Message sent successfully!", {
+      description: "We'll get back to you within 24-48 hours",
+    });
+
     setFormData({
       name: "",
       email: "",
@@ -43,180 +47,203 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="hidden md:block">
-        <TopBar />
-      </div>
+      <TopBar />
 
-      {/* ✅ MAIN CONTENT WRAPPER */}
-      <div className="container mx-auto px-4 max-w-6xl py-10">
-
-        {/* ✅ PAGE HEADER */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#001F5F]">
-            Contact Us
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Have questions or need assistance? We're here to help.
+      {/* Page Header */}
+      <div className="bg-white py-8 md:py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#001F5F] mb-3">Contact Us</h1>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Have questions or need assistance? We're here to help you every step of the way.
           </p>
         </div>
+      </div>
 
-        {/* ✅ MAIN 2 COLUMN LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* ✅ LEFT SIDE */}
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          
+          {/* Left Column - Contact Info Cards */}
           <div className="space-y-6">
-
-            {/* ✅ HERO IMAGE CARD */}
-            <div className="relative overflow-hidden rounded-xl border">
+            {/* Hero Card with Image */}
+            <div className="relative rounded-2xl overflow-hidden h-[280px] md:h-[320px]">
               <Image
-                src="/contact-hero.jpg"
-                alt="Support"
-                width={652}
-                height={350}
-                className="w-full h-[280px] object-cover"
+                src="/images/image1.jpg"
+                alt="Customer Support"
+                fill
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-black/50 flex flex-col justify-center p-6 text-white">
-                <h3 className="text-xl font-bold">We’re Here to Help</h3>
-                <p className="text-sm mt-2 max-w-sm">
-                  Our dedicated team is ready to assist with any questions.
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">We're Here to Help</h2>
+                <p className="text-white/80 text-sm md:text-base">
+                  Our dedicated team is ready to assist you with any questions or concerns.
                 </p>
               </div>
             </div>
 
-            {/* ✅ EMAIL + CALL CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* EMAIL */}
-              <div className="bg-[#001F5F] border p-5 rounded-xl flex items-center gap-4">
-                <div className="bg-[#FBC84C] p-3 rounded-lg">
-                  <Mail className="text-black" />
+            {/* Contact Cards Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#001F5F] rounded-xl p-5 text-white">
+                <div className="w-10 h-10 bg-[#FBC84C] rounded-lg flex items-center justify-center mb-4">
+                  <Mail className="w-5 h-5 text-[#001F5F]" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Email Us</p>
-                  <p className="font-semibold text-white">
-                    support@exaltride.com
-                  </p>
-                </div>
+                <h3 className="font-semibold mb-1">Email Us</h3>
+                <p className="text-white/70 text-sm">support@exaltride.com</p>
               </div>
 
-              {/* CALL */}
-              <div className="bg-[#001F5F] border p-5 rounded-xl flex items-center gap-4">
-                <div className="bg-[#FBC84C] p-3 rounded-lg">
-                  <Phone className="text-black" />
+              <div className="bg-[#001F5F] rounded-xl p-5 text-white">
+                <div className="w-10 h-10 bg-[#FBC84C] rounded-lg flex items-center justify-center mb-4">
+                  <Phone className="w-5 h-5 text-[#001F5F]" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Call Us</p>
-                  <p className="font-semibold text-white">
-                    +91 1800-000-000
-                  </p>
-                </div>
+                <h3 className="font-semibold mb-1">Call Us</h3>
+                <p className="text-white/70 text-sm">+91 1800-XXX-XXXX</p>
               </div>
             </div>
 
-
-            {/* ✅ SUPPORT IMAGE */}
-            <div className="relative overflow-hidden rounded-xl border">
+            {/* Quick Response Card with Image */}
+            <div className="relative rounded-2xl overflow-hidden h-[240px] md:h-[280px]">
               <Image
-                src="/contact-support.jpg"
-                alt="Quick support"
-                width={652}
-                height={350}
-                className="w-full h-[240px] object-cover"
+                src="/images/image2.jpg"
+                alt="Quick Response"
+                fill
+                className="object-cover"
               />
-              <div className="absolute bottom-4 left-4 bg-white px-4 py-1.5 rounded-lg text-xs font-semibold">
-                Quick Response Time
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <Headphones className="w-5 h-5 text-[#FBC84C]" />
+                  <span className="font-semibold">Quick Response Time</span>
+                </div>
+                <p className="text-white/80 text-sm">
+                  We typically respond within 24-48 business hours. Your satisfaction is our priority.
+                </p>
               </div>
             </div>
 
-            {/* ✅ INFO CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card className="p-4 flex items-center gap-3">
-                <Clock className="text-blue-600" />
-                <div>
-                  <p className="font-semibold text-sm">Business Hours</p>
-                  <p className="text-xs text-gray-600">
-                    Mon–Sat • 9AM – 6PM
-                  </p>
+            {/* Info Cards Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-xl p-5 border border-gray-200">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                  <Clock className="w-5 h-5 text-[#001F5F]" />
                 </div>
-              </Card>
+                <h3 className="font-semibold text-gray-900 mb-1">Business Hours</h3>
+                <p className="text-gray-600 text-sm">Mon-Fri: 9 AM - 7 PM</p>
+                <p className="text-gray-600 text-sm">Sat: 10 AM - 5 PM</p>
+              </div>
 
-              <Card className="p-4 flex items-center gap-3">
-                <Headphones className="text-blue-600" />
-                <div>
-                  <p className="font-semibold text-sm">24/7 Support</p>
-                  <p className="text-xs text-gray-600">
-                    Chat & Email Available
-                  </p>
+              <div className="bg-white rounded-xl p-5 border border-gray-200">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+                  <Headphones className="w-5 h-5 text-[#001F5F]" />
                 </div>
-              </Card>
+                <h3 className="font-semibold text-gray-900 mb-1">24/7 Support</h3>
+                <p className="text-gray-600 text-sm">Online support portal and live chat available.</p>
+              </div>
             </div>
           </div>
 
-          {/* ✅ RIGHT SIDE — FORM */}
-          <div className="bg-white p-8 rounded-xl shadow-sm border h-fit">
-            <h2 className="text-xl font-bold text-[#001F5F] mb-2">
-              Send Us a Message
-            </h2>
-            <p className="text-sm text-gray-600 mb-6">
-              Fill out the form below and we’ll get back to you soon.
+          {/* Right Column - Contact Form */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Send Us a Message</h2>
+            <p className="text-gray-500 mb-6">
+              Fill out the form below and we'll get back to you soon.
             </p>
-
+            
             <form onSubmit={handleSubmit} className="space-y-5">
-              <Input
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
+              </div>
 
-              <Input
-                type="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-              />
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
+              </div>
 
-              <Input
-                placeholder="Phone Number (Optional)"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-              />
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phone Number <span className="text-gray-400">(Optional)</span>
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-[#001F5F] focus:ring-[#001F5F]"
+                />
+              </div>
 
-              <Input
-                placeholder="Subject (Optional)"
-                value={formData.subject}
-                onChange={(e) =>
-                  setFormData({ ...formData, subject: e.target.value })
-                }
-              />
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Subject <span className="text-gray-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full h-11 rounded-md border border-gray-300 px-3 pr-10 text-gray-900 focus:border-[#001F5F] focus:outline-none focus:ring-1 focus:ring-[#001F5F] appearance-none bg-white"
+                  >
+                    <option value="">Select a subject</option>
+                    <option value="general">General Inquiry</option>
+                    <option value="order">Order Status</option>
+                    <option value="product">Product Question</option>
+                    <option value="technical">Technical Support</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
 
-              <textarea
-                rows={5}
-                className="w-full rounded-md border px-3 py-2 text-sm"
-                placeholder="Please provide details about your inquiry..."
-                value={formData.message}
-                onChange={(e) =>
-                  setFormData({ ...formData, message: e.target.value })
-                }
-                required
-              />
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Message <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  rows={5}
+                  placeholder="Please provide details about your inquiry..."
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="w-full rounded-md border border-gray-300 px-3 py-3 text-gray-900 focus:border-[#001F5F] focus:outline-none focus:ring-1 focus:ring-[#001F5F] resize-none"
+                  required
+                />
+              </div>
 
-              <div className="bg-yellow-50 text-xs text-gray-700 p-3 rounded">
-                We typically respond within 24–48 business hours.
+              {/* Note */}
+              <div className="bg-[#FFF8E7] border border-[#FBC84C]/30 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Note:</span> All fields marked with <span className="text-red-500">*</span> are required. We'll respond to your inquiry within 24-48 business hours.
+                </p>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-[#001F5F] hover:bg-blue-800"
+                className="w-full h-12 bg-[#001F5F] hover:bg-[#001845] text-white font-medium text-base"
                 disabled={loading}
               >
-                {loading ? "Submitting..." : "Submit"}
+                {loading ? "Sending..." : "Submit"}
               </Button>
             </form>
           </div>

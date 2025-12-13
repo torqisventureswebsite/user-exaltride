@@ -3,17 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Car } from "lucide-react";
 import type { Product } from "@/components/product/ProductCard";
+import { useCarProducts, type CarProduct } from "@/lib/hooks/useCarProducts";
 
 interface TrendingSectionProps {
   products: Product[];
 }
 
-export function TrendingSection({ products }: TrendingSectionProps) {
-  if (!products || products.length === 0) {
-    return null;
-  }
+export function TrendingSection({ products: initialProducts }: TrendingSectionProps) {
+  const { products, isLoading, hasCarFilter } = useCarProducts({
+    endpoint: "products/new-arrivals",
+    limit: 40,
+    initialProducts: initialProducts as CarProduct[],
+  });
 
   // ✅ take more items for scroll (not 4)
   const trendingProducts = products.slice(0, 40);
@@ -63,20 +66,30 @@ export function TrendingSection({ products }: TrendingSectionProps) {
       <div className="container mx-auto px-4">
         {/* ✅ Header */}
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl md:text-3xl">🔥</span>
-              <h2 className="text-xl md:text-3xl font-bold text-[#101828]">
-                Trending This Week
-              </h2>
+          <div className="flex items-center gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-xl md:text-3xl font-bold text-[#101828]">
+                  Trending This Week
+                </h2>
+              </div>
+              <p className="text-xs md:text-sm text-gray-600">
+                {hasCarFilter ? "Trending for your car" : "Hot picks that car enthusiasts are loving right now"}
+              </p>
             </div>
-            <p className="text-xs md:text-sm text-gray-600">
-              Hot picks that car enthusiasts are loving right now
-            </p>
+            {isLoading && (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            )}
+            {hasCarFilter && !isLoading && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                <Car className="h-3 w-3" />
+                Filtered
+              </span>
+            )}
           </div>
 
           <Link
-            href="/products?type=trending"
+            href={"/collections/trending" as any}
             className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base"
           >
             View all
@@ -98,11 +111,11 @@ export function TrendingSection({ products }: TrendingSectionProps) {
 
         {/* ✅ REAL SCROLLER */}
         <div className="relative">
-          {/* ✅ LEFT ARROW — hidden only at extreme left */}
+          {/* ✅ LEFT ARROW — hidden on mobile and at extreme left */}
           <button
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
-            className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
+            className={`hidden md:flex absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
               ${
                 canScrollLeft
                   ? "bg-white shadow-lg hover:bg-gray-100"
@@ -113,11 +126,11 @@ export function TrendingSection({ products }: TrendingSectionProps) {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          {/* ✅ RIGHT ARROW — hidden only at extreme right */}
+          {/* ✅ RIGHT ARROW — hidden on mobile and at extreme right */}
           <button
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
-            className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
+            className={`hidden md:flex absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition
               ${
                 canScrollRight
                   ? "bg-white shadow-lg hover:bg-gray-100"
@@ -131,12 +144,12 @@ export function TrendingSection({ products }: TrendingSectionProps) {
           {/* ✅ SCROLL CONTAINER */}
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar pl-0 pr-6"
+            className="flex gap-3 md:gap-6 overflow-x-auto scroll-smooth no-scrollbar pr-4 md:pr-6"
           >
             {trendingProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="min-w-[160px] max-w-[160px] md:min-w-[280px] md:max-w-[280px] shrink-0 relative"
+                className="min-w-[150px] max-w-[150px] md:min-w-[280px] md:max-w-[280px] shrink-0 relative"
               >
                 {/* ✅ RANK BADGE (#1, #2, etc.) */}
                 <div className="absolute top-6 md:top-8 left-1 md:left-2 z-10 bg-[#001F5F] text-white text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full shadow">

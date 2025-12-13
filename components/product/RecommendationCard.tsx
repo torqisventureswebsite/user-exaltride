@@ -32,7 +32,9 @@ export function RecommendationCard({ product }: RecommendationCardProps) {
           categoryId: product.category_id,
           slug: product.slug,
         });
-        toast.success("Added to cart!");
+        toast.success("Added to cart!", {
+          description: `${product.title} has been added to your cart`,
+        });
       } catch (error) {
         toast.error("Failed to add to cart");
       }

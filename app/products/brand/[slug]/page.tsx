@@ -41,7 +41,7 @@ export default async function BrandPage(
     notFound();
   }
 
-  const products = await fetchAllBrandProducts(brand.id);
+  const products = await fetchAllBrandProducts(brand.slug);
 
   return (
     <>

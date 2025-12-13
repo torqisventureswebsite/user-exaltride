@@ -40,11 +40,6 @@ export function CategoryCard({
             <p className="mt-1 text-sm text-gray-700">
               {category.description || "Explore our collection"}
             </p>
-            {category.item_count && (
-              <span className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-900">
-                {category.item_count} items
-              </span>
-            )}
           </div>
           <ArrowRight className="h-5 w-5 text-gray-900 transition-transform group-hover:translate-x-1" />
         </div>

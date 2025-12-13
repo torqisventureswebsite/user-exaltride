@@ -1,10 +1,15 @@
 "use client";
 
-import { MapPin, RotateCcw, ShieldCheck, Wallet } from "lucide-react";
-import { useState } from "react";
+import { MapPin, RotateCcw, Truck } from "lucide-react";
+import { useLocation } from "@/lib/location/context";
 
-export default function DeliveryAndServices() {
-  const [pincode, setPincode] = useState("");
+interface DeliveryAndServicesProps {
+  returnPolicy?: string | null;
+  shippingInfo?: string | null;
+}
+
+export default function DeliveryAndServices({ returnPolicy, shippingInfo }: DeliveryAndServicesProps) {
+  const { location, openModal } = useLocation();
 
   return (
     <div className="bg-white border rounded-2xl p-5 space-y-4 shadow-sm">
@@ -17,44 +22,37 @@ export default function DeliveryAndServices() {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 flex-1 border rounded-lg px-3 py-2">
           <MapPin className="h-4 w-4 text-gray-500" />
-          <input
-            value={pincode}
-            onChange={(e) => setPincode(e.target.value)}
-            type="text"
-            placeholder="Enter pincode"
-            className="outline-none text-sm w-full"
-          />
+          <span className="text-sm text-gray-600">
+            {location?.pincode 
+              ? `Deliver to ${location.city} - ${location.pincode}`
+              : "Enter pincode for delivery info"
+            }
+          </span>
         </div>
 
-        <button className="bg-[#001F5F] text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-800">
-          Check
+        <button 
+          onClick={openModal}
+          className="bg-[#001F5F] text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-800"
+        >
+          {location?.pincode ? "Change" : "Check"}
         </button>
       </div>
 
-      {/* SERVICES GRID */}
-      <div className="grid grid-cols-2 gap-4 pt-2 text-sm text-gray-700">
-
-        <div className="flex items-center gap-2">
-          <RotateCcw className="h-4 w-4 text-blue-600" />
-          <span>7 Days Return</span>
+      {/* Shipping Info */}
+      {shippingInfo && (
+        <div className="flex items-start gap-2 text-sm text-gray-600">
+          <Truck className="h-4 w-4 text-blue-700 mt-0.5 flex-shrink-0" />
+          <span>{shippingInfo}</span>
         </div>
+      )}
 
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-blue-600" />
-          <span>1 Year Warranty</span>
+      {/* Return Policy */}
+      {returnPolicy && (
+        <div className="flex items-start gap-2 text-sm text-gray-600">
+          <RotateCcw className="h-4 w-4 text-blue-700 mt-0.5 flex-shrink-0" />
+          <span>{returnPolicy}</span>
         </div>
-
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-yellow-600" />
-          <span>Secure Payment</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Wallet className="h-4 w-4 text-orange-600" />
-          <span>Cash on Delivery</span>
-        </div>
-
-      </div>
+      )}
     </div>
   );
 }
