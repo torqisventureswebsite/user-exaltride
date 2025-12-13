@@ -2,45 +2,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Music, Headphones, Wrench, Cpu } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchBrands } from "@/lib/api/brands";
 
-// Map brand names to icons (fallback = Music)
-const brandIcons: Record<string, any> = {
-  Bosch: Wrench,
-  JBL: Headphones,
-  Pioneer: Headphones,
-  Sony: Music,
-  Philips: Cpu,
-  Blaupunkt: Music,
-  Kenwood: Headphones,
-};
-
-// Brand descriptions
-const brandDescriptions: Record<string, string> = {
-  Bosch: "Quality You Trust",
-  JBL: "Power & Performance",
-  Pioneer: "Innovation in Sound",
-  Sony: "Premium Audio Solutions",
-  Philips: "Smart Technology",
-  Blaupunkt: "German Engineering",
-  Kenwood: "Audio Excellence",
-};
+interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  description?: string | null;
+  product_count?: number;
+}
 
 export default function SponsoredBrands() {
-  const [brands, setBrands] = useState<any[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadBrands() {
       try {
         const apiBrands = await fetchBrands();
-        // Sort by product_count and take top 4
-        const sorted = [...apiBrands]
+
+        // ✅ Sort by product_count DESC and take top 4
+        const topBrands = [...apiBrands]
           .sort((a, b) => (b.product_count || 0) - (a.product_count || 0))
           .slice(0, 4);
-        setBrands(sorted);
+
+        setBrands(topBrands);
       } catch (err) {
         console.error("Error loading brands:", err);
       } finally {
@@ -58,12 +47,16 @@ export default function SponsoredBrands() {
           <span>🎖</span>
           <span>Sponsored Brands</span>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white p-5 rounded-xl border shadow-sm text-center animate-pulse">
-              <div className="h-6 w-6 bg-gray-200 rounded mx-auto mb-3"></div>
-              <div className="h-4 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-24 mx-auto mb-4"></div>
+            <div
+              key={i}
+              className="bg-white p-5 rounded-xl border shadow-sm text-center animate-pulse"
+            >
+              <div className="h-12 w-12 bg-gray-200 rounded mx-auto mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded w-24 mx-auto mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-32 mx-auto mb-4"></div>
               <div className="h-8 bg-gray-200 rounded"></div>
             </div>
           ))}
@@ -80,31 +73,49 @@ export default function SponsoredBrands() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        {brands.map((brand) => {
-          const Icon = brandIcons[brand.name] || Music;
-          const description = brandDescriptions[brand.name] || brand.description || "Premium Products";
-
-          return (
-            <div
-              key={brand.id}
-              className="bg-white p-5 rounded-xl border shadow-sm text-center"
-            >
-              <div className="flex justify-center mb-3 text-[#001F5F]">
-                <Icon className="h-6 w-6" />
-              </div>
-
-              <h3 className="font-semibold text-gray-900">{brand.name}</h3>
-              <p className="text-xs text-gray-500">{description}</p>
-
-              <Link 
-                href={`/products/brand/${brand.slug}` as any}
-                className="mt-4 w-full py-1.5 text-sm border border-[#001F5F] text-[#001F5F] rounded-lg hover:bg-[#001F5F] hover:text-white transition block"
-              >
-                Explore
-              </Link>
+        {brands.map((brand) => (
+          <div
+            key={brand.id}
+            className="bg-white p-5 rounded-xl border shadow-sm text-center"
+          >
+            {/* Brand Logo */}
+            <div className="flex justify-center mb-3">
+              {brand.logo ? (
+                <Image
+                  src={brand.logo}
+                  alt={brand.name}
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                />
+              ) : (
+                <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg text-lg font-bold text-gray-600">
+                  {brand.name.charAt(0)}
+                </div>
+              )}
             </div>
-          );
-        })}
+
+            {/* Brand Name */}
+            <h3 className="font-semibold text-gray-900">
+              {brand.name}
+            </h3>
+
+            {/* Description */}
+            <p className="text-xs text-gray-500">
+              {brand.description || "Premium Products"}
+            </p>
+
+            {/* CTA */}
+            <Link
+              href={`/products/brand/${brand.slug}`}
+              className="mt-4 w-full py-1.5 text-sm border border-[#001F5F]
+                         text-[#001F5F] rounded-lg hover:bg-[#001F5F]
+                         hover:text-white transition block"
+            >
+              Explore
+            </Link>
+          </div>
+        ))}
       </div>
     </div>
   );

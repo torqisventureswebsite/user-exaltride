@@ -1,6 +1,6 @@
 // components/category-sections/BuyingGuide.tsx
 import { Info } from "lucide-react";
-
+import Link from "next/link";
 export default function BuyingGuide() {
   const items = [
     {
@@ -56,10 +56,13 @@ export default function BuyingGuide() {
 
       {/* OUTLINED NAVY BUTTON (not yellow) */}
       <div className="flex justify-center">
+        <Link href="/contact">
         <button className="mt-5 px-4 py-2 text-sm border border-[#001F5F] text-[#001F5F] rounded-lg hover:bg-[#001F5F] hover:text-white transition flex items-center gap-2">
           💬 Need Help? Chat with Expert
         </button>
+        </Link>
       </div>
     </div>
   );
+  
 }
