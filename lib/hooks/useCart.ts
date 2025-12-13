@@ -13,7 +13,7 @@ import {
 } from "@/lib/cart-api";
 
 export interface CartItem {
-  product_id: string;
+  productId: string;
   quantity: number;
   [key: string]: any;
 }

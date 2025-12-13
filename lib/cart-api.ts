@@ -65,7 +65,7 @@ export async function fetchCartItems(token?: string | null) {
  */
 export async function addItemToCart(
   item: {
-    product_id: string;
+    productId: string;
     quantity: number;
     [key: string]: any;
   },

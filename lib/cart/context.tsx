@@ -60,7 +60,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Map API response to CartItem format
   const mapApiItemToCartItem = (item: Record<string, unknown>): CartItem => ({
-    productId: (item.product_id || item.productId || item.slug) as string,
+    productId: (item.productId || item.productId || item.slug) as string,
     name: (item.name || item.product_name || "") as string,
     price: (item.price || 0) as number,
     quantity: (item.quantity || 1) as number,
@@ -90,6 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Refresh cart from API
   const refreshCart = useCallback(async () => {
+    console.log("Refreshing cart...");
     if (!isAuthenticated) {
       setIsLoading(false);
       return;
@@ -97,8 +98,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     
     setIsLoading(true);
     try {
+      console.log("Fetching cart...");
       const cartItems = await fetchCart();
+      console.log("Cart items:", cartItems);
       setItems(cartItems);
+      
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +167,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           method: "POST",
           headers,
           body: JSON.stringify({
-            product_id: item.productId,
+            productId: item.productId,
             quantity: item.quantity,
           }),
         });
@@ -244,7 +248,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         headers,
         body: JSON.stringify({
-          product_id: item.productId,
+          productId: item.productId,
           quantity,
         }),
       }).catch((error) => console.error("Error adding to cart:", error));
