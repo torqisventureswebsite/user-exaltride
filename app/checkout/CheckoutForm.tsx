@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CreditCard, MapPin, User, Wallet, Loader2, Plus, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
-import { useCart, CartItem } from "@/lib/cart/context";
+import { CartItem } from "@/lib/cart/context";
 import { toast } from "sonner";
 
 interface CheckoutFormProps {
@@ -34,7 +34,6 @@ interface SavedAddress {
 export default function CheckoutForm({ cartItems, subtotal, total }: CheckoutFormProps) {
   const router = useRouter();
   const { tokens, user } = useAuth();
-  const { clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Saved addresses state
@@ -253,14 +252,12 @@ export default function CheckoutForm({ cartItems, subtotal, total }: CheckoutFor
       const redirectUrl = paymentData.data?.redirectUrl || paymentData.redirectUrl || paymentData.data?.paymentUrl || paymentData.paymentUrl;
       
       if (redirectUrl) {
-        // Clear cart before redirecting to payment
-        clearCart();
+        // Don't clear cart here - cart will be cleared after payment confirmation
         window.location.href = redirectUrl;
         return;
       }
 
-      // If no redirect URL, go to order confirmation
-      clearCart();
+      // If no redirect URL, go to order confirmation (payment status will be checked there)
       (router.push as (url: string) => void)(`/order-confirmation?orderId=${orderId}`);
     } catch (error) {
       console.error("Checkout error:", error);

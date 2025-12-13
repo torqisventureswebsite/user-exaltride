@@ -5,9 +5,10 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import Image from "next/image";
-import { CheckCircle, Home, Package, Download, X, Calendar, Loader2 } from "lucide-react";
+import { CheckCircle, Home, Package, Download, X, Calendar, Loader2, AlertCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/context";
+import { useCart } from "@/lib/cart/context";
 import WishlistSection from "@/components/cart/WishlistSection";
 
 interface OrderItem {
@@ -32,13 +33,18 @@ interface OrderDetails {
   items: OrderItem[];
 }
 
+type PaymentState = "loading" | "success" | "pending" | "failed";
+
 export default function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const { tokens } = useAuth();
+  const { clearCart } = useCart();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentState, setPaymentState] = useState<PaymentState>("loading");
+  const [cartCleared, setCartCleared] = useState(false);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -60,7 +66,19 @@ export default function OrderConfirmationContent() {
           throw new Error(data.error || "Failed to fetch order details");
         }
 
-        setOrder(data.data || data);
+        const orderData = data.data || data;
+        setOrder(orderData);
+
+        // Check payment status from order data
+        const paymentStatus = orderData.paymentStatus?.toLowerCase();
+        if (paymentStatus === "paid" || paymentStatus === "completed" || paymentStatus === "success") {
+          setPaymentState("success");
+        } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
+          setPaymentState("failed");
+        } else {
+          // Payment is still pending
+          setPaymentState("pending");
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load order");
       } finally {
@@ -70,6 +88,14 @@ export default function OrderConfirmationContent() {
 
     fetchOrderDetails();
   }, [orderId, tokens]);
+
+  // Clear cart only when payment is confirmed successful
+  useEffect(() => {
+    if (paymentState === "success" && !cartCleared) {
+      clearCart();
+      setCartCleared(true);
+    }
+  }, [paymentState, cartCleared, clearCart]);
 
   // Calculate estimated delivery date (5-7 days from now)
   const getEstimatedDelivery = () => {
@@ -117,6 +143,94 @@ export default function OrderConfirmationContent() {
     day: "numeric",
     year: "numeric",
   });
+
+  // Render payment pending state
+  if (paymentState === "pending") {
+    return (
+      <div className="container mx-auto px-4 py-8 flex-1">
+        {/* Pending Payment Banner */}
+        <div className="bg-yellow-500 rounded-2xl p-6 md:p-8 mb-8 text-white">
+          <div className="flex items-start gap-4">
+            <div className="bg-white rounded-full p-3 flex-shrink-0">
+              <Clock className="h-8 w-8 text-yellow-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">Payment Pending</h1>
+              <p className="text-yellow-100">
+                Your payment is being processed. Please complete the payment to confirm your order.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <p className="text-gray-600 mb-6">
+              If you have already completed the payment, please wait a moment while we verify it. 
+              This page will automatically update once the payment is confirmed.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/cart">
+                <Button className="bg-[#FBC84C] hover:bg-yellow-500 text-[#001F5F] font-semibold">
+                  Return to Cart
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.reload()}
+                className="border-[#001F5F] text-[#001F5F]"
+              >
+                <Loader2 className="h-4 w-4 mr-2" />
+                Check Payment Status
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render payment failed state
+  if (paymentState === "failed") {
+    return (
+      <div className="container mx-auto px-4 py-8 flex-1">
+        {/* Failed Payment Banner */}
+        <div className="bg-red-500 rounded-2xl p-6 md:p-8 mb-8 text-white">
+          <div className="flex items-start gap-4">
+            <div className="bg-white rounded-full p-3 flex-shrink-0">
+              <AlertCircle className="h-8 w-8 text-red-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">Payment Failed</h1>
+              <p className="text-red-100">
+                Unfortunately, your payment could not be processed. Your cart items are still saved.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <p className="text-gray-600 mb-6">
+              Don't worry! Your items are still in your cart. You can try again with a different payment method.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/cart">
+                <Button className="bg-[#FBC84C] hover:bg-yellow-500 text-[#001F5F] font-semibold">
+                  Return to Cart
+                </Button>
+              </Link>
+              <Link href="/checkout">
+                <Button variant="outline" className="border-[#001F5F] text-[#001F5F]">
+                  Try Again
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 flex-1">
