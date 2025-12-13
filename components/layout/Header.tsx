@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
@@ -23,6 +23,24 @@ export default function Header() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    if (isUserDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isUserDropdownOpen]);
 
   // Smooth scroll to deals section
   const scrollToDeals = () => {
@@ -70,9 +88,8 @@ export default function Header() {
               {/* Login/Profile with Dropdown */}
               {isAuthenticated ? (
                 <div 
-                  className="relative group"
-                  onMouseEnter={() => setIsUserDropdownOpen(true)}
-                  onMouseLeave={() => setIsUserDropdownOpen(false)}
+                  ref={userDropdownRef}
+                  className="relative"
                 >
                   <button
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -194,9 +211,8 @@ export default function Header() {
             {/* User/Login with Dropdown */}
             {isAuthenticated ? (
               <div 
+                ref={userDropdownRef}
                 className="relative"
-                onMouseEnter={() => setIsUserDropdownOpen(true)}
-                onMouseLeave={() => setIsUserDropdownOpen(false)}
               >
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
