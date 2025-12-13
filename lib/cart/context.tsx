@@ -63,10 +63,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     console.log("Mapping API item:", JSON.stringify(item, null, 2));
     return {
       productId: (item.product_id || item.productId || item.slug) as string,
-      name: (item?.product_name || item?.name || item?.title) as string,
-      price: (item?.price || item?.unit_price) as number,
-      quantity: (item?.quantity) as number,
-      image: (item?.primary_image || item?.image) as string,
+      name: (item?.product_name || item?.name || item?.title || "") as string,
+      price: (item?.price || item?.unit_price || 0) as number,
+      quantity: (item?.quantity || 0) as number,
+      image: (item?.primary_image || item?.image || "") as string,
       categoryId: (item?.category_id || item?.categoryId) as string | undefined,
       slug: (item?.slug || item?.product_id || item?.productId) as string | undefined,
     };
