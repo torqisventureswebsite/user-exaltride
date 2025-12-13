@@ -260,6 +260,14 @@ export function ProductCard({
             {product.title || "Product"}
           </h3>
 
+          {/* Compatibility Indicator */}
+          {isCompatibleWithUserCar && (
+            <div className="flex items-center gap-1 mb-1 text-green-600">
+              <CheckCircle className="h-3 w-3" />
+              <span className="text-[10px] md:text-xs font-medium">Fits your car</span>
+            </div>
+          )}
+
           {/* Rating */}
           {/* {product.rating && product.rating > 0 && (
             <div className="mb-2 md:mb-3 flex items-center gap-1 md:gap-2">
