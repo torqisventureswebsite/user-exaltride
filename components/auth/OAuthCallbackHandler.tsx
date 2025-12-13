@@ -1,23 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { authService } from "@/lib/auth/service";
 
 export function OAuthCallbackHandler() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
       const code = searchParams.get("code");
       const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
 
       // Only handle if there's a code or error (OAuth callback)
       if (!code && !error) return;
 
+      // Skip if we're on the /auth/callback page (let that page handle it)
+      if (pathname === "/auth/callback") return;
+
       if (error) {
-        console.error("OAuth error:", error);
-        window.location.href = "/auth/login?error=" + encodeURIComponent(error);
+        console.error("OAuth error:", error, errorDescription);
+        window.location.href = "/auth/login?error=" + encodeURIComponent(errorDescription || error);
         return;
       }
 
@@ -46,7 +51,7 @@ export function OAuthCallbackHandler() {
     };
 
     handleOAuthCallback();
-  }, [searchParams]);
+  }, [searchParams, pathname]);
 
   return null;
 }

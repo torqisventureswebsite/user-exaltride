@@ -26,9 +26,9 @@ export const cognitoConfig = {
   // Cognito domain
   domain: COGNITO_DOMAIN,
   
-  // Redirect URI for Google SSO (use env var for production, fallback to local)
+  // Redirect URI for Google SSO - must match exactly what's configured in Cognito
   get redirectUri() {
-    return process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || `${getBaseUrl()}/auth/callback`;
+    return process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI || "https://exaltride.com";
   },
   get logoutUri() {
     return getBaseUrl();
